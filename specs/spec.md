@@ -175,6 +175,71 @@ resource:
 - `duration`
 - `percentage`
 
+## 组件 Intermediate Representation
+
+从 `DSL` 推断中间形态的抽象组件，便于适配器（框架 + 组件库）进行高效的实现
+
+## 组件推断
+
+```mermaid
+graph TD
+    Start(开始) --> CheckResource{资源声明?}
+
+    %% 受限选项
+    CheckResource -- "yes" --> CheckResourceQuantity{关联数量?}
+    CheckResourceQuantity -- "single" --> SingleResourceCase[Select]
+    CheckResourceQuantity -- "multiple" --> MultipleResourceCase[MultipleSelect]
+
+    %% 非受限选项
+    CheckResource -- "no" --> CheckDataType{数据类型?}
+
+    %% boolean 类型
+    CheckDataType -- "boolean" --> SwitchCase[Switch]
+
+    %% string 类型
+    CheckDataType -- "other" --> CheckPromptMode{交互模式?}
+
+    CheckPromptMode -- "manual" --> CheckManualMode{区间模式？}
+    CheckPromptMode -- "auto" --> CheckAutoMode{区间模式？}
+
+    CheckManualMode -- "point" --> CheckManualPointQuantity{关联数量?}
+    CheckManualMode -- "range" --> CheckManualRangeQuantity{关联数量?}
+
+    %% string + point
+    CheckManualPointQuantity -- "single" --> CheckManualPointSingleFormat{内容格式?}
+    CheckManualPointQuantity -- "multiple" --> ListBuilderCase[ListBuilder]
+
+    %% string + point + single
+    CheckManualPointSingleFormat -- "normal" --> InputCase[Input]
+    CheckManualPointSingleFormat -- "text" --> TextAreaCase[TextArea]
+
+    CheckManualRangeQuantity -- "single" --> RangeInputCase[RangeInput]
+    CheckManualRangeQuantity -- "multiple" --> ListRangeBuilderCase[ListRangeBuilder]
+
+    CheckAutoMode -- "point" --> CheckAutoPointQuantity{关联数量?}
+    CheckAutoMode -- "range" --> CheckAutoRangeQuantity{关联数量?}
+
+    %% point
+    CheckAutoPointQuantity -- "single" --> PickerCase[Picker]
+    CheckAutoPointQuantity -- "multiple" --> ListPickerBuilderCase[ListPickerBuilder]
+
+    CheckAutoRangeQuantity -- "single" --> RangePickerCase[RangePicker]
+    CheckAutoRangeQuantity -- "multiple" --> ListRangePickerBuilderCase[ListRangePickerBuilder]
+```
+
+组件说明：
+
+- `Input`: 单行文本/数字输入
+- `TextArea`: 长文本输入
+- `Select`: 单选
+- `MultipleSelect`: 多选
+- `Picker`: 数值或日期的选择
+- `RangePicker`: 数值或日期的区间选择
+- `ListBuilder`: 列表构建器
+- `ListRangeBuilder`: 区间列表构建器
+- `ListPickerBuilder`: 本质上依然为列表构建器，适用于 Picker 场景，仅用作语义标识
+- `ListRangePickerBuilder`: 本质上依然为区间列表构建器，适用于 Picker 场景，仅用作语义标识
+
 ## 业务集成
 
 - [规则配置中心](./references/setter.md) 基于 **规则因子描述** 提供配置器，用户按需配置规则因子形成 **业务规则**
