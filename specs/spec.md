@@ -147,6 +147,34 @@ resource:
 | `minItems` | `multiple` | 最少数量 |
 | `maxItems` | `multiple` | 最大数量 |
 
+## 规则因子 Operator
+
+推断逻辑：根据 `dataType` + `semantic` 确定“数据域”，再结合 `mode`（点/区间）和 `quantity`（单/多）确定“操作域”，从而锁定可用的 `operator` 列表
+
+### 数据类型推断 DataType
+
+| dataType | mode  | quantity | 推断的 Operator 语义                                              |
+| :------- | :---- | :------- | :---------------------------------------------------------------- |
+| number   | point | single   | `=`, `≠`, `>`, `>=`, `<`, `<=`                                    |
+| number   | point | multiple | `in`, `not in`                                                    |
+| number   | range | single   | `between`, `not between`                                          |
+| number   | range | multiple | `between any`, `betwen all`, `not between any`, `not between all` |
+| string   | point | single   | `=`, `≠`, `contains`, `within`, `starts_with`, `ends_with`        |
+| string   | point | multiple | `in`, `not in`                                                    |
+| boolean  | point | single   | `is`                                                              |
+
+### 场景推断 Semantic
+
+### Number 类型继承
+
+以下 `Semantic` 本质上遵循 `dataType=number` 的 `operator` 可选范围：
+
+- `rate`
+- `date`
+- `time`
+- `duration`
+- `percentage`
+
 ## 业务集成
 
 - [规则配置中心](./references/setter.md) 基于 **规则因子描述** 提供配置器，用户按需配置规则因子形成 **业务规则**
