@@ -4,6 +4,12 @@
 
 基于 `yaml` 设计 `DSL` 用以描述 **规则因子** 语义化结构，**规则配置器** 通过解释 **规则因子描述** 提供可交互视图，用以配置业务规则。`DSL` 设计的核心在于 **规则配置器** 能构基于 **规则因子描述** 推断合适的表单控件、合适的 **目标匹配方式** 选择范围，以及正确的边界值约束条件
 
+## 业务集成
+
+**规则因子** 与 **规则配置器** 为紧密协同关系，作为 **规则配置中心** 组成要素
+
+- [规则配置器](./references/setter.md) 基于 **规则因子描述** 提供配置器，用户按需配置规则因子形成 **业务规则**
+
 ## 设计原则
 
 设计核心在于描述规则因子的 **元模型**，而非具体的规则实例，必须遵循核心原则：
@@ -68,7 +74,7 @@ resource:
 
 动态资源描述：
 
-- `name` 资源名称，具备唯一性
+- `name` 资源名称，具备唯一性，供应方约定
 - `features` 资源供应商支持的特性，例如：分页、关键词搜索
 
 动态资源接口声明：
@@ -102,16 +108,16 @@ resource:
 - `dataType` 原始数据类型，支持：`string` / `number` / `boolean`
 - `mode` 声明单点值或者区间值，支持：`point` / `range`
 - `quantity` 声明多值或者单值，支持：`single` / `multiple`
-- `semantic` 语义化场景，作为原始数据类型的精细化扩充，例如：
+- `semantic` 语义化场景，作为原始数据类型的精细化扩充
 
 `mode` + `quantity` 正交逻辑：
 
-| mode    | quantity   | 业务含义     | 匹配逻辑                 |
-| :------ | :--------- | :----------- | :----------------------- |
-| `point` | `single`   | 单个值       | `target = value`         |
-| `point` | `multiple` | 多个离散值   | `target in [v1, v2]`     |
-| `range` | `single`   | 单个连续区间 | `min <= target <= max`   |
-| `range` | `multiple` | 多个离散区间 | `(t in r1) or (t in r2)` |
+| mode    | quantity   | 业务含义     | 匹配逻辑                           |
+| :------ | :--------- | :----------- | :--------------------------------- |
+| `point` | `single`   | 单个值       | `target = value`                   |
+| `point` | `multiple` | 多个离散值   | `target in [v1, v2]`               |
+| `range` | `single`   | 单个连续区间 | `min <= target <= max`             |
+| `range` | `multiple` | 多个离散区间 | `(t between r1) or (t between r2)` |
 
 `semantic` 语义化场景支持：
 
@@ -123,9 +129,7 @@ resource:
 
 ### 数据约束与校验
 
-`constraints` 字段用于定义数据的合法性规则
-
-**原始数据类型** 的约束如下：
+`constraints` 用于定义边界值的校验规则
 
 | 约束字段           | 适用类型        | 说明              |
 | :----------------- | :-------------- | :---------------- |
@@ -147,7 +151,7 @@ resource:
 | `minItems` | `multiple` | 最少数量 |
 | `maxItems` | `multiple` | 最大数量 |
 
-## 规则因子 Operator
+## 推断规则因子 Operator
 
 推断逻辑：根据 `dataType` + `semantic` 确定“数据域”，再结合 `mode`（点/区间）和 `quantity`（单/多）确定“操作域”，从而锁定可用的 `operator` 列表
 
@@ -163,11 +167,9 @@ resource:
 | string   | point | multiple | `in`, `not in`                                                    |
 | boolean  | point | single   | `is`                                                              |
 
-### 场景推断 Semantic
+### 场景类型推断 Semantic
 
-### Number 类型继承
-
-以下 `Semantic` 本质上遵循 `dataType=number` 的 `operator` 可选范围：
+以下 `Semantic` 本质上遵循 `dataType=number` 的 `operator` 推断逻辑：
 
 - `rate`
 - `date`
@@ -175,7 +177,7 @@ resource:
 - `duration`
 - `percentage`
 
-## 抽象组件 Intermediate Representation
+## 推断抽象组件 Intermediate Representation
 
 从 `DSL` 推断中间形态的抽象组件，便于适配器（框架 + 组件库）进行高效的实现
 
@@ -238,7 +240,3 @@ graph TD
 - `ListRangeBuilder`: 区间列表构建器
 - `ListPickerBuilder` 本质上为 `ListBuilder`，语义上适用于 `Picker` 场景
 - `ListRangePickerBuilder` 本质上为 `ListRangeBuilder`，语义上适用于 `Picker` 场景
-
-## 业务集成
-
-- [规则配置中心](./references/setter.md) 基于 **规则因子描述** 提供配置器，用户按需配置规则因子形成 **业务规则**
