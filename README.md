@@ -1,1 +1,1 @@
-# sisyphus-spec
+# sisyphus
