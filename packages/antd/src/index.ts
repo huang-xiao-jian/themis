@@ -1,1 +1,2 @@
-// @sisyphus/antd - 占位文件
+import { sum } from '@sisyphus/core';
+export { sum };
