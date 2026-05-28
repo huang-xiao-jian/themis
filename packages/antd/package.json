@@ -1,0 +1,23 @@
+{
+  "name": "@sisyphus/antd",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sisyphus/core": "workspace:*",
+    "@sisyphus/react": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0"
+  },
+  "peerDependencies": {
+    "antd": ">=5.0.0",
+    "react": ">=18.0.0"
+  }
+}
