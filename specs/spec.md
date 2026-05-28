@@ -175,11 +175,9 @@ resource:
 - `duration`
 - `percentage`
 
-## 组件 Intermediate Representation
+## 抽象组件 Intermediate Representation
 
 从 `DSL` 推断中间形态的抽象组件，便于适配器（框架 + 组件库）进行高效的实现
-
-## 组件推断
 
 ```mermaid
 graph TD
@@ -231,14 +229,15 @@ graph TD
 
 - `Input`: 单行文本/数字输入
 - `TextArea`: 长文本输入
+- `RangeInput`: 区间输入
 - `Select`: 单选
 - `MultipleSelect`: 多选
 - `Picker`: 数值或日期的选择
 - `RangePicker`: 数值或日期的区间选择
-- `ListBuilder`: 列表构建器
+- `ListBuilder`: 列表构建器，
 - `ListRangeBuilder`: 区间列表构建器
-- `ListPickerBuilder`: 本质上依然为列表构建器，适用于 Picker 场景，仅用作语义标识
-- `ListRangePickerBuilder`: 本质上依然为区间列表构建器，适用于 Picker 场景，仅用作语义标识
+- `ListPickerBuilder` 本质上为 `ListBuilder`，语义上适用于 `Picker` 场景
+- `ListRangePickerBuilder` 本质上为 `ListRangeBuilder`，语义上适用于 `Picker` 场景
 
 ## 业务集成
 
