@@ -8,9 +8,17 @@
 
 提供核心的规则配置能力，目前处于概念验证阶段
 
-## 功能拆分
+## 技术栈
 
-包前缀统一为：`sisyphus`，例如：`@sisyphus/core`
+- Runtime: `Node.js 22.16.0`
+- Language: `TypeScript 6.0.3`
+- Package Manager: `pnpm 10.28.2`
+
+## 项目约定
+
+### 功能拆分
+
+功能拆分为多个子包，前缀统一为：`sisyphus`，例如：`@sisyphus/core`
 
 ```shell
 └── packages
