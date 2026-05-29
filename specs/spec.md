@@ -72,15 +72,20 @@ resource:
       value: 'sh'
 ```
 
+**动态资源** 为从服务端下发的数据源，根据数据源特性区分亚型：
+
+- 是否分页输出
+- 是否支持关键词过滤
+
 动态资源描述：
 
 - `name` 资源名称，具备唯一性，供应方约定
-- `features` 资源供应商支持的特性，例如：分页、关键词搜索
+- `features` 资源供应商支持的特性，例如：分页、关键词过滤
 
 动态资源接口声明：
 
 ```ts
-type DynamicResourceFeature = 'pagination' | 'search';
+type DynamicResourceFeature = 'pagination' | 'filter';
 
 interface DynamicResource {
   // 约定的资源名称
@@ -100,7 +105,7 @@ resource:
 ```yaml
 resource:
   name: Employees
-  features: ['pagination', 'search']
+  features: ['pagination', 'filter']
 ```
 
 ### 数据元属性
@@ -174,6 +179,7 @@ resource:
 - `rate`
 - `date`
 - `time`
+- `datetime`
 - `duration`
 - `percentage`
 
@@ -206,12 +212,12 @@ graph TD
     CheckManualMode -- "range" --> CheckManualRangeQuantity{关联数量?}
 
     %% string + point
-    CheckManualPointQuantity -- "single" --> CheckManualPointSingleFormat{内容格式?}
+    CheckManualPointQuantity -- "single" --> CheckManualPointSingleLength{内容格式?}
     CheckManualPointQuantity -- "multiple" --> ListBuilderCase[ListBuilder]
 
     %% string + point + single
-    CheckManualPointSingleFormat -- "normal" --> InputCase[Input]
-    CheckManualPointSingleFormat -- "text" --> TextAreaCase[TextArea]
+    CheckManualPointSingleLength -- "<=100" --> InputCase[Input]
+    CheckManualPointSingleLength -- ">100" --> TextAreaCase[TextArea]
 
     CheckManualRangeQuantity -- "single" --> RangeInputCase[RangeInput]
     CheckManualRangeQuantity -- "multiple" --> ListRangeBuilderCase[ListRangeBuilder]
@@ -236,7 +242,7 @@ graph TD
 - `MultipleSelect`: 多选
 - `Picker`: 数值或日期的选择
 - `RangePicker`: 数值或日期的区间选择
-- `ListBuilder`: 列表构建器，
+- `ListBuilder`: 列表构建器
 - `ListRangeBuilder`: 区间列表构建器
 - `ListPickerBuilder` 本质上为 `ListBuilder`，语义上适用于 `Picker` 场景
 - `ListRangePickerBuilder` 本质上为 `ListRangeBuilder`，语义上适用于 `Picker` 场景
