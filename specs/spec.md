@@ -41,6 +41,7 @@
 interface FieldDataSource {
   label: string;
   value: string | number;
+  disabled?: boolean;
 }
 ```
 

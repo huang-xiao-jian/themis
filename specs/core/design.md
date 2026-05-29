@@ -13,7 +13,7 @@
 
 ## 核心边界
 
-- **导出级别**：`RuleGroup` / `AtomicRule`，业务方无法感知内部实现
+- **导出级别**：`AtomicRuleGroup` / `AtomicRule`，业务方无法感知内部实现
 - **推断机制透明**：`Operator` 推断、`Component` 推断对业务方不可见
 - **Fetcher 由业务方提供**：通过 `provideXXXFetcher` 注入，内核管理响应式状态
 
@@ -96,11 +96,11 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 ): PaginatedFilterableFetcherProvider<T>;
 ```
 
-**说明**：`StaticResource` 为静态资源，预设选项无需动态加载，不使用 Fetcher
+**说明**：`StaticResource` 为静态资源，预设选项无需动态加载，不使用 Fetcher。`RuleFactorDefinition.resource.features` 为空数组时对应 `StaticResource`，包含 `pagination`/`filter` 时对应对应的 `DynamicResource` 类型
 
 ### DSL 定义
 
-规则因子定义由 `RuleSetter` 持有，供 `RuleGroupSetter` / `AtomicRuleSetter` 共享：
+规则因子定义由 `RuleWorkspace` 持有，供 `AtomicRuleGroupSetter` / `AtomicRuleSetter` 共享：
 
 ```ts
 interface RuleFactorDefinition {
@@ -134,11 +134,11 @@ interface FieldChangeAction {
 }
 
 /** 原子规则初始化数据（编辑场景） */
-interface AtomicRuleInit {
+interface AtomicRule {
   /** 规则标识 */
   readonly id: string;
   /** 规则因子名称 */
-  readonly factorName: string;
+  readonly name: string;
   /** 操作符 */
   readonly operator: string;
   /** 阈值 */
@@ -152,8 +152,6 @@ interface AtomicRuleSetter {
   readonly factor: Signal<RuleFactorDefinition | null>;
   /** 可用的匹配操作符列表（由推断机制计算） */
   readonly operators: Signal<readonly FieldDataSource[]>;
-  /** 响应式资源（供适配层使用） */
-  readonly resource: Signal<ResponseResource | null>;
 
   /** 选中的规则因子名称（表单字段，用户行为触发变更） */
   readonly name: Signal<string | null>;
@@ -177,61 +175,70 @@ interface AtomicRuleSetter {
 }
 ```
 
-### RuleGroupSetter
+### AtomicRuleGroupSetter
 
 规则组设置器管理原子规则集合：
 
 ```ts
-interface RuleGroupSetter {
-  /** 规则组名称 */
-  readonly name: string;
-  /** 已配置的原子规则列表 */
+/** 规则组初始化数据（编辑场景） */
+interface AtomicRuleGroup {
+  /** 已有的原子规则列表 */
+  readonly rules: readonly AtomicRule[];
+}
+
+interface AtomicRuleGroupSetter {
+  /** 规则组唯一标识 */
+  readonly id: string;
+  /** 已配置的原子规则列表，仅在编辑场景 */
   readonly rules: Signal<readonly AtomicRule[]>;
-  /** 可用的规则因子列表（已排除已使用的规则因子） */
-  readonly availableFactors: Signal<readonly RuleFactorDefinition[]>;
+  /** 已创建的规则实例列表 */
+  readonly ruleSetters: Signal<readonly AtomicRuleSetter[]>;
+  /** 可用的规则因子列表 */
+  readonly factors: Signal<readonly RuleFactorDefinition[]>;
+  /** 适配选择器的选项集合，需要排除已使用的规则因子 */
+  readonly factorOptions: Signal<readonly FieldDataSource[]>;
 
   /** 创建原子规则设置器（新建场景） */
-  add(ruleId: string): AtomicRuleSetter;
-  /** 创建原子规则设置器（编辑场景） */
-  add(ruleId: string, init: AtomicRuleInit): AtomicRuleSetter;
+  addRule(ruleId: string): AtomicRuleSetter;
   /** 移除原子规则 */
-  remove(ruleId: string): void;
+  removeRule(ruleId: string): void;
   /** 验证所有原子规则 */
   validate(): boolean;
   /** 构建规则组 */
-  build(): RuleGroup;
+  build(): AtomicRuleGroup;
 }
 ```
 
-### RuleSetter - 统一入口
+### RuleWorkspace - 统一入口
 
 使用 Builder Pattern 实例化：
 
 ```ts
-class RuleSetterBuilder {
+class RuleWorkspaceBuilder {
   /** 添加规则因子定义 */
-  withFactors(factors: RuleFactorDefinition[]): RuleSetterBuilder;
+  withFactors(factors: RuleFactorDefinition[]): RuleWorkspaceBuilder;
   /** 添加 Fetcher */
-  withFetchers(fetchers: readonly FetcherProvider[]): RuleSetterBuilder;
-  /** 添加已有规则（编辑场景可选） */
-  withRules(rules: readonly AtomicRule[]): RuleSetterBuilder;
-  /** 构建 RuleSetter 实例 */
-  build(): RuleSetter;
+  withFetchers(fetchers: readonly FetcherProvider[]): RuleWorkspaceBuilder;
+  /** 添加已有规则组（编辑场景可选） */
+  withRuleGroups(ruleGroups: readonly AtomicRuleGroup[]): RuleWorkspaceBuilder;
+  /** 构建 RuleWorkspace 实例 */
+  build(): RuleWorkspace;
 }
 
-interface RuleSetter {
-  /** 已创建的规则组列表 */
-  readonly ruleGroups: Signal<readonly RuleGroup[]>;
-  /** 已注册的规则（编辑场景填充，新建场景为空） */
-  readonly rules: Signal<readonly AtomicRule[]>;
+interface RuleWorkspace {
+  /** 已创建的规则组列表，仅在编辑场景 */
+  readonly ruleGroups: Signal<readonly AtomicRuleGroup[]>;
+  /** 已创建的规则组实例列表 */
+  readonly ruleGroupSetters: Signal<readonly AtomicRuleGroupSetter[]>;
 
-  /** 创建规则组设置器 */
-  addGroup(groupId: string): RuleGroupSetter;
+  /** 创建规则组设置器（新建场景） */
+  addGroup(groupId: string): AtomicRuleGroupSetter;
+  /** 移除规则组 */
   removeGroup(groupId: string): void;
   /** 验证所有规则组 */
   validate(): boolean;
   /** 构建所有规则组 */
-  build(): readonly RuleGroup[];
+  build(): readonly AtomicRuleGroup[];
 }
 ```
 
@@ -240,101 +247,111 @@ interface RuleSetter {
 ### 新建场景
 
 ```ts
+import {
+  RuleWorkspaceBuilder,
+  providePaginatedFilterableFetcher,
+  provideElementaryFetcher,
+} from '@sisyphus/core';
+
 // 1. 定义 DSL
 const factors: RuleFactorDefinition[] = [
   {
     name: 'employee',
     title: '员工',
     dataType: 'string',
+    semantic: 'rate',
     resource: { name: 'Employee', features: ['pagination', 'filter'] },
   },
   {
     name: 'deliver_city',
     title: '目标城市',
     dataType: 'string',
-    resource: { name: 'City' },
+    resource: { name: 'City' }, // 无 features = StaticResource
+  },
+  {
+    name: 'order_amount',
+    title: '订单金额',
+    dataType: 'number',
+    mode: 'range',
+    quantity: 'multiple',
   },
 ];
 
-// 2. 提供 Fetcher
+// 2. 提供 Fetcher（DynamicResource 必须，StaticResource 无需）
 const fetchers = [
   providePaginatedFilterableFetcher({
     fetch(keyword, page, pageSize) {
       return api.searchEmployees(keyword, page, pageSize);
     },
   }),
-  // 注：StaticResource 无需 Fetcher，预设选项直接赋值
+  provideElementaryFetcher({
+    fetch() {
+      return api.getCities();
+    },
+  }),
 ];
 
-// 1. 通过 Builder 链式调用
-const ruleSetter = new RuleSetterBuilder().withFactors(factors).withFetchers(fetchers).build();
+// 3. 构建 RuleWorkspace
+const workspace = new RuleWorkspaceBuilder().withFactors(factors).withFetchers(fetchers).build();
 
 // 4. 创建规则组
-const ruleGroup = ruleSetter.addGroup('group-001');
+const group = workspace.addGroup('group-1');
 
 // 5. 创建原子规则
-const atomicSetter = ruleGroup.add('rule-001');
+const rule = group.addRule('rule-1');
 
-// 6. 切换规则因子（自动重置 operator/threshold）
-atomicSetter.onFieldChange({ field: 'name', value: 'employee' });
+// 6. 用户选择规则因子（触发推断）
+rule.onFieldChange({ field: 'name', value: 'employee' });
+// 自动：factor 切换、operators 推断、重置 operator/threshold
 
-// factor → employee 定义
-// operators → ['=', '≠', 'in', 'not in']（推断）
-// operator → null（重置）
-// threshold → null（重置）
+// 7. 用户选择操作符
+rule.onFieldChange({ field: 'operator', value: 'eq' });
 
-// 7. 设置 operator 和 threshold
-atomicSetter.onFieldChange({ field: 'operator', value: 'IN' });
-atomicSetter.onFieldChange({ field: 'threshold', value: ['emp-001', 'emp-002'] });
+// 8. 用户输入阈值
+rule.onFieldChange({ field: 'threshold', value: 100 });
 
-// 8. 验证并构建
-if (atomicSetter.validate()) {
-  const rule = atomicSetter.build();
+// 9. 验证并构建
+if (group.validate()) {
+  const atomicRuleGroup = group.build();
 }
-
-const group = ruleGroup.build();
 ```
 
 ### 编辑场景
 
 ```ts
-// 1. 从已有规则创建配置器
-const existingRules: AtomicRule[] = [
+// 已有规则组数据（从后端加载）
+const existingGroups: AtomicRuleGroup[] = [
   {
-    id: 'rule-001',
-    factor: { name: 'employee', title: '员工', dataType: 'string', ... },
-    operator: 'IN',
-    threshold: ['emp-001', 'emp-002'],
+    rules: [
+      { id: 'rule-1', name: 'employee', operator: 'eq', threshold: 100 },
+      { id: 'rule-2', name: 'deliver_city', operator: 'in', threshold: ['北京', '上海'] },
+    ],
   },
 ];
 
-
-// 2. 通过 Builder 链式调用
-const ruleSetter = new RuleSetterBuilder()
+// 初始化时传入已有数据
+const workspace = new RuleWorkspaceBuilder()
   .withFactors(factors)
   .withFetchers(fetchers)
-  .withRules(existingRules)
+  .withRuleGroups(existingGroups)
   .build();
 
+// 通过 build 获取最终结果（包含编辑后的数据）
+if (workspace.validate()) {
+  const result = workspace.build();
+  console.log('规则组数量:', result.length);
+}
+```
 
-// 3. 获取规则组
-const ruleGroup = ruleSetter.addGroup('group-001');
+### 构建最终结果
 
-// 4. 编辑已有规则
-const atomicSetter = ruleGroup.add('rule-001', {
-  id: 'rule-001',
-  factorName: 'employee',
-  operator: 'IN',
-  threshold: ['emp-003'],
-});
+```ts
+// 验证所有规则组并构建最终输出
+if (workspace.validate()) {
+  // result: readonly AtomicRuleGroup[]
+  const result = workspace.build();
 
-// 5. 修改阈值
-atomicSetter.onFieldChange({ field: 'threshold', value: ['emp-003', 'emp-004'] });
-
-
-// 6. 验证并构建
-if (atomicSetter.validate()) {
-  const rule = atomicSetter.build();
+  // 提交规则组或者进一步操作
 }
 ```
 
@@ -345,7 +362,7 @@ packages/core/src/
 ├── contracts/
 │   ├── fetcher.ts    # Fetcher 接口定义
 │   ├── dsl.ts        # DSL 类型定义
-│   ├── rule.ts       # AtomicRule / RuleGroup 定义
+│   ├── rule.ts       # AtomicRule / AtomicRuleGroup 定义
 │   └── index.ts
 ├── factory/
 │   ├── fetcher.ts    # provideXXXFetcher 工厂函数
@@ -355,8 +372,8 @@ packages/core/src/
 │   └── index.ts
 ├── setter/
 │   ├── AtomicRuleSetter.ts
-│   ├── RuleGroupSetter.ts
-│   ├── RuleSetter.ts
+│   ├── AtomicRuleGroupSetter.ts
+│   ├── RuleWorkspace.ts
 │   └── index.ts
 └── index.ts          # 统一导出
 ```
