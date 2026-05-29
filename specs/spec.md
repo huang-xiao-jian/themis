@@ -2,13 +2,11 @@
 
 ## 业务目标
 
-基于 `yaml` 设计 `DSL` 用以描述 **规则因子** 语义化结构，**规则配置器** 通过解释 **规则因子描述** 提供可交互视图，用以配置业务规则。`DSL` 设计的核心在于 **规则配置器** 能构基于 **规则因子描述** 推断合适的表单控件、合适的 **目标匹配方式** 选择范围，以及正确的边界值约束条件
+基于 `json` 设计 `DSL` 用以描述 **规则因子** 语义化结构，**规则配置器** 通过解释 **规则因子描述** 提供可交互视图，用以配置业务规则。`DSL` 设计的核心在于 **规则配置器** 能构基于 **规则因子描述** 推断合适的 **表单控件**、**匹配操作符** 选择范围，以及正确的边界值约束条件
 
 ## 业务集成
 
-**规则因子** 与 **规则配置器** 为紧密协同关系，作为 **规则配置中心** 组成要素
-
-- [规则配置器](./references/setter.md) 基于 **规则因子描述** 提供配置器，用户按需配置规则因子形成 **业务规则**
+**规则因子** 与 **规则配置器** 为紧密协同关系，作为 **规则配置中心** 组成要素，规则配置器基于 **规则因子描述** 提供配置器，用户按需配置规则因子形成 **业务规则**。
 
 ## 设计原则
 
@@ -27,10 +25,12 @@
 - `title` 规则因子名称
 - `description` 规则因子描述
 
-```yaml
-name: deliver_city
-title: 目标城市
-description: 选择可发送快递的目标城市
+```json
+{
+  "name": "deliver_city",
+  "title": "目标城市",
+  "description": "选择可发送快递的目标城市"
+}
 ```
 
 ### 关联资源 Resource
@@ -62,14 +62,16 @@ interface StaticResource {
 
 静态资源案例：
 
-```yaml
-resource:
-  name: City
-  options:
-    - label: '北京'
-      value: 'bj'
-    - label: '上海'
-      value: 'sh'
+```json
+{
+  "resource": {
+    "name": "City",
+    "options": [
+      { "label": "北京", "value": "bj" },
+      { "label": "上海", "value": "sh" }
+    ]
+  }
+}
 ```
 
 **动态资源** 为从服务端下发的数据源，根据数据源特性区分亚型：
@@ -97,15 +99,17 @@ interface DynamicResource {
 
 动态资源案例：
 
-```yaml
-resource:
-  name: City
+```json
+{ "resource": { "name": "City" } }
 ```
 
-```yaml
-resource:
-  name: Employees
-  features: ['pagination', 'filter']
+```json
+{
+  "resource": {
+    "name": "Employees",
+    "features": ["pagination", "filter"]
+  }
+}
 ```
 
 ### 数据元属性
