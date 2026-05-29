@@ -225,7 +225,7 @@ interface FieldConstraints {
 ```ts
 interface InputProperties extends BaseProperties {
   /** 组件类型标识 */
-  readonly type: 'input';
+  readonly type: 'Input';
 }
 ```
 
@@ -236,7 +236,7 @@ interface InputProperties extends BaseProperties {
 ```ts
 interface TextAreaProperties extends BaseProperties {
   /** 组件类型标识 */
-  readonly type: 'textarea';
+  readonly type: 'TextArea';
 }
 ```
 
@@ -247,7 +247,7 @@ interface TextAreaProperties extends BaseProperties {
 ```ts
 interface RangeInputProperties extends BaseProperties {
   /** 组件类型标识 */
-  readonly type: 'rangeInput';
+  readonly type: 'RangeInput';
 }
 ```
 
@@ -258,7 +258,7 @@ interface RangeInputProperties extends BaseProperties {
 ```ts
 interface SwitchProperties extends BaseProperties {
   /** 组件类型标识 */
-  readonly type: 'switch';
+  readonly type: 'Switch';
 }
 ```
 
@@ -269,7 +269,7 @@ interface SwitchProperties extends BaseProperties {
 ```ts
 interface SelectProperties extends BaseProperties {
   /** 组件类型标识 */
-  readonly type: 'select';
+  readonly type: 'Select';
   /** 数据资源 */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
@@ -282,7 +282,7 @@ interface SelectProperties extends BaseProperties {
 ```ts
 interface MultipleSelectProperties extends BaseProperties {
   /** 组件类型标识 */
-  readonly type: 'multipleSelect';
+  readonly type: 'MultipleSelect';
   /** 数据资源 */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
@@ -295,7 +295,7 @@ interface MultipleSelectProperties extends BaseProperties {
 ```ts
 interface PickerProperties extends BaseProperties {
   /** 组件类型标识 */
-  readonly type: 'picker';
+  readonly type: 'Picker';
 }
 ```
 
@@ -306,7 +306,7 @@ interface PickerProperties extends BaseProperties {
 ```ts
 interface RangePickerProperties extends BaseProperties {
   /** 组件类型标识 */
-  readonly type: 'rangePicker';
+  readonly type: 'RangePicker';
 }
 ```
 
