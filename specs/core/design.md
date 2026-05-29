@@ -4,11 +4,7 @@
 
 ## 技术栈
 
-- [alien-signals](https://github.com/stackblitz/alien-signals) `Signal Primitive` 支持
-
-如需获取使用文档，使用 `context7` 获取即可，对应的 `libraryId` 参数如下：
-
-- `alien-signals` --> `/stackblitz/alien-signals`
+- [alien-signals](https://github.com/stackblitz/alien-signals) `Signal Primitive` 支持，使用 `context7` 可获取文档，`libraryId == /stackblitz/alien-signals`
 
 ## 设计目标
 
@@ -18,58 +14,89 @@
 ## 核心边界
 
 - **导出级别**：`RuleGroup` / `AtomicRule`，业务方无法感知内部实现
-- **推断机制透明**：Operator 推断、Component 推断对业务方不可见
+- **推断机制透明**：`Operator` 推断、`Component` 推断对业务方不可见
 - **Fetcher 由业务方提供**：通过 `provideXXXFetcher` 注入，内核管理响应式状态
 
 ## 协议设计
 
 ### Fetcher 接口
 
-业务方按场景组合提供 Fetcher（不是按 resource name），共 4 种类型：
+业务方按场景组合提供 Fetcher（与 DynamicResource 类型对应），共 4 种类型：
 
 ```ts
-// 基础 Fetcher - 无分页、无过滤
-interface BasicFetcher<T = FieldDataSource> {
+// 基础动态资源 Fetcher - 无分页、无过滤
+interface ElementaryFetcher<T = FieldDataSource> {
   fetch(): Promise<T[]>;
 }
 
-// 分页 Fetcher
-interface PaginationFetcher<T = FieldDataSource> {
+// 分页动态资源 Fetcher
+interface PaginatedFetcher<T = FieldDataSource> {
   fetch(page: number, pageSize: number): Promise<PaginatedResult<T>>;
 }
 
-// 过滤 Fetcher
-interface FilterFetcher<T = FieldDataSource> {
+// 过滤动态资源 Fetcher
+interface FilterableFetcher<T = FieldDataSource> {
   fetch(keyword: string): Promise<T[]>;
 }
 
-// 分页+过滤 Fetcher
-interface PaginationFilterFetcher<T = FieldDataSource> {
+// 分页+过滤动态资源 Fetcher
+interface PaginatedFilterableFetcher<T = FieldDataSource> {
   fetch(keyword: string, page: number, pageSize: number): Promise<PaginatedResult<T>>;
 }
 ```
 
 ### provideXXXFetcher - 类型安全的 Fetcher 注入
 
-通过 `provideXXXFetcher` 工厂函数创建注册项，自动携带 `type`：
+通过 `provideXXXFetcher` 工厂函数创建注册项，返回 `FetcherProvider` 类型：
 
 ```ts
-function provideBasicFetcher<T extends FieldDataSource>(
-  fetcher: BasicFetcher<T>
-): FetcherRegistration<T> & { readonly type: 'basic' };
+interface FetcherProvider<T extends FieldDataSource> {
+  /** fetcher 实例 */
+  readonly fetcher:
+    | ElementaryFetcher<T>
+    | PaginatedFetcher<T>
+    | FilterableFetcher<T>
+    | PaginatedFilterableFetcher<T>;
+}
 
-function providePaginationFetcher<T extends FieldDataSource>(
-  fetcher: PaginationFetcher<T>
-): FetcherRegistration<T> & { readonly type: 'pagination' };
+/** 基础动态资源 Fetcher Provider */
+interface ElementaryFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
+  readonly fetcher: ElementaryFetcher<T>;
+}
 
-function provideFilterFetcher<T extends FieldDataSource>(
-  fetcher: FilterFetcher<T>
-): FetcherRegistration<T> & { readonly type: 'filter' };
+/** 分页动态资源 Fetcher Provider */
+interface PaginatedFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
+  readonly fetcher: PaginatedFetcher<T>;
+}
 
-function providePaginationFilterFetcher<T extends FieldDataSource>(
-  fetcher: PaginationFilterFetcher<T>
-): FetcherRegistration<T> & { readonly type: 'pagination-filter' };
+/** 过滤动态资源 Fetcher Provider */
+interface FilterableFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
+  readonly fetcher: FilterableFetcher<T>;
+}
+
+/** 分页+过滤动态资源 Fetcher Provider */
+interface PaginatedFilterableFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
+  readonly fetcher: PaginatedFilterableFetcher<T>;
+}
+
+function provideElementaryFetcher<T extends FieldDataSource>(
+  fetcher: ElementaryFetcher<T>
+): ElementaryFetcherProvider<T>;
+
+function providePaginatedFetcher<T extends FieldDataSource>(
+  fetcher: PaginatedFetcher<T>
+): PaginatedFetcherProvider<T>;
+
+function provideFilterableFetcher<T extends FieldDataSource>(
+  fetcher: FilterableFetcher<T>
+): FilterableFetcherProvider<T>;
+
+function providePaginatedFilterableFetcher<T extends FieldDataSource>(
+  fetcher: PaginatedFilterableFetcher<T>
+): PaginatedFilterableFetcherProvider<T>;
 ```
+
+**说明**：`StaticResource` 为静态资源，预设选项无需动态加载，不使用 Fetcher
 
 ### DSL 定义
 
@@ -103,7 +130,7 @@ interface AtomicRuleSetter {
   /** 已激活的规则因子定义 */
   readonly factor: Signal<RuleFactorDefinition | null>;
   /** 可用的匹配操作符列表（由推断机制计算） */
-  readonly operators: Signal<readonly string[]>;
+  readonly operators: Signal<readonly FieldDataSource[]>;
   /** 选中的操作符 */
   readonly operator: Signal<string | null>;
   /** 阈值（外部注入） */
@@ -184,18 +211,14 @@ const factors: RuleFactorDefinition[] = [
   },
 ];
 
-// 2. 提供 Fetcher（通过数组+provideXXXFetcher，自动携带 type）
+// 2. 提供 Fetcher（通过数组+provideXXXFetcher，自动携带 fetcher 类型）
 const fetchers = [
-  providePaginationFilterFetcher({
+  providePaginatedFilterableFetcher({
     fetch(keyword, page, pageSize) {
       return api.searchEmployees(keyword, page, pageSize);
     },
   }),
-  provideBasicFetcher({
-    fetch() {
-      return [{ label: '北京', value: 'bj' }];
-    },
-  }),
+  // 注：StaticResource 无需 Fetcher，预设选项直接赋值
 ];
 
 // 3. 创建配置器
