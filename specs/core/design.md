@@ -124,6 +124,27 @@ interface RuleFactorDefinition {
 原子规则设置器集成推断机制，使用 Signal 固化状态：
 
 ```ts
+/** 表单字段标识 */
+type FieldName = 'name' | 'operator' | 'threshold';
+
+/** 表单字段变更 Action */
+interface FieldChangeAction {
+  field: FieldName;
+  value: unknown;
+}
+
+/** 原子规则初始化数据（编辑场景） */
+interface AtomicRuleInit {
+  /** 规则标识 */
+  readonly id: string;
+  /** 规则因子名称 */
+  readonly factorName: string;
+  /** 操作符 */
+  readonly operator: string;
+  /** 阈值 */
+  readonly threshold: unknown;
+}
+
 interface AtomicRuleSetter {
   /** 唯一标识 */
   readonly id: string;
@@ -131,17 +152,26 @@ interface AtomicRuleSetter {
   readonly factor: Signal<RuleFactorDefinition | null>;
   /** 可用的匹配操作符列表（由推断机制计算） */
   readonly operators: Signal<readonly FieldDataSource[]>;
-  /** 选中的操作符 */
-  readonly operator: Signal<string | null>;
-  /** 阈值（外部注入） */
-  readonly threshold: Signal<unknown>;
   /** 响应式资源（供适配层使用） */
   readonly resource: Signal<ResponseResource | null>;
 
-  /** 切换规则因子（自动重置 operator/threshold） */
-  switch(name: string): void;
-  /** 验证阈值是否符合约束 */
-  validate(threshold: unknown): boolean;
+  /** 选中的规则因子名称（表单字段，用户行为触发变更） */
+  readonly name: Signal<string | null>;
+  /** 选中的操作符（表单字段，用户行为触发变更） */
+  readonly operator: Signal<string | null>;
+  /** 阈值（表单字段，用户行为触发变更） */
+  readonly threshold: Signal<unknown>;
+
+  /**
+   * 表单字段变更回调（供组件 onChange 绑定，单个方法处理三个字段）
+   * - field='name' 时：自动触发 factor 切换、operators 推断、重置 operator/threshold
+   * - field='operator' 时：更新操作符
+   * - field='threshold' 时：更新阈值
+   */
+  readonly onFieldChange: (action: FieldChangeAction) => void;
+
+  /** 验证配置是否完整可用 */
+  validate(): boolean;
   /** 构建原子规则 */
   build(): AtomicRule;
 }
@@ -160,10 +190,14 @@ interface RuleGroupSetter {
   /** 可用的规则因子列表（已排除已使用的规则因子） */
   readonly availableFactors: Signal<readonly RuleFactorDefinition[]>;
 
-  /** 创建原子规则设置器 */
+  /** 创建原子规则设置器（新建场景） */
   add(ruleId: string): AtomicRuleSetter;
+  /** 创建原子规则设置器（编辑场景） */
+  add(ruleId: string, init: AtomicRuleInit): AtomicRuleSetter;
   /** 移除原子规则 */
   remove(ruleId: string): void;
+  /** 验证所有原子规则 */
+  validate(): boolean;
   /** 构建规则组 */
   build(): RuleGroup;
 }
@@ -171,28 +205,39 @@ interface RuleGroupSetter {
 
 ### RuleSetter - 统一入口
 
+使用 Builder Pattern 实例化：
+
 ```ts
+class RuleSetterBuilder {
+  /** 添加规则因子定义 */
+  withFactors(factors: RuleFactorDefinition[]): RuleSetterBuilder;
+  /** 添加 Fetcher */
+  withFetchers(fetchers: readonly FetcherProvider[]): RuleSetterBuilder;
+  /** 添加已有规则（编辑场景可选） */
+  withRules(rules: readonly AtomicRule[]): RuleSetterBuilder;
+  /** 构建 RuleSetter 实例 */
+  build(): RuleSetter;
+}
+
 interface RuleSetter {
   /** 已创建的规则组列表 */
   readonly ruleGroups: Signal<readonly RuleGroup[]>;
+  /** 已注册的规则（编辑场景填充，新建场景为空） */
+  readonly rules: Signal<readonly AtomicRule[]>;
 
   /** 创建规则组设置器 */
   addGroup(groupId: string): RuleGroupSetter;
-  /** 获取规则因子定义 */
-  getFactor(name: string): RuleFactorDefinition | undefined;
+  removeGroup(groupId: string): void;
   /** 验证所有规则组 */
   validate(): boolean;
   /** 构建所有规则组 */
   build(): readonly RuleGroup[];
 }
-
-function createRuleSetter(
-  factors: RuleFactorDefinition[],
-  fetchers: readonly FetcherRegistration[]
-): RuleSetter;
 ```
 
 ## 业务方使用示例
+
+### 新建场景
 
 ```ts
 // 1. 定义 DSL
@@ -211,7 +256,7 @@ const factors: RuleFactorDefinition[] = [
   },
 ];
 
-// 2. 提供 Fetcher（通过数组+provideXXXFetcher，自动携带 fetcher 类型）
+// 2. 提供 Fetcher
 const fetchers = [
   providePaginatedFilterableFetcher({
     fetch(keyword, page, pageSize) {
@@ -221,8 +266,8 @@ const fetchers = [
   // 注：StaticResource 无需 Fetcher，预设选项直接赋值
 ];
 
-// 3. 创建配置器
-const ruleSetter = createRuleSetter(factors, fetchers);
+// 1. 通过 Builder 链式调用
+const ruleSetter = new RuleSetterBuilder().withFactors(factors).withFetchers(fetchers).build();
 
 // 4. 创建规则组
 const ruleGroup = ruleSetter.addGroup('group-001');
@@ -230,23 +275,67 @@ const ruleGroup = ruleSetter.addGroup('group-001');
 // 5. 创建原子规则
 const atomicSetter = ruleGroup.add('rule-001');
 
-// 6. 切换规则因子
-atomicSetter.switch('employee');
+// 6. 切换规则因子（自动重置 operator/threshold）
+atomicSetter.onFieldChange({ field: 'name', value: 'employee' });
+
 // factor → employee 定义
 // operators → ['=', '≠', 'in', 'not in']（推断）
 // operator → null（重置）
 // threshold → null（重置）
 
 // 7. 设置 operator 和 threshold
-atomicSetter.operator.value = 'IN';
-atomicSetter.threshold.value = ['emp-001', 'emp-002'];
+atomicSetter.onFieldChange({ field: 'operator', value: 'IN' });
+atomicSetter.onFieldChange({ field: 'threshold', value: ['emp-001', 'emp-002'] });
 
 // 8. 验证并构建
-if (atomicSetter.validate(atomicSetter.threshold.value)) {
+if (atomicSetter.validate()) {
   const rule = atomicSetter.build();
 }
 
 const group = ruleGroup.build();
+```
+
+### 编辑场景
+
+```ts
+// 1. 从已有规则创建配置器
+const existingRules: AtomicRule[] = [
+  {
+    id: 'rule-001',
+    factor: { name: 'employee', title: '员工', dataType: 'string', ... },
+    operator: 'IN',
+    threshold: ['emp-001', 'emp-002'],
+  },
+];
+
+
+// 2. 通过 Builder 链式调用
+const ruleSetter = new RuleSetterBuilder()
+  .withFactors(factors)
+  .withFetchers(fetchers)
+  .withRules(existingRules)
+  .build();
+
+
+// 3. 获取规则组
+const ruleGroup = ruleSetter.addGroup('group-001');
+
+// 4. 编辑已有规则
+const atomicSetter = ruleGroup.add('rule-001', {
+  id: 'rule-001',
+  factorName: 'employee',
+  operator: 'IN',
+  threshold: ['emp-003'],
+});
+
+// 5. 修改阈值
+atomicSetter.onFieldChange({ field: 'threshold', value: ['emp-003', 'emp-004'] });
+
+
+// 6. 验证并构建
+if (atomicSetter.validate()) {
+  const rule = atomicSetter.build();
+}
 ```
 
 ## 目录结构
