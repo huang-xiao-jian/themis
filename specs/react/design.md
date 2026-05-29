@@ -149,12 +149,12 @@ interface ListRangeBuilderProperties extends BaseProperties {
 
 编辑器组件封装了 `@sisyphus/core` 提供的设置器，提供完整的 UI 编辑能力。
 
-### AtomicRuleEditor - 原子规则编辑器
+### AtomicRuleView - 原子规则编辑视图
 
 整合 `name`、`operator`、`threshold` 的完整原子规则编辑器：
 
 ```ts
-interface AtomicRuleEditorProps {
+interface AtomicRuleViewProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
   /** 原子规则设置器（由 @sisyphus/core 提供，已包含推断后的组件属性） */
@@ -166,14 +166,14 @@ interface AtomicRuleEditorProps {
 
 - name selector - 规则因子选择器
 - operator selector - 操作符选择器
-- threshold renderer - 基于 factor.componentType 渲染对应组件
+- threshold renderer - 基于 factor 渲染对应组件
 
-### AtomicRuleGroupEditor - 规则组编辑器
+### AtomicRuleGroupView - 规则组编辑视图
 
 管理多个原子规则编辑器：
 
 ```ts
-interface AtomicRuleGroupEditorProps {
+interface AtomicRuleGroupViewProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
   /** 规则组设置器（由 @sisyphus/core 提供） */
@@ -184,14 +184,14 @@ interface AtomicRuleGroupEditorProps {
 **内部结构**：
 
 - 规则列表渲染
-- 每个规则对应一个 AtomicRuleEditor
+- 每个规则对应一个 `AtomicRuleView`
 
-### RuleWorkspaceEditor - 工作空间编辑器
+### RuleWorkspaceView - 工作空间编辑视图
 
 管理多个规则组编辑器：
 
 ```ts
-interface RuleWorkspaceEditorProps {
+interface RuleWorkspaceViewProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
   /** 规则工作空间（由 @sisyphus/core 提供） */
@@ -202,7 +202,7 @@ interface RuleWorkspaceEditorProps {
 **内部结构**：
 
 - 规则组列表渲染
-- 每个规则组对应一个 AtomicRuleGroupEditor
+- 每个规则组对应一个 `AtomicRuleGroupView`
 
 ## 目录结构
 
