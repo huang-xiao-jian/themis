@@ -9,17 +9,7 @@
 
 ## 技术栈
 
-使用 `Signal` 作为响应式原语，实现具体框架的解耦，具体选型为 [alien-signals](https://github.com/stackblitz/alien-signals)，引用 API 前务必 **使用 `context7` 获取使用文档及说明**
-
-```json
-{
-  "tool": "query-docs", // 来自 MCP --> context7
-  "params": {
-    "libraryId": "/stackblitz/alien-signals",
-    "query": "待解决的问题，例如：如何实现 Signal 计算属性？"
-  }
-}
-```
+使用 `Signal` 作为响应式原语，实现具体框架的解耦
 
 ## 设计目标
 

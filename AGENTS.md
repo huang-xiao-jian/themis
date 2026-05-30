@@ -14,6 +14,20 @@
 - Language: `TypeScript 6.0.3`
 - Package Manager: `pnpm 10.28.2`
 
+## 核心依赖
+
+[alien-signals](https://github.com/stackblitz/alien-signals)，提供 `Signal Primitives`，引用 API 前务必 **使用 context7 获取使用文档及说明**
+
+```json
+{
+  "tool": "query-docs", // 来自 MCP --> context7
+  "params": {
+    "libraryId": "/stackblitz/alien-signals",
+    "query": "待解决的问题，例如：如何实现 Signal 计算属性？"
+  }
+}
+```
+
 ## 项目约定
 
 ### 功能拆分
