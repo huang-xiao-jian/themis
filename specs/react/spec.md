@@ -4,7 +4,7 @@
 
 ## 前置依赖
 
-- [内核设计](../core/design.md)
+- [内核设计](../core/spec.md)
 - [表单组件设计](../interpreter.md)
 
 ## 技术栈

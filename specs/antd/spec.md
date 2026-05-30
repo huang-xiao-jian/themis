@@ -2,7 +2,7 @@
 
 ## 前置依赖
 
-- [@sisyphus/react](../react/design.md)
+- [@sisyphus/react](../react/spec.md)
 
 ## 设计规范
 
