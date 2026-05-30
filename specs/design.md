@@ -159,24 +159,24 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
 }
 ```
 
-## 抽象组件设计
+## 表单组件设计
 
-### 抽象组件设计目标
+### 表单组件设计目标
 
-明确 **抽象组件** 的属性，屏蔽掉原始 `DSL` 定义
+明确 **表单组件** 的属性，用于 `ThresholdRenderer` 渲染阈值输入组件，屏蔽原始 `DSL` 定义。
 
-### 抽象组件设计规范
+### 表单组件设计规范
 
 - 避免框架的细节侵入，统一使用 `Properties` 作为后缀
 - 避免组件的细节侵入，避免出现表单控件的交互属性，约定隐式继承
 
-### 抽象组件属性声明
+### 表单组件属性声明
 
-抽象组件统一继承 `BaseProperties`，组件特定属性按需扩展：
+抽象表单组件统一继承 `BaseProperties`，组件特定属性按需扩展：
 
 ```ts
 /**
- * 抽象组件基础属性
+ * 抽象表单组件基础属性
  */
 interface BaseProperties {
   /** 字段标识 */
@@ -390,12 +390,24 @@ interface ListRangeBuilderProperties extends ListRangeBuilderBaseProperties {
 }
 ```
 
+## 编辑器组件设计
+
+### 编辑器组件设计目标
+
+明确 **编辑器组件** 的属性，用于插件协议注册的组件和渲染器工厂，定义规则编辑视图层级的结构。
+
+### 编辑器组件设计规范
+
+- 编辑器组件与原始 `DSL` 无关联关系
+- 编辑器组件通过 `thresholdProperties` 引用表单组件属性
+- 编辑器组件通过 `View` 后缀与表单组件区分
+
 ### AtomicRuleViewProperties - 原子规则编辑组件
 
 整合 `name`、`operator`、`threshold` 的完整原子规则编辑器，作为规则配置的最小编辑单元：
 
 ```ts
-interface AtomicRuleViewProperties extends BaseProperties {
+interface AtomicRuleViewProperties {
   /** 组件类型标识 */
   readonly type: 'AtomicRuleView';
   /** 禁用状态 */
@@ -405,20 +417,20 @@ interface AtomicRuleViewProperties extends BaseProperties {
   /** 字段标题 */
   title: string;
   /** 阈值属性（由推断规则确定） */
-  thresholdProperties: AbstractComponentProperties;
+  thresholdProperties: ThresholdComponentProperties;
 }
 ```
 
 **属性说明**：
 
-- `thresholdProperties`：阈值部分的抽象组件属性，由内核推断规则确定组件类型
+- `thresholdProperties`：阈值部分的表单组件属性，由内核推断规则确定组件类型
 
 ### AtomicRuleGroupViewProperties - 规则组编辑组件
 
 管理多个原子规则编辑器，用于组织同一层级的规则集合：
 
 ```ts
-interface AtomicRuleGroupViewProperties extends BaseProperties {
+interface AtomicRuleGroupViewProperties {
   /** 组件类型标识 */
   readonly type: 'AtomicRuleGroupView';
   /** 禁用状态 */
@@ -440,7 +452,7 @@ interface AtomicRuleGroupViewProperties extends BaseProperties {
 管理多个规则组编辑器，作为规则配置的顶层容器：
 
 ```ts
-interface RuleWorkspaceViewProperties extends BaseProperties {
+interface RuleWorkspaceViewProperties {
   /** 组件类型标识 */
   readonly type: 'RuleWorkspaceView';
   /** 禁用状态 */
@@ -455,12 +467,19 @@ interface RuleWorkspaceViewProperties extends BaseProperties {
 - 规则组列表渲染
 - 每个规则组对应一个 `AtomicRuleGroupView`
 
-### 表单组件属性
-
-表单组件属性用于 `ThresholdRenderer` 渲染阈值输入组件：
+### 编辑器组件属性类型别名
 
 ```ts
-type ThresholdRendererProperties =
+type EditorComponentProperties =
+  | AtomicRuleViewProperties
+  | AtomicRuleGroupViewProperties
+  | RuleWorkspaceViewProperties;
+```
+
+### 抽象组件属性类型别名
+
+```ts
+type ThresholdComponentProperties =
   | InputProperties
   | TextAreaProperties
   | RangeInputProperties
@@ -473,25 +492,14 @@ type ThresholdRendererProperties =
   | ListRangeBuilderProperties;
 ```
 
-### 编辑器组件属性
-
-编辑器组件属性用于规则编辑视图层级：
-
-```ts
-type EditorComponentProperties =
-  | AtomicRuleViewProperties
-  | AtomicRuleGroupViewProperties
-  | RuleWorkspaceViewProperties;
-```
-
-### 抽象组件与 Resource 映射关系
+### 表单组件与 Resource 映射关系
 
 | 表单组件         | 关联 Resource 类型                             |
 | :--------------- | :--------------------------------------------- |
 | `Select`         | `StaticResource` / `ElementaryDynamicResource` |
 | `MultipleSelect` | `StaticResource` / `ElementaryDynamicResource` |
 
-### 抽象组件属性解构来源
+### 表单组件属性解构来源
 
 | 属性类别      | 来源说明                                             |
 | :------------ | :--------------------------------------------------- |
