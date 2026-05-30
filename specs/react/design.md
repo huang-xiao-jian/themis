@@ -149,12 +149,24 @@ interface ListRangeBuilderProperties extends BaseProperties {
 
 编辑器组件封装了 `@sisyphus/core` 提供的设置器，提供完整的 UI 编辑能力。
 
-### AtomicRuleView - 原子规则编辑视图
+### ThresholdRenderer - 阈值渲染器
+
+内部组件，通过 `useSisyphusScope()` 获取 `ComponentRenderer`，渲染抽象组件属性：
+
+```tsx
+/** 内部实现示例 */
+function ThresholdRenderer({ properties }: { properties: AbstractComponentProperties }) {
+  const { renderer } = useSisyphusScope();
+  return renderer.render(properties);
+}
+```
+
+### AtomicRuleEditor - 原子规则编辑器
 
 整合 `name`、`operator`、`threshold` 的完整原子规则编辑器：
 
-```ts
-interface AtomicRuleViewProps {
+```tsx
+interface AtomicRuleEditorProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
   /** 原子规则设置器（由 @sisyphus/core 提供，已包含推断后的组件属性） */
@@ -166,14 +178,14 @@ interface AtomicRuleViewProps {
 
 - name selector - 规则因子选择器
 - operator selector - 操作符选择器
-- threshold renderer - 基于 factor 渲染对应组件
+- threshold renderer - 通过 `useSisyphusScope()` 获取渲染器，渲染对应组件
 
-### AtomicRuleGroupView - 规则组编辑视图
+### AtomicRuleGroupEditor - 规则组编辑器
 
 管理多个原子规则编辑器：
 
-```ts
-interface AtomicRuleGroupViewProps {
+```tsx
+interface AtomicRuleGroupEditorProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
   /** 规则组设置器（由 @sisyphus/core 提供） */
@@ -184,14 +196,14 @@ interface AtomicRuleGroupViewProps {
 **内部结构**：
 
 - 规则列表渲染
-- 每个规则对应一个 `AtomicRuleView`
+- 每个规则对应一个 `AtomicRuleEditor`
 
-### RuleWorkspaceView - 工作空间编辑视图
+### RuleWorkspaceEditor - 工作空间编辑器
 
 管理多个规则组编辑器：
 
-```ts
-interface RuleWorkspaceViewProps {
+```tsx
+interface RuleWorkspaceEditorProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
   /** 规则工作空间（由 @sisyphus/core 提供） */
@@ -202,7 +214,7 @@ interface RuleWorkspaceViewProps {
 **内部结构**：
 
 - 规则组列表渲染
-- 每个规则组对应一个 `AtomicRuleGroupView`
+- 每个规则组对应一个 `AtomicRuleGroupEditor`
 
 ## 目录结构
 
@@ -211,6 +223,11 @@ packages/react/src/
 ├── built-in/
 │   ├── ListBuilder.tsx      # 内建列表构建器
 │   ├── ListRangeBuilder.tsx # 内建区间列表构建器
+│   └── index.ts
+├── context/
+│   ├── SisyphusScopeContext.ts  # Context 定义
+│   ├── SisyphusScopeProvider.tsx # Provider 组件
+│   ├── useSisyphusScope.ts       # Hook 函数
 │   └── index.ts
 ├── app/
 │   ├── SisyphusScope.ts       # 应用实例与插件机制
@@ -226,18 +243,50 @@ packages/react/src/
 
 ## 使用示例
 
+通过 React Context 传递 `SisyphusScope` 实例，编辑器组件内部通过 `useSisyphusScope()` 获取渲染器：
+
 ```tsx
-import { createSisyphusScope, RuleWorkspaceEditor } from '@sisyphus/react';
+import { SisyphusScopeProvider, useSisyphusScope, RuleWorkspaceEditor } from '@sisyphus/react';
 import { createAntdPlugin } from '@sisyphus/antd';
 import { RuleWorkspace } from '@sisyphus/core';
 
 // 创建应用实例并安装 antd 插件
 const scope = createSisyphusScope();
-
 scope.use(createAntdPlugin());
 
-// 使用编辑器组件
+// 通过 Context 传递 scope
+function App() {
+  return (
+    <SisyphusScopeProvider scope={scope}>
+      <WorkspaceEditor />
+    </SisyphusScopeProvider>
+  );
+}
+
+// 编辑器组件通过 hook 获取 scope
 function WorkspaceEditor({ workspace }: { workspace: RuleWorkspace }) {
+  // 获取 scope 实例
+  const { renderer } = useSisyphusScope();
+
   return <RuleWorkspaceEditor workspace={workspace} />;
 }
 ```
+
+### SisyphusScopeProvider - 作用域提供者
+
+```ts
+interface SisyphusScopeProviderProps {
+  /** Sisyphus 应用实例 */
+  scope: SisyphusScope;
+  /** 子元素 */
+  children: React.ReactNode;
+}
+```
+
+### useSisyphusScope - 获取作用域实例
+
+```ts
+function useSisyphusScope(): SisyphusScope;
+```
+
+**说明**：内部 `ThresholdRenderer` 组件通过 `useSisyphusScope()` 获取渲染器，自动渲染对应的抽象组件
