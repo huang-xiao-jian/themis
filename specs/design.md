@@ -399,8 +399,8 @@ interface ListRangeBuilderProperties extends ListRangeBuilderBaseProperties {
 ### 编辑器组件设计规范
 
 - 编辑器组件与原始 `DSL` 无关联关系
-- 编辑器组件通过 `thresholdProperties` 引用表单组件属性
 - 编辑器组件通过 `View` 后缀与表单组件区分
+- 编辑器组件通过 `threshold` 引用表单组件属性
 
 ### AtomicRuleViewProperties - 原子规则编辑组件
 
@@ -417,13 +417,13 @@ interface AtomicRuleViewProperties {
   /** 字段标题 */
   title: string;
   /** 阈值属性（由推断规则确定） */
-  thresholdProperties: ThresholdComponentProperties;
+  threshold: ThresholdComponentProperties;
 }
 ```
 
 **属性说明**：
 
-- `thresholdProperties`：阈值部分的表单组件属性，由内核推断规则确定组件类型
+- `threshold`：阈值部分的表单组件属性，由内核推断规则确定组件类型
 
 ### AtomicRuleGroupViewProperties - 规则组编辑组件
 
@@ -434,9 +434,7 @@ interface AtomicRuleGroupViewProperties {
   /** 组件类型标识 */
   readonly type: 'AtomicRuleGroupView';
   /** 禁用状态 */
-  disabled?: boolean;
-  /** 规则组标题 */
-  title: string;
+  readonly disabled: Signal<boolean>;
   /** 原子规则列表属性 */
   readonly ruleViews: readonly AtomicRuleViewProperties[];
 }
@@ -456,7 +454,7 @@ interface RuleWorkspaceViewProperties {
   /** 组件类型标识 */
   readonly type: 'RuleWorkspaceView';
   /** 禁用状态 */
-  disabled?: boolean;
+  readonly disabled: Signal<boolean>;
   /** 规则组列表属性 */
   readonly ruleGroups: readonly AtomicRuleGroupViewProperties[];
 }

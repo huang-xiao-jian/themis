@@ -27,11 +27,11 @@
 /** 编辑器组件渲染器注册表 */
 interface ComponentRendererRegistry {
   /** 注册 AtomicRuleView 组件 */
-  registerAtomicRuleView(component: React.ComponentType<AtomicRuleViewProps>): void;
+  registerAtomicRuleView(component: React.ComponentType<AtomicRuleViewProperties>): void;
   /** 注册 AtomicRuleGroupView 组件 */
-  registerAtomicRuleGroupView(component: React.ComponentType<AtomicRuleGroupViewProps>): void;
+  registerAtomicRuleGroupView(component: React.ComponentType<AtomicRuleGroupViewProperties>): void;
   /** 注册 RuleWorkspaceView 组件 */
-  registerRuleWorkspaceView(component: React.ComponentType<RuleWorkspaceViewProps>): void;
+  registerRuleWorkspaceView(component: React.ComponentType<RuleWorkspaceViewProperties>): void;
 }
 ```
 
