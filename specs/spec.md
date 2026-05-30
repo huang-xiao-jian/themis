@@ -35,7 +35,9 @@
 
 ### 关联资源 Resource
 
-`Resource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构：
+`Resource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构。
+
+**说明**：此处定义的是 DSL 结构，运行时 Resource 封装及详细类型请参考 [规则因子解释器](../interpreter.md)
 
 ```ts
 interface FieldDataSource {

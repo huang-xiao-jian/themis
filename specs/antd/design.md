@@ -51,6 +51,7 @@ function createAntdPlugin(): SisyphusPlugin;
 import { createSisyphusScope } from '@sisyphus/react';
 import { createAntdPlugin } from '@sisyphus/antd';
 
-const scope = createSisyphusScope();
-scope.use(createAntdPlugin());
+const scope = createSisyphusScope({
+  plugins: [createAntdPlugin()],
+});
 ```

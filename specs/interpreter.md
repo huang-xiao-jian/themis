@@ -6,6 +6,31 @@
 
 - [alien-signals](https://github.com/stackblitz/alien-signals) - `Signal Primitive`
 
+## 基础类型定义
+
+以下是解释器中引用的基础类型声明：
+
+```ts
+/**
+ * 数据源选项结构
+ */
+interface FieldDataSource {
+  label: string;
+  value: string | number;
+  disabled?: boolean;
+}
+
+/**
+ * 分页结果结构
+ */
+interface PaginatedResult<T = FieldDataSource> {
+  data: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+```
+
 ## Resource 设计
 
 ### Resource 设计目标

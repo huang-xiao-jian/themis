@@ -66,6 +66,21 @@ interface RuleWorkspaceViewProperties {
 }
 ```
 
+### WorkspaceEditor - 业务方入口组件
+
+`WorkspaceEditor` 是业务方直接使用的顶层组件，封装了内部编辑器组件的实现细节：
+
+```ts
+interface WorkspaceEditorProps {
+  /** 工作空间实例 */
+  workspace: RuleWorkspaceScheduler;
+}
+
+function WorkspaceEditor(props: WorkspaceEditorProps): React.ReactElement;
+```
+
+**说明**：`WorkspaceEditor` 内部渲染 `RuleWorkspaceView`，业务方无需感知具体的编辑器组件实现
+
 ### 编辑器组件属性类型别名
 
 ```ts

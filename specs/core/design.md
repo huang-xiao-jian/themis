@@ -381,7 +381,7 @@ packages/core/src/
 ├── resource/
 │   ├── resource.ts   # ResponseResource 接口定义
 │   └── index.ts
-├── setter/
+├── scheduler/
 │   ├── AtomicRuleScheduler.ts
 │   ├── AtomicRuleGroupScheduler.ts
 │   ├── RuleWorkspace.ts
