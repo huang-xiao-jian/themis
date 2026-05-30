@@ -158,6 +158,106 @@ interface SisyphusScopeProviderProps {
 function useSisyphusScope(): SisyphusScope;
 ```
 
+### useSignal - 响应式状态 Hook
+
+将 `alien-signals` 的 `Signal` 转换为 `React` 响应式状态，自动订阅 `Signal` 变化并触发组件重渲染：
+
+```ts
+import { type Signal } from 'alien-signals';
+
+/**
+ * 将 Signal 转换为 React 可用的状态
+ * @param signal - alien-signals 的 Signal 实例
+ * @returns Signal 的当前值，Signal 变化时自动触发重渲染
+ */
+function useSignal<T>(signal: Signal<T>): T;
+```
+
+**使用场景**：订阅 Scheduler 的 Signal 属性（如 `name`、`operator`、`threshold`），用于表单控件绑定：
+
+```tsx
+interface AtomicRuleViewProperties {
+  readonly type: 'AtomicRuleView';
+  readonly scheduler: AtomicRuleScheduler;
+}
+
+function AtomicRuleView({ scheduler }: AtomicRuleViewProperties) {
+  const name = useSignal(scheduler.name);
+  const operator = useSignal(scheduler.operator);
+  const threshold = useSignal(scheduler.threshold);
+  const thresholder = useSignal(scheduler.thresholder);
+
+  return <div>{/* 渲染 name 选择器、operator 选择器、threshold 控件 */}</div>;
+}
+```
+
+### useComputed - 计算属性 Hook
+
+基于 Signal 创建计算属性，自动追踪依赖并在依赖变化时重新计算：
+
+```ts
+import { type Signal, type Computed } from 'alien-signals';
+
+/**
+ * 将 Computed 转换为 React 可用的值
+ * @param computed - alien-signals 的 Computed 实例
+ * @returns 计算后的当前值，依赖 Signal 变化时自动重新计算并触发重渲染
+ */
+function useComputed<T>(computed: Computed<T>): T;
+```
+
+**使用场景**：派生编辑器组件的展示状态，如判断配置是否完整：
+
+```tsx
+function AtomicRuleView({ scheduler }: AtomicRuleViewProperties) {
+  // 基础状态
+  const name = useSignal(scheduler.name);
+  const operator = useSignal(scheduler.operator);
+  const threshold = useSignal(scheduler.threshold);
+
+  // 计算属性：配置是否完整
+  const isComplete = useComputed(
+    () => scheduler.factor() !== null && name() !== null && operator() !== null
+  );
+
+  return <div className={isComplete ? 'complete' : 'incomplete'}>{/* 渲染控件 */}</div>;
+}
+```
+
+### useEffectScope - 副作用作用域 Hook
+
+管理副作用的生命周期，自动清理 Effect：
+
+```ts
+import { type EffectScope } from 'alien-signals';
+
+/**
+ * 创建 Effect 作用域，组件卸载时自动停止所有 Effect
+ * @returns EffectScope 实例，用于注册副作用
+ */
+function useEffectScope(): EffectScope;
+```
+
+**使用场景**：与后端同步、订阅外部数据源等需要清理的场景：
+
+```tsx
+function WorkspaceEditor({ workspace }: WorkspaceEditorProps) {
+  const scope = useEffectScope();
+
+  // 注册 Effect：自动同步到后端
+  scope.run(() => {
+    effect(() => {
+      const groups = workspace.groups();
+      // 同步逻辑
+    });
+  });
+
+  return <RuleWorkspaceView scheduler={workspace} />;
+}
+```
+
+**说明**：`useEffectScope` 在组件卸载时自动停止所有注册的 Effect，避免内存泄漏
+
 ### 组件库适配层职责
 
 组件库适配包（如 `@sisyphus/antd`）负责：
@@ -172,7 +272,12 @@ packages/react/src/
 ├── context/
 │   ├── SisyphusScopeContext.ts  # Context 定义
 │   ├── SisyphusScopeProvider.tsx # Provider 组件
-│   ├── useSisyphusScope.ts       # Hook 函数
+│   └── index.ts
+├── hooks/
+│   ├── useSignal.ts      # Signal 响应式状态 Hook
+│   ├── useComputed.ts    # Computed 计算属性 Hook
+│   ├── useEffectScope.ts # Effect 作用域管理 Hook
+│   ├── useSisyphusScope.ts
 │   └── index.ts
 ├── app/
 │   ├── SisyphusScope.ts       # 应用实例与插件机制
