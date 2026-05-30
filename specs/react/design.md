@@ -17,7 +17,7 @@
 
 ## 渲染层架构
 
-`@sisyphus/react` 作为 **框架适配层**，负责将内核提供的抽象组件属性渲染为具体的 UI 组件。组件推断逻辑由 `@sisyphus/core` 负责，渲染层仅关注属性解释与组件渲染。
+`@sisyphus/react` 作为 **框架适配层**，负责将内核提供的表单组件属性渲染为具体的 UI 组件。组件推断逻辑由 `@sisyphus/core` 负责，渲染层仅关注属性解释与组件渲染。
 
 ### 插件协议
 
@@ -35,7 +35,7 @@ interface ComponentRendererRegistry {
 }
 ```
 
-**说明**：编辑器组件负责渲染抽象组件属性，框架适配层隔离 DSL 推断逻辑
+**说明**：编辑器组件负责渲染表单组件属性，框架适配层隔离 DSL 推断逻辑
 
 ```ts
 /** Sisyphus 上下文（插件可访问） */
@@ -198,5 +198,3 @@ interface SisyphusScopeProviderProps {
 ```ts
 function useSisyphusScope(): SisyphusScope;
 ```
-
-**说明**：内部 `ThresholdRenderer` 组件通过 `useSisyphusScope()` 获取渲染器，自动渲染对应的抽象组件

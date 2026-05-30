@@ -188,9 +188,9 @@ interface DynamicResource {
 - `duration`
 - `percentage`
 
-## 推断抽象组件 Intermediate Representation
+## 推断表单组件 Intermediate Representation
 
-从 `DSL` 推断中间形态的抽象组件，便于适配器（框架 + 组件库）进行高效的实现
+从 `DSL` 推断中间形态的表单组件，便于适配器（框架 + 组件库）进行高效的实现
 
 ```mermaid
 graph TD
@@ -249,8 +249,6 @@ graph TD
 - `RangePicker`: 数值或日期的区间选择
 - `ListBuilder`: 列表构建器
 - `ListRangeBuilder`: 区间列表构建器
-- `ListPickerBuilder` 本质上为 `ListBuilder`，语义上适用于 `Picker` 场景
-- `ListRangePickerBuilder` 本质上为 `ListRangeBuilder`，语义上适用于 `Picker` 场景
 
 ## 规则配置
 

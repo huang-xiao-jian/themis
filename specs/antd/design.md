@@ -6,9 +6,9 @@
 
 ## 组件映射
 
-### 抽象组件到 antd 组件的映射
+### 表单组件到 antd 组件的映射
 
-| 抽象组件         | antd 实现                      | 说明             |
+| 表单组件         | antd 实现                      | 说明             |
 | :--------------- | :----------------------------- | :--------------- |
 | `Input`          | `Input`                        | 单行输入         |
 | `TextArea`       | `Input.TextArea`               | 多行输入         |
@@ -48,9 +48,9 @@ function createAntdPlugin(): SisyphusPlugin;
 **使用方式**：
 
 ```ts
-import { createSisyphusApp } from '@sisyphus/react';
+import { createSisyphusScope } from '@sisyphus/react';
 import { createAntdPlugin } from '@sisyphus/antd';
 
-const app = createSisyphusApp();
-app.use(createAntdPlugin());
+const scope = createSisyphusScope();
+scope.use(createAntdPlugin());
 ```
