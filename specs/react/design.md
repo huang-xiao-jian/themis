@@ -24,26 +24,20 @@
 采用 `SisyphusPlugin` 协议定义框架与组件适配包之间的契约：
 
 ```ts
-/** 组件渲染器注册表 */
+/** 编辑器组件渲染器注册表 */
 interface ComponentRendererRegistry {
-  /** 注册 Input 组件 */
-  registerInput(component: React.ComponentType<InputProperties>): void;
-  /** 注册 TextArea 组件 */
-  registerTextArea(component: React.ComponentType<TextAreaProperties>): void;
-  /** 注册 Switch 组件 */
-  registerSwitch(component: React.ComponentType<SwitchProperties>): void;
-  /** 注册 Select 组件 */
-  registerSelect(component: React.ComponentType<SelectProperties>): void;
-  /** 注册 MultipleSelect 组件 */
-  registerMultipleSelect(component: React.ComponentType<MultipleSelectProperties>): void;
-  /** 注册 Picker 组件 */
-  registerPicker(component: React.ComponentType<PickerProperties>): void;
-  /** 注册 RangePicker 组件 */
-  registerRangePicker(component: React.ComponentType<RangePickerProperties>): void;
-  /** 注册 RangeInput 组件 */
-  registerRangeInput(component: React.ComponentType<RangeInputProperties>): void;
+  /** 注册 AtomicRuleView 组件 */
+  registerAtomicRuleView(component: React.ComponentType<AtomicRuleViewProps>): void;
+  /** 注册 AtomicRuleGroupView 组件 */
+  registerAtomicRuleGroupView(component: React.ComponentType<AtomicRuleGroupViewProps>): void;
+  /** 注册 RuleWorkspaceView 组件 */
+  registerRuleWorkspaceView(component: React.ComponentType<RuleWorkspaceViewProps>): void;
 }
+```
 
+**说明**：编辑器组件负责渲染抽象组件属性，框架适配层隔离 DSL 推断逻辑
+
+```ts
 /** Sisyphus 上下文（插件可访问） */
 interface SisyphusContext {
   /** 组件渲染器注册表 */
@@ -94,56 +88,12 @@ interface SisyphusScope {
 }
 
 interface ComponentRenderer {
-  /** 渲染抽象组件 */
+  /** 渲染抽象组件属性 */
   render(props: AbstractComponentProperties): React.ReactElement;
 }
 ```
 
-**说明**：
-
-- 组件属性类型继承自 [抽象组件属性声明](../design.md#抽象组件属性声明)
-
-## 内建逻辑组件
-
-`ListBuilder` 和 `ListRangeBuilder` 为逻辑组件，实现多值输入场景，内建实现不依赖组件库。
-
-### ListBuilder - 列表构建器
-
-适用于多值单点输入场景，用于构建多个单点值：
-
-```tsx
-interface ListBuilderProperties extends BaseProperties {
-  /** 组件类型标识 */
-  readonly type: 'ListBuilder';
-  /** 列表项属性对象 */
-  readonly item: ListBuilderItemProperties;
-  /** 列表禁用状态 */
-  readonly disabled?: boolean;
-  /** 当前值列表 */
-  value: unknown[];
-  /** 值变更回调 */
-  onChange: (value: unknown[]) => void;
-}
-```
-
-### ListRangeBuilder - 区间列表构建器
-
-适用于多值区间输入场景，用于构建多个区间值：
-
-```tsx
-interface ListRangeBuilderProperties extends BaseProperties {
-  /** 组件类型标识 */
-  readonly type: 'ListRangeBuilder';
-  /** 列表项属性对象 */
-  readonly item: ListRangeBuilderItemProperties;
-  /** 列表禁用状态 */
-  readonly disabled?: boolean;
-  /** 当前值列表 */
-  value: Array<[unknown, unknown]>;
-  /** 值变更回调 */
-  onChange: (value: Array<[unknown, unknown]>) => void;
-}
-```
+**说明**：抽象组件属性定义继承自 [抽象组件属性声明](../design.md#抽象组件属性声明)
 
 ## 编辑器组件
 
@@ -160,9 +110,18 @@ interface AtomicRuleViewProps {
   /** 原子规则视图属性 */
   properties: AtomicRuleViewProperties;
 }
+
+interface AtomicRuleViewProperties {
+  /** 字段标识 */
+  name: string;
+  /** 字段标题 */
+  title: string;
+  /** 阈值属性（由推断规则确定） */
+  thresholdProperties: AbstractComponentProperties;
+}
 ```
 
-### AtomicRuleGroupViewProperties - 规则组编辑组件
+### AtomicRuleGroupView - 规则组编辑组件
 
 管理多个原子规则编辑器：
 
@@ -173,14 +132,16 @@ interface AtomicRuleGroupViewProps {
   /** 规则组视图属性 */
   properties: AtomicRuleGroupViewProperties;
 }
+
+interface AtomicRuleGroupViewProperties {
+  /** 规则组标题 */
+  title: string;
+  /** 原子规则列表属性 */
+  readonly ruleViews: readonly AtomicRuleViewProperties[];
+}
 ```
 
-**内部结构**：
-
-- 规则列表渲染
-- 每个规则对应一个 `AtomicRuleView`
-
-### RuleWorkspaceViewProperties - 工作空间编辑组件
+### RuleWorkspaceView - 工作空间编辑组件
 
 管理多个规则组编辑器：
 
@@ -191,16 +152,17 @@ interface RuleWorkspaceViewProps {
   /** 工作空间视图属性 */
   properties: RuleWorkspaceViewProperties;
 }
+
+interface RuleWorkspaceViewProperties {
+  /** 规则组列表属性 */
+  readonly ruleGroups: readonly AtomicRuleGroupViewProperties[];
+}
 ```
 
 ## 目录结构
 
 ```shell
 packages/react/src/
-├── built-in/
-│   ├── ListBuilder.tsx      # 内建列表构建器
-│   ├── ListRangeBuilder.tsx # 内建区间列表构建器
-│   └── index.ts
 ├── context/
 │   ├── SisyphusScopeContext.ts  # Context 定义
 │   ├── SisyphusScopeProvider.tsx # Provider 组件
@@ -218,14 +180,21 @@ packages/react/src/
 ├── index.ts
 ```
 
+**说明**：抽象组件属性定义统一在 [抽象组件设计](../design.md#抽象组件属性声明) 中维护
+
 ## 使用示例
 
 通过 React Context 传递 `SisyphusScope` 实例，编辑器组件内部通过 `useSisyphusScope()` 获取渲染器：
 
 ```tsx
-import { SisyphusScopeProvider, useSisyphusScope, RuleWorkspaceEditor } from '@sisyphus/react';
+import {
+  SisyphusScopeProvider,
+  useSisyphusScope,
+  RuleWorkspaceView,
+  AtomicRuleGroupView,
+  AtomicRuleView,
+} from '@sisyphus/react';
 import { createAntdPlugin } from '@sisyphus/antd';
-import { RuleWorkspace } from '@sisyphus/core';
 
 // 创建应用实例并安装 antd 插件
 const scope = createSisyphusScope();
@@ -245,9 +214,24 @@ function WorkspaceEditor({ workspace }: { workspace: RuleWorkspace }) {
   // 获取 scope 实例
   const { renderer } = useSisyphusScope();
 
-  return <RuleWorkspaceView workspace={workspace} />;
+  // 直接渲染工作空间视图（由组件库适配包提供）
+  return (
+    <RuleWorkspaceView
+      properties={{
+        ruleGroups: workspace.ruleGroupSetters.get().map(groupToViewProperties),
+      }}
+    />
+  );
 }
 ```
+
+### 组件库适配层职责
+
+组件库适配包（如 `@sisyphus/antd`）负责：
+
+- 注册编辑器组件实现（AtomicRuleView、AtomicRuleGroupView、RuleWorkspaceView）
+- 实现抽象表单组件渲染（Input、Select、ListBuilder 等）
+- 提供业务方开箱即用的组件注册
 
 ### SisyphusScopeProvider - 作用域提供者
 
