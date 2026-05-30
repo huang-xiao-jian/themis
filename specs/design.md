@@ -163,7 +163,7 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
 
 ### 抽象组件设计目标
 
-明确 **抽象组件** 的属性，屏蔽掉原始 `DSL` 定义，以及承担 `Resource` 的解释传递职能
+明确 **抽象组件** 的属性，屏蔽掉原始 `DSL` 定义
 
 ### 抽象组件设计规范
 
@@ -455,10 +455,12 @@ interface RuleWorkspaceViewProperties extends BaseProperties {
 - 规则组列表渲染
 - 每个规则组对应一个 `AtomicRuleGroupView`
 
-### 抽象组件类型联合
+### 表单组件属性
+
+表单组件属性用于 `ThresholdRenderer` 渲染阈值输入组件：
 
 ```ts
-type AbstractComponentProperties =
+type ThresholdRendererProperties =
   | InputProperties
   | TextAreaProperties
   | RangeInputProperties
@@ -468,12 +470,14 @@ type AbstractComponentProperties =
   | PickerProperties
   | RangePickerProperties
   | ListBuilderProperties
-  | ListRangeBuilderProperties
-  | AtomicRuleViewProperties
-  | AtomicRuleGroupViewProperties
-  | RuleWorkspaceViewProperties;
+  | ListRangeBuilderProperties;
+```
 
-/** 编辑器组件类型联合 */
+### 编辑器组件属性
+
+编辑器组件属性用于规则编辑视图层级：
+
+```ts
 type EditorComponentProperties =
   | AtomicRuleViewProperties
   | AtomicRuleGroupViewProperties
@@ -482,11 +486,10 @@ type EditorComponentProperties =
 
 ### 抽象组件与 Resource 映射关系
 
-| 抽象组件         | 关联 Resource 类型                             |
+| 表单组件         | 关联 Resource 类型                             |
 | :--------------- | :--------------------------------------------- |
 | `Select`         | `StaticResource` / `ElementaryDynamicResource` |
 | `MultipleSelect` | `StaticResource` / `ElementaryDynamicResource` |
-| 其他组件         | 无需关联 Resource                              |
 
 ### 抽象组件属性解构来源
 
