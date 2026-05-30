@@ -315,11 +315,38 @@ interface RangePickerProperties extends BaseProperties {
 适用于多值单点输入场景，用于构建多个单点值：
 
 ```ts
-interface ListBuilderProperties extends BaseProperties {
+/** 列表项级别属性 */
+interface ListBuilderItemProperties {
+  /** 列表项组件类型 */
+  readonly type: 'Input' | 'Picker';
+  /** 列表项数据类型 */
+  readonly dataType: 'string' | 'number' | 'boolean';
+  /** 列表项语义化场景（可选） */
+  readonly semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
+  /** 列表项数据约束（可选） */
+  readonly constraints?: FieldConstraints;
+}
+
+/** 列表级别属性 */
+interface ListBuilderBaseProperties {
+  /** 字段标识 */
+  readonly name: string;
+  /** 字段标题 */
+  readonly title: string;
+  /** 列表项数量约束 */
+  readonly constraints?: {
+    /** 最少数量 */
+    minItems?: number;
+    /** 最多数量 */
+    maxItems?: number;
+  };
+}
+
+interface ListBuilderProperties extends ListBuilderBaseProperties {
   /** 组件类型标识 */
   readonly type: 'ListBuilder';
-  /** 列表项组件类型 */
-  itemType: 'Input' | 'Picker';
+  /** 列表项属性对象 */
+  readonly item: ListBuilderItemProperties;
 }
 ```
 
@@ -328,13 +355,105 @@ interface ListBuilderProperties extends BaseProperties {
 适用于多值区间输入场景，用于构建多个区间值：
 
 ```ts
-interface ListRangeBuilderProperties extends BaseProperties {
+/** 列表项级别属性 */
+interface ListRangeBuilderItemProperties {
+  /** 列表项组件类型 */
+  readonly type: 'RangeInput' | 'RangePicker';
+  /** 列表项数据类型 */
+  readonly dataType: 'string' | 'number' | 'boolean';
+  /** 列表项语义化场景（可选） */
+  readonly semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
+  /** 列表项数据约束（可选） */
+  readonly constraints?: FieldConstraints;
+}
+
+/** 列表级别属性 */
+interface ListRangeBuilderBaseProperties {
+  /** 字段标识 */
+  readonly name: string;
+  /** 字段标题 */
+  readonly title: string;
+  /** 列表项数量约束 */
+  readonly constraints?: {
+    /** 最少数量 */
+    minItems?: number;
+    /** 最多数量 */
+    maxItems?: number;
+  };
+}
+
+interface ListRangeBuilderProperties extends ListRangeBuilderBaseProperties {
   /** 组件类型标识 */
   readonly type: 'ListRangeBuilder';
-  /** 列表项组件类型 */
-  itemType: 'RangeInput' | 'RangePicker';
+  /** 列表项属性对象 */
+  readonly item: ListRangeBuilderItemProperties;
 }
 ```
+
+### AtomicRuleViewProperties - 原子规则编辑组件
+
+整合 `name`、`operator`、`threshold` 的完整原子规则编辑器，作为规则配置的最小编辑单元：
+
+```ts
+interface AtomicRuleViewProperties extends BaseProperties {
+  /** 组件类型标识 */
+  readonly type: 'AtomicRuleView';
+  /** 禁用状态 */
+  disabled?: boolean;
+  /** 字段标识 */
+  name: string;
+  /** 字段标题 */
+  title: string;
+  /** 阈值属性（由推断规则确定） */
+  thresholdProperties: AbstractComponentProperties;
+}
+```
+
+**属性说明**：
+
+- `thresholdProperties`：阈值部分的抽象组件属性，由内核推断规则确定组件类型
+
+### AtomicRuleGroupViewProperties - 规则组编辑组件
+
+管理多个原子规则编辑器，用于组织同一层级的规则集合：
+
+```ts
+interface AtomicRuleGroupViewProperties extends BaseProperties {
+  /** 组件类型标识 */
+  readonly type: 'AtomicRuleGroupView';
+  /** 禁用状态 */
+  disabled?: boolean;
+  /** 规则组标题 */
+  title: string;
+  /** 原子规则列表属性 */
+  readonly ruleViews: readonly AtomicRuleViewProperties[];
+}
+```
+
+**内部结构**：
+
+- 规则列表渲染
+- 每个规则对应一个 `AtomicRuleView`
+
+### RuleWorkspaceViewProperties - 工作空间编辑组件
+
+管理多个规则组编辑器，作为规则配置的顶层容器：
+
+```ts
+interface RuleWorkspaceViewProperties extends BaseProperties {
+  /** 组件类型标识 */
+  readonly type: 'RuleWorkspaceView';
+  /** 禁用状态 */
+  disabled?: boolean;
+  /** 规则组列表属性 */
+  readonly ruleGroups: readonly AtomicRuleGroupViewProperties[];
+}
+```
+
+**内部结构**：
+
+- 规则组列表渲染
+- 每个规则组对应一个 `AtomicRuleGroupView`
 
 ### 抽象组件类型联合
 
@@ -349,7 +468,16 @@ type AbstractComponentProperties =
   | PickerProperties
   | RangePickerProperties
   | ListBuilderProperties
-  | ListRangeBuilderProperties;
+  | ListRangeBuilderProperties
+  | AtomicRuleViewProperties
+  | AtomicRuleGroupViewProperties
+  | RuleWorkspaceViewProperties;
+
+/** 编辑器组件类型联合 */
+type EditorComponentProperties =
+  | AtomicRuleViewProperties
+  | AtomicRuleGroupViewProperties
+  | RuleWorkspaceViewProperties;
 ```
 
 ### 抽象组件与 Resource 映射关系

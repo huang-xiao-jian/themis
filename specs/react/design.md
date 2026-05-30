@@ -115,10 +115,10 @@ interface ComponentRenderer {
 interface ListBuilderProperties extends BaseProperties {
   /** 组件类型标识 */
   readonly type: 'ListBuilder';
-  /** 列表项组件类型 */
-  readonly itemType: 'Input' | 'Picker';
-  /** 禁用状态 */
-  disabled?: boolean;
+  /** 列表项属性对象 */
+  readonly item: ListBuilderItemProperties;
+  /** 列表禁用状态 */
+  readonly disabled?: boolean;
   /** 当前值列表 */
   value: unknown[];
   /** 值变更回调 */
@@ -134,10 +134,10 @@ interface ListBuilderProperties extends BaseProperties {
 interface ListRangeBuilderProperties extends BaseProperties {
   /** 组件类型标识 */
   readonly type: 'ListRangeBuilder';
-  /** 列表项组件类型 */
-  readonly itemType: 'RangeInput' | 'RangePicker';
-  /** 禁用状态 */
-  disabled?: boolean;
+  /** 列表项属性对象 */
+  readonly item: ListRangeBuilderItemProperties;
+  /** 列表禁用状态 */
+  readonly disabled?: boolean;
   /** 当前值列表 */
   value: Array<[unknown, unknown]>;
   /** 值变更回调 */
@@ -147,74 +147,51 @@ interface ListRangeBuilderProperties extends BaseProperties {
 
 ## 编辑器组件
 
-编辑器组件封装了 `@sisyphus/core` 提供的设置器，提供完整的 UI 编辑能力。
+编辑器组件封装了抽象组件属性，将内部渲染细节隔离到框架适配层。
 
-### ThresholdRenderer - 阈值渲染器
+### AtomicRuleView - 原子规则编辑组件
 
-内部组件，通过 `useSisyphusScope()` 获取 `ComponentRenderer`，渲染抽象组件属性：
-
-```tsx
-/** 内部实现示例 */
-function ThresholdRenderer({ properties }: { properties: AbstractComponentProperties }) {
-  const { renderer } = useSisyphusScope();
-  return renderer.render(properties);
-}
-```
-
-### AtomicRuleEditor - 原子规则编辑器
-
-整合 `name`、`operator`、`threshold` 的完整原子规则编辑器：
+整合 `name`、`operator`、`threshold` 的完整原子规则编辑器，作为规则配置的最小编辑单元：
 
 ```tsx
-interface AtomicRuleEditorProps {
+interface AtomicRuleViewProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
-  /** 原子规则设置器（由 @sisyphus/core 提供，已包含推断后的组件属性） */
-  setter: AtomicRuleSetter;
+  /** 原子规则视图属性 */
+  properties: AtomicRuleViewProperties;
 }
 ```
 
-**内部结构**：
-
-- name selector - 规则因子选择器
-- operator selector - 操作符选择器
-- threshold renderer - 通过 `useSisyphusScope()` 获取渲染器，渲染对应组件
-
-### AtomicRuleGroupEditor - 规则组编辑器
+### AtomicRuleGroupViewProperties - 规则组编辑组件
 
 管理多个原子规则编辑器：
 
 ```tsx
-interface AtomicRuleGroupEditorProps {
+interface AtomicRuleGroupViewProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
-  /** 规则组设置器（由 @sisyphus/core 提供） */
-  setter: AtomicRuleGroupSetter;
+  /** 规则组视图属性 */
+  properties: AtomicRuleGroupViewProperties;
 }
 ```
 
 **内部结构**：
 
 - 规则列表渲染
-- 每个规则对应一个 `AtomicRuleEditor`
+- 每个规则对应一个 `AtomicRuleView`
 
-### RuleWorkspaceEditor - 工作空间编辑器
+### RuleWorkspaceViewProperties - 工作空间编辑组件
 
 管理多个规则组编辑器：
 
 ```tsx
-interface RuleWorkspaceEditorProps {
+interface RuleWorkspaceViewProps {
   /** 可选：禁用状态 */
   disabled?: boolean;
-  /** 规则工作空间（由 @sisyphus/core 提供） */
-  workspace: RuleWorkspace;
+  /** 工作空间视图属性 */
+  properties: RuleWorkspaceViewProperties;
 }
 ```
-
-**内部结构**：
-
-- 规则组列表渲染
-- 每个规则组对应一个 `AtomicRuleGroupEditor`
 
 ## 目录结构
 
@@ -234,9 +211,9 @@ packages/react/src/
 │   ├── ComponentRenderer.ts # 组件渲染器
 │   └── index.ts
 ├── editor/
-│   ├── AtomicRuleEditor.tsx
-│   ├── AtomicRuleGroupEditor.tsx
-│   ├── RuleWorkspaceEditor.tsx
+│   ├── AtomicRuleView.tsx     # 原子规则编辑组件
+│   ├── AtomicRuleGroupView.tsx # 规则组编辑组件
+│   ├── RuleWorkspaceView.tsx  # 工作空间编辑组件
 │   └── index.ts
 ├── index.ts
 ```
@@ -268,7 +245,7 @@ function WorkspaceEditor({ workspace }: { workspace: RuleWorkspace }) {
   // 获取 scope 实例
   const { renderer } = useSisyphusScope();
 
-  return <RuleWorkspaceEditor workspace={workspace} />;
+  return <RuleWorkspaceView workspace={workspace} />;
 }
 ```
 
