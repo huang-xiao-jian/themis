@@ -1,10 +1,16 @@
-# 规则因子设计
+# 规则因子解释器
+
+规范解释器的实现机制，明确 `DSL` 从抽象到具现的转换过程
+
+## 技术栈
+
+- [alien-signals](https://github.com/stackblitz/alien-signals) - `Signal Primitive`
 
 ## Resource 设计
 
 ### Resource 设计目标
 
-`Resource` 封装为领域实体，屏蔽原始 `DSL` 定义与 `HTTP Fetcher` 等细节，**框架适配层** 按照规范解释为领域实体，属性传递 **组件适配层**。分层职能上，**组件适配层** 对领域实体无任何感知
+`Resource` 封装为领域实体，屏蔽原始 `DSL` 定义与 `HTTP Fetcher` 等细节
 
 ### Resource 设计规范
 
@@ -158,6 +164,95 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
   onRefresh: () => void;
 }
 ```
+
+## 推断规则因子 Operator
+
+推断逻辑：根据 `dataType` + `semantic` 确定“数据域”，再结合 `mode`（点/区间）和 `quantity`（单/多）确定“操作域”，从而锁定可用的 `operator` 列表
+
+### 数据类型推断 DataType
+
+| dataType | mode  | quantity | 推断的 Operator 语义                                              |
+| :------- | :---- | :------- | :---------------------------------------------------------------- |
+| number   | point | single   | `=`, `≠`, `>`, `>=`, `<`, `<=`                                    |
+| number   | point | multiple | `in`, `not in`                                                    |
+| number   | range | single   | `between`, `not between`                                          |
+| number   | range | multiple | `between any`, `betwen all`, `not between any`, `not between all` |
+| string   | point | single   | `=`, `≠`, `contains`, `within`, `starts_with`, `ends_with`        |
+| string   | point | multiple | `in`, `not in`                                                    |
+| boolean  | point | single   | `is`                                                              |
+
+### 场景类型推断 Semantic
+
+以下 `Semantic` 本质上遵循 `dataType=number` 的 `operator` 推断逻辑：
+
+- `rate`
+- `date`
+- `time`
+- `datetime`
+- `duration`
+- `percentage`
+
+## 推断表单组件 Intermediate Representation
+
+从 `DSL` 推断中间形态的表单组件，便于适配器（框架 + 组件库）进行高效的实现
+
+```mermaid
+graph TD
+    Start(开始) --> CheckResource{资源声明?}
+
+    %% 受限选项
+    CheckResource -- "yes" --> CheckResourceQuantity{关联数量?}
+    CheckResourceQuantity -- "single" --> SingleResourceCase[Select]
+    CheckResourceQuantity -- "multiple" --> MultipleResourceCase[MultipleSelect]
+
+    %% 非受限选项
+    CheckResource -- "no" --> CheckDataType{数据类型?}
+
+    %% boolean 类型
+    CheckDataType -- "boolean" --> SwitchCase[Switch]
+
+    %% string 类型
+    CheckDataType -- "other" --> CheckPromptMode{交互模式?}
+
+    CheckPromptMode -- "manual" --> CheckManualMode{区间模式？}
+    CheckPromptMode -- "auto" --> CheckAutoMode{区间模式？}
+
+    CheckManualMode -- "point" --> CheckManualPointQuantity{关联数量?}
+    CheckManualMode -- "range" --> CheckManualRangeQuantity{关联数量?}
+
+    %% string + point
+    CheckManualPointQuantity -- "single" --> CheckManualPointSingleLength{内容格式?}
+    CheckManualPointQuantity -- "multiple" --> ListBuilderCase[ListBuilder]
+
+    %% string + point + single
+    CheckManualPointSingleLength -- "<=100" --> InputCase[Input]
+    CheckManualPointSingleLength -- ">100" --> TextAreaCase[TextArea]
+
+    CheckManualRangeQuantity -- "single" --> RangeInputCase[RangeInput]
+    CheckManualRangeQuantity -- "multiple" --> ListRangeBuilderCase[ListRangeBuilder]
+
+    CheckAutoMode -- "point" --> CheckAutoPointQuantity{关联数量?}
+    CheckAutoMode -- "range" --> CheckAutoRangeQuantity{关联数量?}
+
+    %% point
+    CheckAutoPointQuantity -- "single" --> PickerCase[Picker]
+    CheckAutoPointQuantity -- "multiple" --> ListPickerBuilderCase[ListPickerBuilder]
+
+    CheckAutoRangeQuantity -- "single" --> RangePickerCase[RangePicker]
+    CheckAutoRangeQuantity -- "multiple" --> ListRangePickerBuilderCase[ListRangePickerBuilder]
+```
+
+组件说明：
+
+- `Input`: 单行文本/数字输入
+- `TextArea`: 长文本输入
+- `RangeInput`: 区间输入
+- `Select`: 单选
+- `MultipleSelect`: 多选
+- `Picker`: 数值或日期的选择
+- `RangePicker`: 数值或日期的区间选择
+- `ListBuilder`: 列表构建器
+- `ListRangeBuilder`: 区间列表构建器
 
 ## 表单组件设计
 
@@ -390,91 +485,7 @@ interface ListRangeBuilderProperties extends ListRangeBuilderBaseProperties {
 }
 ```
 
-## 编辑器组件设计
-
-### 编辑器组件设计目标
-
-明确 **编辑器组件** 的属性，用于插件协议注册的组件和渲染器工厂，定义规则编辑视图层级的结构。
-
-### 编辑器组件设计规范
-
-- 编辑器组件与原始 `DSL` 无关联关系
-- 编辑器组件通过 `View` 后缀与表单组件区分
-- 编辑器组件通过 `threshold` 引用表单组件属性
-
-### AtomicRuleViewProperties - 原子规则编辑组件
-
-整合 `name`、`operator`、`threshold` 的完整原子规则编辑器，作为规则配置的最小编辑单元：
-
-```ts
-interface AtomicRuleViewProperties {
-  /** 组件类型标识 */
-  readonly type: 'AtomicRuleView';
-  /** 禁用状态 */
-  disabled?: boolean;
-  /** 字段标识 */
-  name: string;
-  /** 字段标题 */
-  title: string;
-  /** 阈值属性（由推断规则确定） */
-  threshold: ThresholdComponentProperties;
-}
-```
-
-**属性说明**：
-
-- `threshold`：阈值部分的表单组件属性，由内核推断规则确定组件类型
-
-### AtomicRuleGroupViewProperties - 规则组编辑组件
-
-管理多个原子规则编辑器，用于组织同一层级的规则集合：
-
-```ts
-interface AtomicRuleGroupViewProperties {
-  /** 组件类型标识 */
-  readonly type: 'AtomicRuleGroupView';
-  /** 禁用状态 */
-  readonly disabled: Signal<boolean>;
-  /** 原子规则列表属性 */
-  readonly ruleViews: readonly AtomicRuleViewProperties[];
-}
-```
-
-**内部结构**：
-
-- 规则列表渲染
-- 每个规则对应一个 `AtomicRuleView`
-
-### RuleWorkspaceViewProperties - 工作空间编辑组件
-
-管理多个规则组编辑器，作为规则配置的顶层容器：
-
-```ts
-interface RuleWorkspaceViewProperties {
-  /** 组件类型标识 */
-  readonly type: 'RuleWorkspaceView';
-  /** 禁用状态 */
-  readonly disabled: Signal<boolean>;
-  /** 规则组列表属性 */
-  readonly ruleGroups: readonly AtomicRuleGroupViewProperties[];
-}
-```
-
-**内部结构**：
-
-- 规则组列表渲染
-- 每个规则组对应一个 `AtomicRuleGroupView`
-
-### 编辑器组件属性类型别名
-
-```ts
-type EditorComponentProperties =
-  | AtomicRuleViewProperties
-  | AtomicRuleGroupViewProperties
-  | RuleWorkspaceViewProperties;
-```
-
-### 抽象组件属性类型别名
+### 表单组件属性类型别名
 
 ```ts
 type ThresholdComponentProperties =

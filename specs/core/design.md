@@ -1,20 +1,30 @@
 # @sisyphus/core
 
-规则因子支持的内核，负责 `Intermediate Representation` 的推断、匹配操作符 `Operator` 的推断、可用规则因子的推断、`Atomic Rule` 的管理
+规则配置的内核，负责 `Intermediate Representation` 的推断、匹配操作符 `Operator` 的推断、可用规则因子的推断、规则配置的逻辑封装
 
 ## 前置依赖
 
-- [规则因子描述](../spec.md)
-- [规则因子设计](../design.md)
+- [规则及规则因子描述](../spec.md)
+- [规则因子解释器](../interpreter.md)
 
 ## 技术栈
 
-- [alien-signals](https://github.com/stackblitz/alien-signals) `Signal Primitive` 支持，使用 `context7` 可获取文档，`libraryId == /stackblitz/alien-signals`
+使用 `Signal` 作为响应式原语，实现具体框架的解耦，具体选型为 [alien-signals](https://github.com/stackblitz/alien-signals)，引用 API 前务必 **使用 `context7` 获取使用文档及说明**
+
+```json
+{
+  "tool": "query-docs", // 来自 MCP --> context7
+  "params": {
+    "libraryId": "/stackblitz/alien-signals",
+    "query": "待解决的问题，例如：如何实现 Signal 计算属性？"
+  }
+}
+```
 
 ## 设计目标
 
-- **框架无关**：插件实现与框架/组件库解耦，便于多端适配
-- **可测试性**：插件逻辑可独立测试，内核仅关注抽象接口契约
+- **框架无关**：内核实现与框架/组件库解耦，便于多框架、多终端适配
+- **可测试性**：内核负责核心解释器、业务逻辑封装
 
 ## 核心边界
 
@@ -105,7 +115,7 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 
 ### DSL 定义
 
-规则因子定义由 `RuleWorkspace` 持有，供 `AtomicRuleGroupSetter` / `AtomicRuleSetter` 共享：
+规则因子定义由 `RuleWorkspace` 持有，供 `AtomicRuleGroupScheduler` / `AtomicRuleScheduler` 共享：
 
 ```ts
 interface RuleFactorDefinition {
@@ -124,7 +134,7 @@ interface RuleFactorDefinition {
 }
 ```
 
-### AtomicRuleSetter
+### AtomicRuleScheduler
 
 原子规则设置器集成推断机制，使用 Signal 固化状态：
 
@@ -150,13 +160,15 @@ interface AtomicRule {
   readonly threshold: unknown;
 }
 
-interface AtomicRuleSetter {
+interface AtomicRuleScheduler {
   /** 唯一标识 */
   readonly id: string;
   /** 已激活的规则因子定义 */
   readonly factor: Signal<RuleFactorDefinition | null>;
   /** 可用的匹配操作符列表（由推断机制计算） */
   readonly operators: Signal<readonly FieldDataSource[]>;
+  /** threshold 渲染组件属性（由推断机制计算）  */
+  readonly thresholder: Signal<readonly ThresholdComponentProperties>;
 
   /** 选中的规则因子名称（表单字段，用户行为触发变更） */
   readonly name: Signal<string | null>;
@@ -180,7 +192,7 @@ interface AtomicRuleSetter {
 }
 ```
 
-### AtomicRuleGroupSetter
+### AtomicRuleGroupScheduler
 
 规则组设置器管理原子规则集合：
 
@@ -191,20 +203,20 @@ interface AtomicRuleGroup {
   readonly rules: readonly AtomicRule[];
 }
 
-interface AtomicRuleGroupSetter {
+interface AtomicRuleGroupScheduler {
   /** 规则组唯一标识 */
   readonly id: string;
   /** 已配置的原子规则列表，仅在编辑场景 */
-  readonly rules: Signal<readonly AtomicRule[]>;
+  readonly snapshot: readonly AtomicRule[];
   /** 已创建的规则实例列表 */
-  readonly ruleSetters: Signal<readonly AtomicRuleSetter[]>;
+  readonly rules: Signal<readonly AtomicRuleScheduler[]>;
   /** 可用的规则因子列表 */
   readonly factors: Signal<readonly RuleFactorDefinition[]>;
   /** 适配选择器的选项集合，需要排除已使用的规则因子 */
   readonly factorOptions: Signal<readonly FieldDataSource[]>;
 
   /** 创建原子规则设置器（新建场景） */
-  addRule(ruleId: string): AtomicRuleSetter;
+  addRule(ruleId: string): AtomicRuleScheduler;
   /** 移除原子规则 */
   removeRule(ruleId: string): void;
   /** 验证所有原子规则 */
@@ -216,10 +228,10 @@ interface AtomicRuleGroupSetter {
 
 ### RuleWorkspace - 统一入口
 
-使用 Builder Pattern 实例化：
+使用 `Builder Pattern` 实例化：
 
 ```ts
-class RuleWorkspaceBuilder {
+class RuleWorkspaceSchedulerBuilder {
   /** 添加规则因子定义 */
   withFactors(factors: RuleFactorDefinition[]): RuleWorkspaceBuilder;
   /** 添加 Fetcher */
@@ -230,14 +242,14 @@ class RuleWorkspaceBuilder {
   build(): RuleWorkspace;
 }
 
-interface RuleWorkspace {
+interface RuleWorkspaceScheduler {
   /** 已创建的规则组列表，仅在编辑场景 */
-  readonly ruleGroups: Signal<readonly AtomicRuleGroup[]>;
+  readonly snapshot: readonly AtomicRuleGroup[];
   /** 已创建的规则组实例列表 */
-  readonly ruleGroupSetters: Signal<readonly AtomicRuleGroupSetter[]>;
+  readonly groups: Signal<readonly AtomicRuleGroupScheduler[]>;
 
   /** 创建规则组设置器（新建场景） */
-  addGroup(groupId: string): AtomicRuleGroupSetter;
+  addGroup(groupId: string): AtomicRuleGroupScheduler;
   /** 移除规则组 */
   removeGroup(groupId: string): void;
   /** 验证所有规则组 */
@@ -305,19 +317,19 @@ const group = workspace.addGroup('group-1');
 // 5. 创建原子规则
 const rule = group.addRule('rule-1');
 
-// 6. 用户选择规则因子（触发推断）
+// 6. 用户选择规则因子（触发推断），实现阶段由表单控件适配，业务方尽量避免调用
 rule.onFieldChange({ field: 'name', value: 'employee' });
 // 自动：factor 切换、operators 推断、重置 operator/threshold
 
-// 7. 用户选择操作符
+// 7. 用户选择操作符，实现阶段由表单控件适配，业务方尽量避免调用
 rule.onFieldChange({ field: 'operator', value: 'eq' });
 
-// 8. 用户输入阈值
+// 8. 用户输入阈值，实现阶段由表单控件适配，业务方尽量避免调用
 rule.onFieldChange({ field: 'threshold', value: 100 });
 
 // 9. 验证并构建
-if (group.validate()) {
-  const atomicRuleGroup = group.build();
+if (workspace.validate()) {
+  const rule = workspace.build();
 }
 ```
 
@@ -325,7 +337,7 @@ if (group.validate()) {
 
 ```ts
 // 已有规则组数据（从后端加载）
-const existingGroups: AtomicRuleGroup[] = [
+const groups: AtomicRuleGroup[] = [
   {
     rules: [
       { id: 'rule-1', name: 'employee', operator: 'eq', threshold: 100 },
@@ -338,14 +350,8 @@ const existingGroups: AtomicRuleGroup[] = [
 const workspace = new RuleWorkspaceBuilder()
   .withFactors(factors)
   .withFetchers(fetchers)
-  .withRuleGroups(existingGroups)
+  .withRuleGroups(groups)
   .build();
-
-// 通过 build 获取最终结果（包含编辑后的数据）
-if (workspace.validate()) {
-  const result = workspace.build();
-  console.log('规则组数量:', result.length);
-}
 ```
 
 ### 构建最终结果
@@ -376,8 +382,8 @@ packages/core/src/
 │   ├── resource.ts   # ResponseResource 接口定义
 │   └── index.ts
 ├── setter/
-│   ├── AtomicRuleSetter.ts
-│   ├── AtomicRuleGroupSetter.ts
+│   ├── AtomicRuleScheduler.ts
+│   ├── AtomicRuleGroupScheduler.ts
 │   ├── RuleWorkspace.ts
 │   └── index.ts
 └── index.ts          # 统一导出
