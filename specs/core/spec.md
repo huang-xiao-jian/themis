@@ -372,21 +372,32 @@ if (workspace.validate()) {
 
 ```shell
 packages/core/src/
-├── contracts/
-│   ├── fetcher.ts    # Fetcher 接口定义
-│   ├── dsl.ts        # DSL 类型定义
-│   ├── rule.ts       # AtomicRule / AtomicRuleGroup 定义
+├── contracts/       # 契约定义
+│   ├── fetcher.ts    # Fetcher 接口定义（5种类型）
+│   ├── dsl.ts        # DSL 类型定义（RuleFactorDefinition）
+│   ├── rule.ts       # 规则输出类型（AtomicRule / AtomicRuleGroup）
+│   ├── field.ts      # 基础类型（FieldDataSource / PaginatedResult）
 │   └── index.ts
-├── factory/
+├── constraint/      # 约束定义
+│   ├── constraint.ts # FieldConstraints 定义
+│   └── index.ts
+├── components/     # 表单组件属性定义（推断过程产物）
+│   ├── properties.ts # 抽象组件属性（ThresholdComponentProperties，10种类型）
+│   └── index.ts
+├── factory/         # 工厂函数
 │   ├── fetcher.ts    # provideXXXFetcher 工厂函数
 │   └── index.ts
-├── resource/
-│   ├── resource.ts   # ResponseResource 接口定义
+├── inference/       # 推断机制
+│   ├── operator.ts  # Operator 推断逻辑
+│   ├── component.ts # Component 推断逻辑
 │   └── index.ts
-├── scheduler/
+├── resource/       # 资源封装
+│   ├── resource.ts  # Resource 接口定义（5种类型）
+│   └── index.ts
+├── scheduler/      # 调度器
 │   ├── AtomicRuleScheduler.ts
 │   ├── AtomicRuleGroupScheduler.ts
 │   ├── RuleWorkspace.ts
 │   └── index.ts
-└── index.ts          # 统一导出
+└── index.ts         # 统一导出
 ```
