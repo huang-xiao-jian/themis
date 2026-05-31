@@ -6,13 +6,7 @@ export type DataType = 'string' | 'number' | 'boolean';
 /**
  * 数据元属性 - 语义化场景
  */
-export type Semantic =
-  | 'rate'
-  | 'date'
-  | 'time'
-  | 'datetime'
-  | 'duration'
-  | 'percentage';
+export type Semantic = 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
 
 /**
  * 数据元属性 - 交互模式
@@ -25,9 +19,38 @@ export type Mode = 'point' | 'range';
 export type Quantity = 'single' | 'multiple';
 
 /**
+ * 数据源选项结构
+ */
+export interface FieldDataSource {
+  label: string;
+  value: string | number;
+  disabled?: boolean;
+}
+
+/**
+ * 静态资源定义
+ */
+export interface StaticFieldResource {
+  /** 资源名称 */
+  name: string;
+  /** 预设的可选项 */
+  options: FieldDataSource[];
+}
+
+/**
  * 动态资源特性
  */
-export type DynamicResourceFeature = 'pagination' | 'filter';
+export type DynamicFieldResourceFeature = 'pagination' | 'filter';
+
+/**
+ * 动态资源定义
+ */
+export interface DynamicFieldResource {
+  /** 资源名称 */
+  name: string;
+  /** 资源特性 */
+  features: DynamicFieldResourceFeature[];
+}
 
 /**
  * 数据约束定义
@@ -56,16 +79,6 @@ export interface FieldConstraints {
 }
 
 /**
- * 资源定义
- */
-export interface ResourceDefinition {
-  /** 资源名称 */
-  name: string;
-  /** 资源特性 */
-  features?: DynamicResourceFeature[];
-}
-
-/**
  * 规则因子定义
  */
 export interface RuleFactorDefinition {
@@ -84,7 +97,7 @@ export interface RuleFactorDefinition {
   /** 关联数量（单值或多值） */
   quantity?: Quantity;
   /** 关联资源 */
-  resource?: ResourceDefinition;
+  resource?: StaticFieldResource | DynamicFieldResource;
   /** 数据约束 */
   constraints?: FieldConstraints;
 }
