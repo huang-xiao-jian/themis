@@ -33,9 +33,9 @@
 }
 ```
 
-### 关联资源 Resource
+### 关联资源 FieldResource
 
-`Resource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构。
+`FieldResource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构。
 
 **说明**：此处定义的是 DSL 结构，运行时 Resource 封装及详细类型请参考 [规则因子解释器](../interpreter.md)
 
@@ -47,15 +47,15 @@ interface FieldDataSource {
 }
 ```
 
-静态资源描述：
+静态 FieldResource 描述：
 
 - `name` 资源名称，具备唯一性
 - `options` 资源列表，遵循数据结构约束
 
-静态资源接口声明：
+静态 FieldResource 接口声明：
 
 ```ts
-interface StaticResource {
+interface StaticFieldResource {
   // 约定的资源名称
   name: string;
   // 预设的可选项
@@ -63,7 +63,7 @@ interface StaticResource {
 }
 ```
 
-静态资源案例：
+静态 FieldResource 案例：
 
 ```json
 {
@@ -77,30 +77,30 @@ interface StaticResource {
 }
 ```
 
-**动态资源** 为从服务端下发的数据源，根据数据源特性区分亚型：
+**动态 FieldResource** 为从服务端下发的数据源，根据数据源特性区分亚型：
 
 - 是否分页输出
 - 是否支持关键词过滤
 
-动态资源描述：
+动态 FieldResource 描述：
 
 - `name` 资源名称，具备唯一性，供应方约定
 - `features` 资源供应商支持的特性，例如：分页、关键词过滤
 
-动态资源接口声明：
+动态 FieldResource 接口声明：
 
 ```ts
-type DynamicResourceFeature = 'pagination' | 'filter';
+type DynamicFieldResourceFeature = 'pagination' | 'filter';
 
-interface DynamicResource {
+interface DynamicFieldResource {
   // 约定的资源名称
   name: string;
   // 资源供应商支持的特性
-  features: DynamicResourceFeature[];
+  features: DynamicFieldResourceFeature[];
 }
 ```
 
-动态资源案例：
+动态 FieldResource 案例：
 
 ```json
 { "resource": { "name": "City" } }

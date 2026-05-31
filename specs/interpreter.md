@@ -2,6 +2,11 @@
 
 规范解释器的实现机制，明确 `DSL` 从抽象到具现的转换过程
 
+## 术语说明
+
+- **FieldResource**：DSL 层描述性声明，定义资源的特征和来源（详见 [规则因子描述](../spec.md)）
+- **Resource**：运行时层封装实体，包含 Signal 和交互方法
+
 ## 技术栈
 
 - [alien-signals](https://github.com/stackblitz/alien-signals) - `Signal Primitive`
@@ -384,26 +389,26 @@ interface SwitchProperties extends BaseProperties {
 
 ### SelectProperties - 单选
 
-适用于受限单选场景（关联 Resource）：
+适用于受限单选场景（关联运行时 Resource）：
 
 ```ts
 interface SelectProperties extends BaseProperties {
   /** 组件类型标识 */
   readonly type: 'Select';
-  /** 数据资源 */
+  /** 数据资源（运行时 Resource 封装） */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
 ```
 
 ### MultipleSelectProperties - 多选
 
-适用于受限多选场景（关联 Resource）：
+适用于受限多选场景（关联运行时 Resource）：
 
 ```ts
 interface MultipleSelectProperties extends BaseProperties {
   /** 组件类型标识 */
   readonly type: 'MultipleSelect';
-  /** 数据资源 */
+  /** 数据资源（运行时 Resource 封装） */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
 ```
@@ -526,7 +531,9 @@ type ThresholdComponentProperties =
   | ListRangeBuilderProperties;
 ```
 
-### 表单组件与 Resource 映射关系
+### 表单组件与运行时 Resource 映射关系
+
+> 说明：以下映射关系表中的 Resource 指运行时层封装实体
 
 | 表单组件         | 关联 Resource 类型                             |
 | :--------------- | :--------------------------------------------- |
