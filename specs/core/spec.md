@@ -26,9 +26,14 @@
 
 ### Fetcher 接口
 
-业务方按场景组合提供 Fetcher（与 DynamicResource 类型对应），共 4 种类型：
+业务方按场景组合提供 `Fetcher`（与 `DynamicResource` 类型对应），共 5 种类型：
 
 ```ts
+// 静态资源 Fetcher - 由内核默认提供，StaticResource 无需业务方注入
+interface StaticFetcher<T = FieldDataSource> {
+  fetch(): Promise<T[]>;
+}
+
 // 基础动态资源 Fetcher - 无分页、无过滤
 interface ElementaryFetcher<T = FieldDataSource> {
   fetch(): Promise<T[]>;
@@ -58,10 +63,16 @@ interface PaginatedFilterableFetcher<T = FieldDataSource> {
 interface FetcherProvider<T extends FieldDataSource> {
   /** fetcher 实例 */
   readonly fetcher:
+    | StaticFetcherProvider<T>
     | ElementaryFetcher<T>
     | PaginatedFetcher<T>
     | FilterableFetcher<T>
     | PaginatedFilterableFetcher<T>;
+}
+
+/** 静态资源 Fetcher Provider - 由内核默认提供，业务方无需注入 */
+interface StaticFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
+  readonly fetcher: StaticFetcher<T>;
 }
 
 /** 基础动态资源 Fetcher Provider */
@@ -84,6 +95,11 @@ interface PaginatedFilterableFetcherProvider<T extends FieldDataSource> extends 
   readonly fetcher: PaginatedFilterableFetcher<T>;
 }
 
+/** 静态资源 Fetcher Provider - 由内核默认提供，业务方无需注入，不对外导出 */
+function provideStaticFetcher<T extends FieldDataSource>(
+  fetcher: StaticFetcher<T>
+): StaticFetcherProvider<T>;
+
 function provideElementaryFetcher<T extends FieldDataSource>(
   fetcher: ElementaryFetcher<T>
 ): ElementaryFetcherProvider<T>;
@@ -101,7 +117,7 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 ): PaginatedFilterableFetcherProvider<T>;
 ```
 
-**说明**：`StaticResource` 为静态资源，预设选项无需动态加载，不使用 Fetcher。`RuleFactorDefinition.resource.features` 为空数组时对应 `StaticResource`，包含 `pagination`/`filter` 时对应对应的 `DynamicResource` 类型
+**说明**：`StaticResource` 为静态资源，预设选项无需动态加载，由内核默认提供 `StaticFetcher`。`RuleFactorDefinition.resource.features` 为空数组时对应 `StaticResource`，包含 `pagination`/`filter` 时对应对应的 `DynamicResource` 类型
 
 ### DSL 定义
 
@@ -284,18 +300,14 @@ const factors: RuleFactorDefinition[] = [
   },
 ];
 
-// 2. 提供 Fetcher（DynamicResource 必须，StaticResource 无需）
+// 2. 提供 Fetcher（DynamicResource 必须，StaticResource 由内核默认提供）
 const fetchers = [
   providePaginatedFilterableFetcher({
     fetch(keyword, page, pageSize) {
       return api.searchEmployees(keyword, page, pageSize);
     },
   }),
-  provideElementaryFetcher({
-    fetch() {
-      return api.getCities();
-    },
-  }),
+  // 注意：StaticResource 无需提供 Fetcher，由内核默认处理
 ];
 
 // 3. 构建 RuleWorkspace
