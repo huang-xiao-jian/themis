@@ -265,32 +265,6 @@ function WorkspaceEditor({ workspace }: WorkspaceEditorProps) {
 - 注册编辑器组件实现（`AtomicRuleView`、`AtomicRuleGroupView`、`RuleWorkspaceView`）
 - 实现表单组件渲染（`Thresholder`）
 
-## 目录结构
-
-```shell
-packages/react/src/
-├── context/
-│   ├── SisyphusScopeContext.ts  # Context 定义
-│   ├── SisyphusScopeProvider.tsx # Provider 组件
-│   └── index.ts
-├── hooks/
-│   ├── useSignal.ts      # Signal 响应式状态 Hook
-│   ├── useComputed.ts    # Computed 计算属性 Hook
-│   ├── useEffectScope.ts # Effect 作用域管理 Hook
-│   ├── useSisyphusScope.ts
-│   └── index.ts
-├── app/
-│   ├── SisyphusScope.ts       # 应用实例与插件机制
-│   ├── ComponentRenderer.ts # 组件渲染器
-│   └── index.ts
-├── editor/
-│   ├── AtomicRuleView.tsx     # 原子规则编辑组件
-│   ├── AtomicRuleGroupView.tsx # 规则组编辑组件
-│   ├── RuleWorkspaceView.tsx  # 工作空间编辑组件
-│   └── index.ts
-├── index.ts
-```
-
 ## 使用示例
 
 业务方仅感知 `WorkspaceEditor` 层级，通过 `SisyphusScopeProvider` 注入渲染器：
