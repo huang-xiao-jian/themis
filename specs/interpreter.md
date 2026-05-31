@@ -219,7 +219,7 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
 
 ## 推断表单组件 Intermediate Representation
 
-从 `DSL` 推断中间形态的表单组件，便于适配器（框架 + 组件库）进行高效的实现
+从 `DSL` 推断中间形态的表单组件 + 表单组件，便于适配器（框架 + 组件库）进行高效的实现
 
 ```mermaid
 graph TD
@@ -292,7 +292,7 @@ graph TD
 
 ### 表单组件属性声明
 
-抽象表单组件统一继承 `BaseProperties`，组件特定属性按需扩展：
+抽象表单组件统一继承 `BaseProperties`，组件特定属性按需扩展，**特别说明：以下属性定义为最终传递给抽象组件的属性，而不是推断过程中的属性**
 
 ```ts
 /**
