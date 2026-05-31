@@ -18,6 +18,8 @@
 
 ## 编辑器组件
 
+渲染机制：使用组件代理机制，`@sisyphus/react` 内部实现编辑器组件，通过插件协议进行代理渲染
+
 ### 编辑器组件设计目标
 
 明确 **编辑器组件** 的属性，用于插件协议注册的组件和渲染器工厂，定义规则编辑视图层级的结构。
@@ -151,6 +153,8 @@ interface SisyphusScopeProviderProps {
   children: React.ReactNode;
 }
 ```
+
+## 技术支持
 
 ### useSisyphusScope - 获取作用域实例
 

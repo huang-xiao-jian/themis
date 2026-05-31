@@ -20,7 +20,7 @@
 
 ```json
 {
-  "tool": "query-docs", // 来自 MCP --> context7
+  "tool": "context7/query-docs",
   "params": {
     "libraryId": "/stackblitz/alien-signals",
     "query": "待解决的问题，例如：如何实现 Signal 计算属性？"
