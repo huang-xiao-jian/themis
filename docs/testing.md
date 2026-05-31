@@ -24,16 +24,27 @@
 ### 测试代码规范
 
 - `vitest` API 必须明确的导入，不依赖全局变量
+- `vitest` 测试用例描述必须使用全英语，不允许
 
 ```ts
 import { describe, expect, it, rstest } from 'vitest';
+
+it('should return single point', () => {
+  // Arrange, Act, Assert pattern
+});
 ```
 
 ### 测试运行
 
-`vitest` 支持测试文件过滤：
+`vitest` 支持测试用例范围过滤：
 
 ```bash
-# 匹配文件名包含 Inferer 的测试用例文件
+# 运行特定测试用例
+pnpm vitest run -t "should return single point"
+
+# 运行文件名包含 Inferer 的测试用例
 pnpm vitest run "Inferer"
+
+# 运行特定 package 的测试用例文件
+pnpm vitest run --project @sisyphus/core
 ```
