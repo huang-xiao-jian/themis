@@ -17,14 +17,12 @@
 
 - 响应式状态管理基于 `@preact/signals-core`，看做运行时标准，不纳入内核分层架构范畴
 
-## 分层架构指引
+## 分层架构
 
 - 接入层：对外暴露类型安全的 `API` 协议，简化业务方实例化内核应用层的过程
 - 基础设施层：将原始 `RuleFactorResource` 转化为 `Resource` 实体，定义动态资源获取的 `Fetcher` 抽象，依赖业务方提供 `Fetcher` 实现
 - 应用层：编排领域逻辑，负责规则配置的数据、行为封装
 - 领域层：封装核心业务规则，包括规则推断机制、操作符映射逻辑、阈值属性计算逻辑。根据 `RuleFactorDefinition` 定义推断可用 `operators` 和 `thresholder`，以及 `AtomicRuleGroup` 级别的可选规则因子选项推断
-
-## 协议设计
 
 ### 基础设施层
 
@@ -60,59 +58,91 @@ interface PaginatedFilterableFetcher<T = FieldDataSource> {
 
 ##### 依赖关系
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                  ResourceFactoryFacade                 │
-│                    (统一资源工厂)                        │
-└───────────────────────┬─────────────────────────────────┘
-                        │ 依赖
-        ┌───────────────┴───────────────┐
-        ▼                               ▼
-┌───────────────────┐         ┌───────────────────┐
-│ StaticResourceFactory │       │ DynamicResourceFactory │
-│   (静态资源工厂)     │         │   (动态资源工厂)     │
-└───────────────────┘         └─────────┬───────────┘
-                                        │ 依赖
-                                ┌───────┴───────┐
-                                ▼               ▼
-                        ┌───────────────┐  ┌───────────────┐
-                        │ StaticResource │  │ FetcherRegistry │
-                        │ (内核默认)     │  │ (业务方提供)   │
-                        └───────────────┘  └───────────────┘
+```mermaid
+classDiagram
+  class ResourceFactory {
+    <<abstract>>
+  }
+  class StaticResourceFactory {
+    <<abstract>>
+  }
+  class DynamicResourceFactory {
+    <<abstract>>
+  }
+  class FetcherRegistry
+
+  ResourceFactory ..> StaticResourceFactory : Dependency
+  ResourceFactory ..> DynamicResourceFactory : Dependency
+  DynamicResourceFactory ..> FetcherRegistry : Dependency
 ```
 
-**依赖关系说明**：
+**职责说明**：
 
-| 组件                     | 依赖方            | 说明                             |
-| :----------------------- | :---------------- | :------------------------------- |
-| `ResourceFactoryFacade`  | -                 | 统一入口，协调静态/动态工厂      |
-| `StaticResourceFactory`  | -                 | 无外部依赖，内核默认提供 options |
-| `DynamicResourceFactory` | `FetcherRegistry` | 必须依赖 registry 获取 Fetcher   |
-| `FetcherRegistry`        | -                 | 业务方注册、管理 Fetcher         |
+- `FetcherRegistry`：业务方注册和管理 `Fetcher`，支持基于资源名称查询
+- `StaticResourceFactory`：将 `StaticRuleFactorResource` 转换为 `StaticResource` 实体
+- `DynamicResourceFactory`：将 `DynamicRuleFactorResource` 转换为对应亚型 `DynamicResource` 实体
+- `ResourceFactory`：`Facade`，统一入口，根据 `RuleFactorDefinition.resource` 形态自动选择工厂
 
 ##### 抽象设计
 
 ```ts
 /**
- * 资源工厂基类
+ * 运行时 Resource 实体联合类型
+ *
+ * 涵盖所有 Resource 亚型，便于 ResourceFactory（Facade）作为统一返回类型
  */
-abstract class ResourceFactory<T extends Resource> {
-  abstract create(factorResource: DynamicRuleFactorResource);
+type Resource = StaticResource<FieldDataSource> | DynamicResource<FieldDataSource>;
+
+type DynamicResource<T> =
+  | ElementaryDynamicResource<T>
+  | PaginatedDynamicResource<T>
+  | FilterableDynamicResource<T>
+  | PaginatedFilterableDynamicResource<T>;
+
+/**
+ * 静态资源工厂
+ *
+ * 职责：创建 StaticResource
+ * 依赖：无外部依赖，options 直接来源于 DSL 的 StaticRuleFactorResource.options
+ */
+abstract class StaticResourceFactory {
+  /**
+   * 创建静态资源实例
+   * @param resource DSL 描述的静态资源
+   */
+  abstract create(resource: StaticRuleFactorResource): StaticResource<FieldDataSource>;
 }
 
 /**
- * 统一资源工厂入口
+ * 动态资源工厂
+ *
+ * 职责：创建 DynamicResource（根据 resource.features 组合确定亚型）
+ * 依赖：FetcherRegistry（由业务方提供）
  */
-class ResourceFactoryFacade {
-  /* ... */
+abstract class DynamicResourceFactory {
+  /**
+   * 创建动态资源实例
+   * @param resource DSL 描述的动态资源（包含 features 组合）
+   */
+  abstract create(resource: DynamicRuleFactorResource): DynamicResource<FieldDataSource>;
+}
+
+/**
+ * 统一资源工厂（Facade）
+ *
+ * 职责：作为资源创建的统一入口
+ *       根据 RuleFactorDefinition.resource 形态自动选择工厂
+ * 依赖：StaticResourceFactory + DynamicResourceFactory
+ */
+abstract class ResourceFactory {
+  /**
+   * 统一资源创建入口
+   * @param factor 规则因子定义
+   * @returns 资源实例，若无 resource 声明则返回 null
+   */
+  abstract create(factor: RuleFactorDefinition): Resource | null;
 }
 ```
-
-**职责说明**：
-
-- `FetcherRegistry`：业务方注册和管理 Fetcher，支持基于资源名称查询
-- `ResourceFactory`：将 `RuleFactorDefinition` 转换为 `Resource` 领域实体
-- `ResourceFactoryFacade`：统一入口，根据 DSL 特征自动选择合适的工厂
 
 ### 接入层
 
@@ -189,13 +219,46 @@ class RuleWorkspaceBuilder {
 }
 ```
 
-**使用场景区分**：
+### 领域层
 
-| 场景     | 推荐方式                     | 说明                                                  |
-| :------- | :--------------------------- | :---------------------------------------------------- |
-| 新建规则 | `Builder`                    | 无需 `withRuleGroups`，通过 `addGroup`/`addRule` 创建 |
-| 编辑规则 | `Builder` + `withRuleGroups` | 传入已有数据，自动还原规则组和原子规则                |
-| 简单测试 | `createRuleWorkspace`        | 一行代码创建，配置项均可选                            |
+**核心推断逻辑**：
+
+- `AtomicRule` 级别根据 `RuleFactorDefinition` 推断可用 `operators` 和 `thresholder`，参考 [规则因子解释器](../interpreter.md) 中的推断机制
+- `AtomicRuleGroup` 级别的规则因子选项推断，参考 [规则及规则因子描述](../spec.md) 中的规则配置约束章节
+
+#### 推断器类声明
+
+```ts
+/**
+ * 操作符推断器
+ *
+ * 根据 dataType + semantic 确定"数据域"，再结合 mode（点/区间）和 quantity（单/多）确定"操作域"
+ */
+class OperatorInferrer {
+  infer(factor: RuleFactorDefinition): readonly FieldDataSource[];
+}
+
+/**
+ * 阈值渲染组件属性推断器
+ *
+ * 根据 RuleFactorDefinition 推断中间形态的表单组件 + 表单组件属性
+ */
+class ThresholderInferrer {
+  infer(factor: RuleFactorDefinition): ThresholdComponentProperties;
+}
+
+/**
+ * 规则因子选项推断器
+ *
+ * 从全部规则因子列表中排除已使用的规则因子
+ */
+class FactorOptionsInferrer {
+  infer(
+    allFactors: readonly RuleFactorDefinition[],
+    usedFactorNames: ReadonlySet<string>
+  ): readonly FieldDataSource[];
+}
+```
 
 ### 应用层
 
@@ -211,18 +274,6 @@ type FieldName = 'name' | 'operator' | 'threshold';
 interface FieldChangeAction {
   field: FieldName;
   value: unknown;
-}
-
-/** 原子规则初始化数据（编辑场景） */
-interface AtomicRule {
-  /** 规则标识 */
-  readonly id: string;
-  /** 规则因子名称 */
-  readonly name: string;
-  /** 操作符 */
-  readonly operator: string;
-  /** 阈值 */
-  readonly threshold: unknown;
 }
 
 interface AtomicRuleScheduler {
@@ -257,28 +308,45 @@ interface AtomicRuleScheduler {
 }
 ```
 
-**内部协作协议**
-
 `AtomicRuleScheduler` 与领域层推断器的协作流程：
 
-- `AtomicRuleScheduler` 依赖 `OperatorInferrer` 和 `ThresholderInferrer` 进行推断
-- 当用户选择规则因子时，自动触发 `operators` 和 `thresholder` 的重新推断
-- 推断器采用 Class 风格，便于扩展和依赖注入
+```mermaid
+classDiagram
+  class AtomicRuleScheduler {
+    <<interface>>
+  }
+  class OperatorInferrer {
+    <<class>>
+  }
+  class ThresholderInferrer {
+    <<class>>
+  }
 
-```ts
-/**
- * 操作符推断器
- */
-class OperatorInferrer {
-  infer(factor: RuleFactorDefinition): readonly FieldDataSource[];
-}
+  AtomicRuleScheduler ..> OperatorInferrer : Dependency
+  AtomicRuleScheduler ..> ThresholderInferrer : Dependency
+```
 
-/**
- * 阈值渲染组件属性推断器
- */
-class ThresholderInferrer {
-  infer(factor: RuleFactorDefinition, operator: string): ThresholdComponentProperties;
-}
+用户选择规则因子的联动流程:
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant S as AtomicRuleScheduler
+  participant OI as OperatorInferrer
+  participant TI as ThresholderInferrer
+
+  U->>S: 选择规则因子
+  activate S
+  S->>S:  Update factor Signal
+  S->>OI: infer(factor)
+  OI-->>S: operators: FieldDataSource[]
+  S->>S: Update operators Signal
+  S->>TI: infer(factor)
+  TI-->>S: thresholder: ThresholdComponentProperties
+  S->>S: Update thresholder Signal
+  S->>S: Reset operator
+  S->>S: Reset threshold
+  deactivate S
 ```
 
 #### AtomicRuleGroupScheduler
@@ -315,9 +383,7 @@ interface AtomicRuleGroupScheduler {
 }
 ```
 
-**factorOptions 推断逻辑**
-
-`factorOptions` 用于在规则组中选择规则因子时提供可选列表，需排除已配置的规则因子。
+`factorOptions` 用于在规则组中选择规则因子时提供可选列表，需排除 `Group` 内部已配置的规则因子
 
 **特别说明**：`FactorOptionsInferrer` 属于 `AtomicRuleGroup` 级别，每个规则组独立维护自己的 `factorOptions`，不同规则组之间 **不共享**。
 
@@ -334,29 +400,7 @@ interface AtomicRuleGroupScheduler {
 
 #### RuleWorkspaceScheduler
 
-统一入口，持有规则因子定义供调度器共享：
-
-```ts
-interface RuleWorkspaceScheduler {
-  /** 已创建的规则组列表，仅在编辑场景 */
-  readonly snapshots: readonly AtomicRuleGroup[];
-  /** 已创建的规则组实例列表 */
-  readonly groups: Signal<readonly AtomicRuleGroupScheduler[]>;
-
-  /** 创建规则组设置器（新建场景） */
-  addGroup(groupId: string): AtomicRuleGroupScheduler;
-  /** 移除规则组 */
-  removeGroup(groupId: string): void;
-  /** 验证所有规则组 */
-  validate(): boolean;
-  /** 构建所有规则组 */
-  build(): readonly AtomicRuleGroup[];
-}
-```
-
-**生命周期管理方法**
-
-`RuleWorkspaceScheduler` 提供完整的生命周期管理能力：
+统一入口，持有规则因子定义供调度器共享，并提供完整的生命周期管理能力：
 
 ```ts
 interface RuleWorkspaceScheduler {
@@ -383,57 +427,12 @@ interface RuleWorkspaceScheduler {
 }
 ```
 
-### 领域层
-
-**核心推断逻辑**：
-
-- `AtomicRule` 级别根据 `RuleFactorDefinition` 推断可用 `operators` 和 `thresholder`，参考 [规则因子解释器](../interpreter.md) 中的推断机制
-- `AtomicRuleGroup` 级别的规则因子选项推断，参考 [规则及规则因子描述](../spec.md) 中的规则配置约束章节
-
-#### 推断器类声明
-
-```ts
-/**
- * 操作符推断器
- *
- * 根据 dataType + semantic 确定"数据域"，再结合 mode（点/区间）和 quantity（单/多）确定"操作域"
- */
-class OperatorInferrer {
-  infer(factor: RuleFactorDefinition): readonly FieldDataSource[];
-}
-
-/**
- * 阈值渲染组件属性推断器
- *
- * 根据 RuleFactorDefinition 推断中间形态的表单组件 + 表单组件属性
- */
-class ThresholderInferrer {
-  infer(factor: RuleFactorDefinition, operator: string): ThresholdComponentProperties;
-}
-
-/**
- * 规则因子选项推断器
- *
- * 从全部规则因子列表中排除已使用的规则因子
- */
-class FactorOptionsInferrer {
-  infer(
-    allFactors: readonly RuleFactorDefinition[],
-    usedFactorNames: ReadonlySet<string>
-  ): readonly FieldDataSource[];
-}
-```
-
 ## 业务方使用示例
 
 ### 新建场景
 
 ```ts
-import {
-  RuleWorkspaceBuilder,
-  providePaginatedFilterableFetcher,
-  provideElementaryFetcher,
-} from '@sisyphus/core';
+import { RuleWorkspaceBuilder, providePaginatedFilterableFetcher } from '@sisyphus/core';
 
 // 1. 定义 DSL
 const factors: RuleFactorDefinition[] = [
@@ -441,14 +440,13 @@ const factors: RuleFactorDefinition[] = [
     name: 'employee',
     title: '员工',
     dataType: 'string',
-    semantic: 'rate',
     resource: { name: 'Employee', features: ['pagination', 'filter'] },
   },
   {
     name: 'deliver_city',
     title: '目标城市',
     dataType: 'string',
-    resource: { name: 'City' }, // 无 features = StaticResource
+    resource: { name: 'City' }, // 无 features = StaticResource（由内核默认提供）
   },
   {
     name: 'order_amount',
@@ -459,14 +457,13 @@ const factors: RuleFactorDefinition[] = [
   },
 ];
 
-// 2. 提供 Fetcher（DynamicResource 必须，StaticResource 由内核默认提供）
+// 2. 提供 Fetcher（仅 DynamicResource 需要，StaticResource 由内核默认提供）
 const fetchers = [
   providePaginatedFilterableFetcher({
     fetch(keyword, page, pageSize) {
       return api.searchEmployees(keyword, page, pageSize);
     },
   }),
-  // 注意：StaticResource 无需提供 Fetcher，由内核默认处理
 ];
 
 // 3. 构建 RuleWorkspace
@@ -478,26 +475,31 @@ const group = workspace.addGroup('group-1');
 // 5. 创建原子规则
 const rule = group.addRule('rule-1');
 
-// 6. 用户选择规则因子（触发推断），实现阶段由表单控件适配，业务方尽量避免调用
+// 6. 用户选择规则因子（表单控件适配层负责调用）
+// 推断联动流程见 [用户选择规则因子的联动流程](#用户选择规则因子的联动流程)
 rule.onFieldChange({ field: 'name', value: 'employee' });
-// 自动：factor 切换、operators 推断、重置 operator/threshold
 
-// 7. 用户选择操作符，实现阶段由表单控件适配，业务方尽量避免调用
+// 7. 用户选择操作符
 rule.onFieldChange({ field: 'operator', value: 'eq' });
 
-// 8. 用户输入阈值，实现阶段由表单控件适配，业务方尽量避免调用
+// 8. 用户输入阈值
 rule.onFieldChange({ field: 'threshold', value: 100 });
 
 // 9. 验证并构建
 if (workspace.validate()) {
-  const rule = workspace.build();
+  const result = workspace.build();
+  // result: readonly AtomicRuleGroup[]
 }
+
+// 10. 销毁工作空间，释放订阅与缓存
+workspace.destroy();
 ```
 
 ### 编辑场景
 
 ```ts
 // 已有规则组数据（从后端加载）
+// AtomicRuleGroup 参见 [规则及规则因子描述](../spec.md#规则配置业务概念)
 const groups: AtomicRuleGroup[] = [
   {
     rules: [
@@ -507,22 +509,10 @@ const groups: AtomicRuleGroup[] = [
   },
 ];
 
-// 初始化时传入已有数据
+// 初始化时传入已有数据（factors / fetchers 沿用新建场景中已定义的实例）
 const workspace = new RuleWorkspaceBuilder()
   .withFactors(factors)
   .withFetchers(fetchers)
   .withRuleGroups(groups)
   .build();
-```
-
-### 构建最终结果
-
-```ts
-// 验证所有规则组并构建最终输出
-if (workspace.validate()) {
-  // result: readonly AtomicRuleGroup[]
-  const result = workspace.build();
-
-  // 提交规则组或者进一步操作
-}
 ```

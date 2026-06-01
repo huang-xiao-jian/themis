@@ -25,6 +25,8 @@
 ### Resource 封装
 
 ```ts
+import { type FieldDataSource } from './spec.md';
+
 /**
  * 静态资源 - 预设选项，无需动态加载
  */
