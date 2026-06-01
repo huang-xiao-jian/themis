@@ -56,6 +56,64 @@ interface PaginatedFilterableFetcher<T = FieldDataSource> {
 }
 ```
 
+#### 资源工厂与 Fetcher 管理
+
+##### 依赖关系
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  ResourceFactoryFacade                 │
+│                    (统一资源工厂)                        │
+└───────────────────────┬─────────────────────────────────┘
+                        │ 依赖
+        ┌───────────────┴───────────────┐
+        ▼                               ▼
+┌───────────────────┐         ┌───────────────────┐
+│ StaticResourceFactory │       │ DynamicResourceFactory │
+│   (静态资源工厂)     │         │   (动态资源工厂)     │
+└───────────────────┘         └─────────┬───────────┘
+                                        │ 依赖
+                                ┌───────┴───────┐
+                                ▼               ▼
+                        ┌───────────────┐  ┌───────────────┐
+                        │ StaticResource │  │ FetcherRegistry │
+                        │ (内核默认)     │  │ (业务方提供)   │
+                        └───────────────┘  └───────────────┘
+```
+
+**依赖关系说明**：
+
+| 组件                     | 依赖方            | 说明                             |
+| :----------------------- | :---------------- | :------------------------------- |
+| `ResourceFactoryFacade`  | -                 | 统一入口，协调静态/动态工厂      |
+| `StaticResourceFactory`  | -                 | 无外部依赖，内核默认提供 options |
+| `DynamicResourceFactory` | `FetcherRegistry` | 必须依赖 registry 获取 Fetcher   |
+| `FetcherRegistry`        | -                 | 业务方注册、管理 Fetcher         |
+
+##### 抽象设计
+
+```ts
+/**
+ * 资源工厂基类
+ */
+abstract class ResourceFactory<T extends Resource> {
+  abstract create(factorResource: DynamicRuleFactorResource);
+}
+
+/**
+ * 统一资源工厂入口
+ */
+class ResourceFactoryFacade {
+  /* ... */
+}
+```
+
+**职责说明**：
+
+- `FetcherRegistry`：业务方注册和管理 Fetcher，支持基于资源名称查询
+- `ResourceFactory`：将 `RuleFactorDefinition` 转换为 `Resource` 领域实体
+- `ResourceFactoryFacade`：统一入口，根据 DSL 特征自动选择合适的工厂
+
 ### 接入层
 
 #### Fetcher 工厂函数
@@ -90,14 +148,54 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 
 #### Builder Pattern 入口
 
+**工厂函数 vs Builder Pattern** 职责边界：
+
+- `createRuleWorkspace`：简化入口，一站式创建规则工作空间，适合简单场景
+- `RuleWorkspaceBuilder`：链式配置入口，适合需要精细控制配置的场景
+
 ```ts
+/**
+ * 简化工厂函数 - 一站式创建（推荐新手场景）
+ */
+function createRuleWorkspace(config: {
+  factors: RuleFactorDefinition[];
+  fetchers?: readonly FetcherProvider[];
+  ruleGroups?: readonly AtomicRuleGroup[];
+}): RuleWorkspaceScheduler;
+
+/**
+ * Builder Pattern - 链式配置入口（推荐标准场景）
+ */
 class RuleWorkspaceBuilder {
+  /**
+   * 配置规则因子定义（必须）
+   */
   withFactors(factors: RuleFactorDefinition[]): RuleWorkspaceBuilder;
+
+  /**
+   * 配置动态资源 Fetcher（DynamicResource 必须，StaticResource 由内核默认提供）
+   */
   withFetchers(fetchers: readonly FetcherProvider[]): RuleWorkspaceBuilder;
+
+  /**
+   * 配置已有规则组数据（编辑场景可选，新建场景可不传入）
+   */
   withRuleGroups(ruleGroups: readonly AtomicRuleGroup[]): RuleWorkspaceBuilder;
+
+  /**
+   * 构建工作空间调度器
+   */
   build(): RuleWorkspaceScheduler;
 }
 ```
+
+**使用场景区分**：
+
+| 场景     | 推荐方式                     | 说明                                                  |
+| :------- | :--------------------------- | :---------------------------------------------------- |
+| 新建规则 | `Builder`                    | 无需 `withRuleGroups`，通过 `addGroup`/`addRule` 创建 |
+| 编辑规则 | `Builder` + `withRuleGroups` | 传入已有数据，自动还原规则组和原子规则                |
+| 简单测试 | `createRuleWorkspace`        | 一行代码创建，配置项均可选                            |
 
 ### 应用层
 
@@ -159,6 +257,30 @@ interface AtomicRuleScheduler {
 }
 ```
 
+**内部协作协议**
+
+`AtomicRuleScheduler` 与领域层推断器的协作流程：
+
+- `AtomicRuleScheduler` 依赖 `OperatorInferrer` 和 `ThresholderInferrer` 进行推断
+- 当用户选择规则因子时，自动触发 `operators` 和 `thresholder` 的重新推断
+- 推断器采用 Class 风格，便于扩展和依赖注入
+
+```ts
+/**
+ * 操作符推断器
+ */
+class OperatorInferrer {
+  infer(factor: RuleFactorDefinition): readonly FieldDataSource[];
+}
+
+/**
+ * 阈值渲染组件属性推断器
+ */
+class ThresholderInferrer {
+  infer(factor: RuleFactorDefinition, operator: string): ThresholdComponentProperties;
+}
+```
+
 #### AtomicRuleGroupScheduler
 
 规则组设置器管理原子规则集合：
@@ -193,6 +315,23 @@ interface AtomicRuleGroupScheduler {
 }
 ```
 
+**factorOptions 推断逻辑**
+
+`factorOptions` 用于在规则组中选择规则因子时提供可选列表，需排除已配置的规则因子。
+
+**特别说明**：`FactorOptionsInferrer` 属于 `AtomicRuleGroup` 级别，每个规则组独立维护自己的 `factorOptions`，不同规则组之间 **不共享**。
+
+```ts
+/**
+ * factorOptions 推断规则
+ *
+ * 1. 数据源：factors.signal（RuleWorkspace 共享的规则因子定义列表）
+ * 2. 排除规则：已存在于 rules.signal 中的原子规则的 name
+ * 3. 输出格式：转换为 FieldDataSource[] 供 Select 组件使用
+ * 4. 作用域：AtomicRuleGroup 级别，每个规则组独立计算
+ */
+```
+
 #### RuleWorkspaceScheduler
 
 统一入口，持有规则因子定义供调度器共享：
@@ -215,6 +354,35 @@ interface RuleWorkspaceScheduler {
 }
 ```
 
+**生命周期管理方法**
+
+`RuleWorkspaceScheduler` 提供完整的生命周期管理能力：
+
+```ts
+interface RuleWorkspaceScheduler {
+  /** 已创建的规则组列表，仅在编辑场景 */
+  readonly snapshots: readonly AtomicRuleGroup[];
+  /** 已创建的规则组实例列表 */
+  readonly groups: Signal<readonly AtomicRuleGroupScheduler[]>;
+
+  // 创建与删除
+  /** 创建规则组设置器（新建场景） */
+  addGroup(groupId: string): AtomicRuleGroupScheduler;
+  /** 移除规则组 */
+  removeGroup(groupId: string): void;
+
+  // 验证与构建
+  /** 验证所有规则组 */
+  validate(): boolean;
+  /** 构建所有规则组 */
+  build(): readonly AtomicRuleGroup[];
+
+  // 生命周期管理
+  /** 销毁工作空间，释放所有资源（订阅、缓存等） */
+  destroy(): void;
+}
+```
+
 ### 领域层
 
 **核心推断逻辑**：
@@ -222,28 +390,39 @@ interface RuleWorkspaceScheduler {
 - `AtomicRule` 级别根据 `RuleFactorDefinition` 推断可用 `operators` 和 `thresholder`，参考 [规则因子解释器](../interpreter.md) 中的推断机制
 - `AtomicRuleGroup` 级别的规则因子选项推断，参考 [规则及规则因子描述](../spec.md) 中的规则配置约束章节
 
-### 缺失内容分析
+#### 推断器类声明
 
-#### 接入层
+```ts
+/**
+ * 操作符推断器
+ *
+ * 根据 dataType + semantic 确定"数据域"，再结合 mode（点/区间）和 quantity（单/多）确定"操作域"
+ */
+class OperatorInferrer {
+  infer(factor: RuleFactorDefinition): readonly FieldDataSource[];
+}
 
-- 缺少对外导出类型清单的显式声明
-- 缺少 `createWorkspace` 工厂函数与 `Builder` 的职责边界说明
+/**
+ * 阈值渲染组件属性推断器
+ *
+ * 根据 RuleFactorDefinition 推断中间形态的表单组件 + 表单组件属性
+ */
+class ThresholderInferrer {
+  infer(factor: RuleFactorDefinition, operator: string): ThresholdComponentProperties;
+}
 
-#### 基础设施层
-
-- 缺少 `RuleFactorResource` → `Resource` 转换的类型安全约束定义
-
-#### 应用层
-
-- 缺少 `AtomicRuleScheduler` 与领域层推断机制的内部协作协议
-- 缺少 `AtomicRuleGroupScheduler.factorOptions` 的推断逻辑来源说明
-- 缺少 `RuleWorkspaceScheduler` 生命周期管理方法（dispose）
-
-#### 领域层
-
-- 缺少 `operators` 推断函数签名的显式声明
-- 缺少 `thresholder` 推断函数签名的显式声明
-- 缺少 `factorOptions` 推断函数签名的显式声明
+/**
+ * 规则因子选项推断器
+ *
+ * 从全部规则因子列表中排除已使用的规则因子
+ */
+class FactorOptionsInferrer {
+  infer(
+    allFactors: readonly RuleFactorDefinition[],
+    usedFactorNames: ReadonlySet<string>
+  ): readonly FieldDataSource[];
+}
+```
 
 ## 业务方使用示例
 
