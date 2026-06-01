@@ -4,7 +4,7 @@
 
 ## 术语说明
 
-- **FieldResource**：DSL 层描述性声明，定义资源的特征和来源（详见 [规则因子描述](../spec.md)）
+- **FactorResource**：DSL 层描述性声明，定义资源的特征和来源（详见 [规则因子描述](../spec.md)）
 - **Resource**：运行时层封装实体，包含 Signal 和交互方法
 
 ## 技术栈

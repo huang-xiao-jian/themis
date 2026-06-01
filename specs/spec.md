@@ -2,7 +2,7 @@
 
 ## 业务目标
 
-基于 `json` 设计 `DSL` 用以描述 **规则因子** 语义化结构，**规则配置器** 通过解释 **规则因子描述** 提供可交互视图，用以配置业务规则。`DSL` 设计的核心在于 **规则配置器** 能构基于 **规则因子描述** 推断合适的 **表单控件**、**匹配操作符** 选择范围，以及正确的边界值约束条件
+基于 `json` 设计 `DSL` 用以描述 **规则因子** 语义化结构，**规则配置器** 通过解释 **规则因子描述** 提供可交互视图，用以配置业务规则。`DSL` 设计的核心在于 **规则配置器** 能构基于 **规则因子描述** 推断正确的 **匹配操作符**、**表单控件**、**边界值约束条件**
 
 ## 业务集成
 
@@ -17,7 +17,7 @@
 
 ## 规则因子描述设计
 
-### 基础信息
+### 标识信息 FactorAnnotation
 
 描述规则因子的元信息：
 
@@ -33,11 +33,9 @@
 }
 ```
 
-### 关联资源 FieldResource
+### 关联资源 FactorResource
 
-`FieldResource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构。
-
-**说明**：此处定义的是 DSL 结构，运行时 Resource 封装及详细类型请参考 [规则因子解释器](../interpreter.md)
+`FactorResource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构。
 
 ```ts
 interface FieldDataSource {
@@ -47,15 +45,15 @@ interface FieldDataSource {
 }
 ```
 
-静态 FieldResource 描述：
+静态 `FactorResource` 描述：
 
 - `name` 资源名称，具备唯一性
 - `options` 资源列表，遵循数据结构约束
 
-静态 FieldResource 接口声明：
+静态 `FactorResource` 接口声明：
 
 ```ts
-interface StaticFieldResource {
+interface StaticFactorResource {
   // 约定的资源名称
   name: string;
   // 预设的可选项
@@ -63,7 +61,7 @@ interface StaticFieldResource {
 }
 ```
 
-静态 FieldResource 案例：
+静态 FactorResource 案例：
 
 ```json
 {
@@ -77,30 +75,30 @@ interface StaticFieldResource {
 }
 ```
 
-**动态 FieldResource** 为从服务端下发的数据源，根据数据源特性区分亚型：
+**动态 FactorResource** 为从服务端下发的数据源，根据数据源特性区分亚型：
 
 - 是否分页输出
 - 是否支持关键词过滤
 
-动态 FieldResource 描述：
+动态 FactorResource 描述：
 
 - `name` 资源名称，具备唯一性，供应方约定
 - `features` 资源供应商支持的特性，例如：分页、关键词过滤
 
-动态 FieldResource 接口声明：
+动态 FactorResource 接口声明：
 
 ```ts
-type DynamicFieldResourceFeature = 'pagination' | 'filter';
+type DynamicFactorResourceFeature = 'pagination' | 'filter';
 
-interface DynamicFieldResource {
+interface DynamicFactorResource {
   // 约定的资源名称
   name: string;
   // 资源供应商支持的特性
-  features: DynamicFieldResourceFeature[];
+  features: DynamicFactorResourceFeature[];
 }
 ```
 
-动态 FieldResource 案例：
+动态 FactorResource 案例：
 
 ```json
 { "resource": { "name": "City" } }
@@ -115,7 +113,7 @@ interface DynamicFieldResource {
 }
 ```
 
-### 数据元属性
+### 数据元属性 FactorMetadata
 
 - `dataType` 原始数据类型，支持：`string` / `number` / `boolean`
 - `mode` 声明单点值或者区间值，支持：`point` / `range`
@@ -139,7 +137,7 @@ interface DynamicFieldResource {
 - `duration`
 - `percentage`
 
-### 数据约束与校验
+### 数据约束与校验 FactorConstraint
 
 `constraints` 用于定义边界值的校验规则
 
