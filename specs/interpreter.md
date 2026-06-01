@@ -1,50 +1,25 @@
 # 规则因子解释器
 
-规范解释器的实现机制，明确 `DSL` 从抽象到具现的转换过程
+规范解释器的实现机制，明确 `DSL` 从抽象到具体的转换机制
+
+## 前置依赖
+
+- [规则及规则因子描述](./spec.md)
 
 ## 术语说明
 
 - **FactorResource**：DSL 层描述性声明，定义资源的特征和来源（详见 [规则因子描述](../spec.md)）
-- **Resource**：运行时层封装实体，包含 Signal 和交互方法
-
-## 技术栈
-
-- [alien-signals](https://github.com/stackblitz/alien-signals) - `Signal Primitive`
-
-## 基础类型定义
-
-以下是解释器中引用的基础类型声明：
-
-```ts
-/**
- * 数据源选项结构
- */
-interface FieldDataSource {
-  label: string;
-  value: string | number;
-  disabled?: boolean;
-}
-
-/**
- * 分页结果结构
- */
-interface PaginatedResult<T = FieldDataSource> {
-  data: T[];
-  page: number;
-  pageSize: number;
-  total: number;
-}
-```
+- **Resource**：运行时层封装实体，包含 `Signal` 和交互方法
 
 ## Resource 设计
 
 ### Resource 设计目标
 
-`Resource` 封装为领域实体，屏蔽原始 `DSL` 定义与 `HTTP Fetcher` 等细节
+将原始 `FactorResource` 封装为 `Resource` 领域实体，屏蔽原始 `DSL` 定义与 **数据源获取** 等细节
 
 ### Resource 设计规范
 
-- 属性包含 `options` 响应式数据，使用 `Signal` 作为响应式实体
+- 选项采用 `Signal<FieldDataSource>` 响应式数据
 - 交互方法采用 `onXXX` 事件绑定风格
 
 ### Resource 封装
@@ -224,19 +199,19 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
 
 ## 推断表单组件 Intermediate Representation
 
-从 `DSL` 推断中间形态的表单组件 + 表单组件，便于适配器（框架 + 组件库）进行高效的实现
+从 `DSL` 推断中间形态的表单组件 + 表单组件属性，便于适配器（框架 + 组件库）进行高效的实现
 
 ```mermaid
 graph TD
-    Start(开始) --> CheckResource{资源声明?}
+    Start(开始) --> CheckFactorResource{资源声明?}
 
     %% 受限选项
-    CheckResource -- "yes" --> CheckResourceQuantity{关联数量?}
-    CheckResourceQuantity -- "single" --> SingleResourceCase[Select]
-    CheckResourceQuantity -- "multiple" --> MultipleResourceCase[MultipleSelect]
+    CheckFactorResource -- "yes" --> CheckFactorResourceQuantity{关联数量?}
+    CheckFactorResourceQuantity -- "single" --> SingleResourceCase[Select]
+    CheckFactorResourceQuantity -- "multiple" --> MultipleResourceCase[MultipleSelect]
 
     %% 非受限选项
-    CheckResource -- "no" --> CheckDataType{数据类型?}
+    CheckFactorResource -- "no" --> CheckDataType{数据类型?}
 
     %% boolean 类型
     CheckDataType -- "boolean" --> SwitchCase[Switch]
@@ -530,15 +505,6 @@ type ThresholdComponentProperties =
   | ListBuilderProperties
   | ListRangeBuilderProperties;
 ```
-
-### 表单组件与运行时 Resource 映射关系
-
-> 说明：以下映射关系表中的 Resource 指运行时层封装实体
-
-| 表单组件         | 关联 Resource 类型                             |
-| :--------------- | :--------------------------------------------- |
-| `Select`         | `StaticResource` / `ElementaryDynamicResource` |
-| `MultipleSelect` | `StaticResource` / `ElementaryDynamicResource` |
 
 ### 表单组件属性解构来源
 

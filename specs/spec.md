@@ -17,7 +17,7 @@
 
 ## 规则因子描述设计
 
-### 标识信息 FactorAnnotation
+### 标识信息 RuleFactorAnnotation
 
 描述规则因子的元信息：
 
@@ -33,9 +33,9 @@
 }
 ```
 
-### 关联资源 FactorResource
+### 关联资源 RuleFactorResource
 
-`FactorResource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构。
+`RuleFactorResource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构。
 
 ```ts
 interface FieldDataSource {
@@ -45,15 +45,15 @@ interface FieldDataSource {
 }
 ```
 
-静态 `FactorResource` 描述：
+静态资源描述：
 
 - `name` 资源名称，具备唯一性
 - `options` 资源列表，遵循数据结构约束
 
-静态 `FactorResource` 接口声明：
+静态资源接口声明：
 
 ```ts
-interface StaticFactorResource {
+interface StaticRuleFactorResource {
   // 约定的资源名称
   name: string;
   // 预设的可选项
@@ -61,7 +61,7 @@ interface StaticFactorResource {
 }
 ```
 
-静态 FactorResource 案例：
+静态资源案例：
 
 ```json
 {
@@ -75,30 +75,30 @@ interface StaticFactorResource {
 }
 ```
 
-**动态 FactorResource** 为从服务端下发的数据源，根据数据源特性区分亚型：
+**动态资源** 为从服务端下发的数据源，根据数据源特性区分亚型：
 
 - 是否分页输出
 - 是否支持关键词过滤
 
-动态 FactorResource 描述：
+动态 RuleFactorResource 描述：
 
 - `name` 资源名称，具备唯一性，供应方约定
 - `features` 资源供应商支持的特性，例如：分页、关键词过滤
 
-动态 FactorResource 接口声明：
+动态资源接口声明：
 
 ```ts
-type DynamicFactorResourceFeature = 'pagination' | 'filter';
+type DynamicRuleFactorResourceFeature = 'pagination' | 'filter';
 
-interface DynamicFactorResource {
+interface DynamicRuleFactorResource {
   // 约定的资源名称
   name: string;
   // 资源供应商支持的特性
-  features: DynamicFactorResourceFeature[];
+  features: DynamicRuleFactorResourceFeature[];
 }
 ```
 
-动态 FactorResource 案例：
+动态资源案例：
 
 ```json
 { "resource": { "name": "City" } }
@@ -113,7 +113,7 @@ interface DynamicFactorResource {
 }
 ```
 
-### 数据元属性 FactorMetadata
+### 数据元属性 RuleFactorMetadata
 
 - `dataType` 原始数据类型，支持：`string` / `number` / `boolean`
 - `mode` 声明单点值或者区间值，支持：`point` / `range`
@@ -137,7 +137,7 @@ interface DynamicFactorResource {
 - `duration`
 - `percentage`
 
-### 数据约束与校验 FactorConstraint
+### 数据约束与校验 RuleFactorConstraint
 
 `constraints` 用于定义边界值的校验规则
 
@@ -160,6 +160,25 @@ interface DynamicFactorResource {
 | :--------- | :--------- | :------- |
 | `minItems` | `multiple` | 最少数量 |
 | `maxItems` | `multiple` | 最大数量 |
+
+### 规则因子定义
+
+```ts
+interface RuleFactorDefinition {
+  name: string;
+  title: string;
+  description?: string;
+  dataType: 'string' | 'number' | 'boolean';
+  semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
+  mode?: 'point' | 'range';
+  quantity?: 'single' | 'multiple';
+  resource?: {
+    name: string;
+    features?: ('pagination' | 'filter')[];
+  };
+  constraints?: FieldConstraints;
+}
+```
 
 ## 规则配置
 

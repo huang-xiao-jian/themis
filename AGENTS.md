@@ -16,9 +16,9 @@
 
 ## 核心依赖
 
-- Signal Primitives: [alien-signals](https://github.com/stackblitz/alien-signals)
+- Signal Primitives: [@preact/signals-core](https://github.com/preactjs/signals/tree/main/packages/core)
 
-使用 `alien-signals` 前务必 **使用 context7 query-docs 获取使用文档及说明**，关键参数 `libraryId --> /stackblitz/alien-signals`
+使用 `@preact/signals-core` 前务必 **使用 context7 query-docs 获取使用文档及说明**
 
 ## 文档引用
 

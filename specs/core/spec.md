@@ -7,10 +7,6 @@
 - [规则及规则因子描述](../spec.md)
 - [规则因子解释器](../interpreter.md)
 
-## 技术栈
-
-使用 `Signal` 作为响应式原语，实现具体框架的解耦
-
 ## 设计目标
 
 - **框架无关**：内核实现与框架/组件库解耦，便于多框架、多终端适配
@@ -118,27 +114,6 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 ```
 
 **说明**：`StaticResource` 为静态资源，预设选项无需动态加载，由内核默认提供 `StaticFetcher`。`RuleFactorDefinition.resource.features` 为空数组时对应 `StaticResource`，包含 `pagination`/`filter` 时对应对应的 `DynamicResource` 类型
-
-### DSL 定义
-
-规则因子定义由 `RuleWorkspace` 持有，供 `AtomicRuleGroupScheduler` / `AtomicRuleScheduler` 共享：
-
-```ts
-interface RuleFactorDefinition {
-  name: string;
-  title: string;
-  description?: string;
-  dataType: 'string' | 'number' | 'boolean';
-  semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
-  mode?: 'point' | 'range';
-  quantity?: 'single' | 'multiple';
-  resource?: {
-    name: string;
-    features?: ('pagination' | 'filter')[];
-  };
-  constraints?: FieldConstraints;
-}
-```
 
 ### AtomicRuleScheduler
 
@@ -264,6 +239,8 @@ interface RuleWorkspaceScheduler {
   build(): readonly AtomicRuleGroup[];
 }
 ```
+
+特别说明：**规则因子定义由 `RuleWorkspace` 持有，供 `AtomicRuleGroupScheduler` / `AtomicRuleScheduler` 共享**
 
 ## 业务方使用示例
 
