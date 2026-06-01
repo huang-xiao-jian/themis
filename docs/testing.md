@@ -24,7 +24,7 @@
 ### 测试代码规范
 
 - `vitest` API 必须明确的导入，不依赖全局变量
-- `vitest` 测试用例描述必须使用全英语，不允许
+- `vitest` 测试用例描述必须使用全英语
 
 ```ts
 import { describe, expect, it, rstest } from 'vitest';
