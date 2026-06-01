@@ -11,25 +11,30 @@
 
 - **框架无关**：内核实现与框架/组件库解耦，便于多框架、多终端适配
 - **可测试性**：内核负责核心解释器、业务逻辑封装
+- **分层架构**：内核实现遵循领域驱动设计风格的分层架构
 
-## 核心边界
+## 设计约定
 
-- **导出级别**：`AtomicRuleGroup` / `AtomicRule`，业务方无法感知内部实现
-- **推断机制透明**：`Operator` 推断、`Component` 推断对业务方不可见
-- **Fetcher 由业务方提供**：通过 `provideXXXFetcher` 注入，内核管理响应式状态
+- 响应式状态管理基于 `@preact/signals-core`，看做运行时标准，不纳入内核分层架构范畴
+
+## 分层架构指引
+
+- 接入层：对外暴露类型安全的 `API` 协议，简化业务方实例化内核应用层的过程
+- 基础设施层：将原始 `RuleFactorResource` 转化为 `Resource` 实体，定义动态资源获取的 `Fetcher` 抽象，依赖业务方提供 `Fetcher` 实现
+- 应用层：编排领域逻辑，负责规则配置的数据、行为封装
+- 领域层：封装核心业务规则，包括规则推断机制、操作符映射逻辑、阈值属性计算逻辑。根据 `RuleFactorDefinition` 定义推断可用 `operators` 和 `thresholder`，以及 `AtomicRuleGroup` 级别的可选规则因子选项推断
 
 ## 协议设计
 
-### Fetcher 接口
+### 基础设施层
 
-业务方按场景组合提供 `Fetcher`（与 `DynamicResource` 类型对应），共 5 种类型：
+**特别说明**：`Resource` 实体的具体协议定义详见 [interpreter.md](../interpreter.md)，`StaticResource` 为静态资源，预设选项无需动态加载
+
+#### Fetcher 端口
+
+业务方按场景组合提供 `Fetcher`，作为具体的实现细节
 
 ```ts
-// 静态资源 Fetcher - 由内核默认提供，StaticResource 无需业务方注入
-interface StaticFetcher<T = FieldDataSource> {
-  fetch(): Promise<T[]>;
-}
-
 // 基础动态资源 Fetcher - 无分页、无过滤
 interface ElementaryFetcher<T = FieldDataSource> {
   fetch(): Promise<T[]>;
@@ -51,50 +56,20 @@ interface PaginatedFilterableFetcher<T = FieldDataSource> {
 }
 ```
 
-### provideXXXFetcher - 类型安全的 Fetcher 注入
+### 接入层
 
-通过 `provideXXXFetcher` 工厂函数创建注册项，返回 `FetcherProvider` 类型：
+#### Fetcher 工厂函数
+
+通过 `provideXXXFetcher` 工厂函数创建类型安全的 `Fetcher` 注册项：
 
 ```ts
 interface FetcherProvider<T extends FieldDataSource> {
-  /** fetcher 实例 */
   readonly fetcher:
-    | StaticFetcherProvider<T>
     | ElementaryFetcher<T>
     | PaginatedFetcher<T>
     | FilterableFetcher<T>
     | PaginatedFilterableFetcher<T>;
 }
-
-/** 静态资源 Fetcher Provider - 由内核默认提供，业务方无需注入 */
-interface StaticFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
-  readonly fetcher: StaticFetcher<T>;
-}
-
-/** 基础动态资源 Fetcher Provider */
-interface ElementaryFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
-  readonly fetcher: ElementaryFetcher<T>;
-}
-
-/** 分页动态资源 Fetcher Provider */
-interface PaginatedFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
-  readonly fetcher: PaginatedFetcher<T>;
-}
-
-/** 过滤动态资源 Fetcher Provider */
-interface FilterableFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
-  readonly fetcher: FilterableFetcher<T>;
-}
-
-/** 分页+过滤动态资源 Fetcher Provider */
-interface PaginatedFilterableFetcherProvider<T extends FieldDataSource> extends FetcherProvider<T> {
-  readonly fetcher: PaginatedFilterableFetcher<T>;
-}
-
-/** 静态资源 Fetcher Provider - 由内核默认提供，业务方无需注入，不对外导出 */
-function provideStaticFetcher<T extends FieldDataSource>(
-  fetcher: StaticFetcher<T>
-): StaticFetcherProvider<T>;
 
 function provideElementaryFetcher<T extends FieldDataSource>(
   fetcher: ElementaryFetcher<T>
@@ -113,11 +88,22 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 ): PaginatedFilterableFetcherProvider<T>;
 ```
 
-**说明**：`StaticResource` 为静态资源，预设选项无需动态加载，由内核默认提供 `StaticFetcher`。`RuleFactorDefinition.resource.features` 为空数组时对应 `StaticResource`，包含 `pagination`/`filter` 时对应对应的 `DynamicResource` 类型
+#### Builder Pattern 入口
 
-### AtomicRuleScheduler
+```ts
+class RuleWorkspaceBuilder {
+  withFactors(factors: RuleFactorDefinition[]): RuleWorkspaceBuilder;
+  withFetchers(fetchers: readonly FetcherProvider[]): RuleWorkspaceBuilder;
+  withRuleGroups(ruleGroups: readonly AtomicRuleGroup[]): RuleWorkspaceBuilder;
+  build(): RuleWorkspaceScheduler;
+}
+```
 
-原子规则设置器集成推断机制，使用 Signal 固化状态：
+### 应用层
+
+#### AtomicRuleScheduler
+
+原子规则设置器集成推断机制：
 
 ```ts
 /** 表单字段标识 */
@@ -173,7 +159,7 @@ interface AtomicRuleScheduler {
 }
 ```
 
-### AtomicRuleGroupScheduler
+#### AtomicRuleGroupScheduler
 
 规则组设置器管理原子规则集合：
 
@@ -188,7 +174,7 @@ interface AtomicRuleGroupScheduler {
   /** 规则组唯一标识 */
   readonly id: string;
   /** 已配置的原子规则列表，仅在编辑场景 */
-  readonly snapshot: readonly AtomicRule[];
+  readonly snapshots: readonly AtomicRule[];
   /** 已创建的规则实例列表 */
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
   /** 可用的规则因子列表 */
@@ -207,25 +193,14 @@ interface AtomicRuleGroupScheduler {
 }
 ```
 
-### RuleWorkspace - 统一入口
+#### RuleWorkspaceScheduler
 
-使用 `Builder Pattern` 实例化：
+统一入口，持有规则因子定义供调度器共享：
 
 ```ts
-class RuleWorkspaceSchedulerBuilder {
-  /** 添加规则因子定义 */
-  withFactors(factors: RuleFactorDefinition[]): RuleWorkspaceBuilder;
-  /** 添加 Fetcher */
-  withFetchers(fetchers: readonly FetcherProvider[]): RuleWorkspaceBuilder;
-  /** 添加已有规则组（编辑场景可选） */
-  withRuleGroups(ruleGroups: readonly AtomicRuleGroup[]): RuleWorkspaceBuilder;
-  /** 构建 RuleWorkspace 实例 */
-  build(): RuleWorkspace;
-}
-
 interface RuleWorkspaceScheduler {
   /** 已创建的规则组列表，仅在编辑场景 */
-  readonly snapshot: readonly AtomicRuleGroup[];
+  readonly snapshots: readonly AtomicRuleGroup[];
   /** 已创建的规则组实例列表 */
   readonly groups: Signal<readonly AtomicRuleGroupScheduler[]>;
 
@@ -240,7 +215,35 @@ interface RuleWorkspaceScheduler {
 }
 ```
 
-特别说明：**规则因子定义由 `RuleWorkspace` 持有，供 `AtomicRuleGroupScheduler` / `AtomicRuleScheduler` 共享**
+### 领域层
+
+**核心推断逻辑**：
+
+- `AtomicRule` 级别根据 `RuleFactorDefinition` 推断可用 `operators` 和 `thresholder`，参考 [规则因子解释器](../interpreter.md) 中的推断机制
+- `AtomicRuleGroup` 级别的规则因子选项推断，参考 [规则及规则因子描述](../spec.md) 中的规则配置约束章节
+
+### 缺失内容分析
+
+#### 接入层
+
+- 缺少对外导出类型清单的显式声明
+- 缺少 `createWorkspace` 工厂函数与 `Builder` 的职责边界说明
+
+#### 基础设施层
+
+- 缺少 `RuleFactorResource` → `Resource` 转换的类型安全约束定义
+
+#### 应用层
+
+- 缺少 `AtomicRuleScheduler` 与领域层推断机制的内部协作协议
+- 缺少 `AtomicRuleGroupScheduler.factorOptions` 的推断逻辑来源说明
+- 缺少 `RuleWorkspaceScheduler` 生命周期管理方法（dispose）
+
+#### 领域层
+
+- 缺少 `operators` 推断函数签名的显式声明
+- 缺少 `thresholder` 推断函数签名的显式声明
+- 缺少 `factorOptions` 推断函数签名的显式声明
 
 ## 业务方使用示例
 
