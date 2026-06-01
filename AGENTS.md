@@ -22,5 +22,6 @@
 
 ## 文档引用
 
+- [document](./docs/document.md) 文档编写规范，修改或生成文档前必须理解
 - [projects](./docs/projects.md) 项目功能拆分，包拆分
 - [testing](./docs/testing.md) 自动化测试规范与指引
