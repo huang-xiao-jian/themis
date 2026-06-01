@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      alien-signals:
-        specifier: ^3.2.1
-        version: 3.2.1
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -27,6 +23,9 @@ importers:
       prettier-plugin-packagejson:
         specifier: ^3.0.0
         version: 3.0.0(prettier@3.8.1)
+      skills:
+        specifier: ^1.5.9
+        version: 1.5.9
       tsdown:
         specifier: ^0.22.1
         version: 0.22.1(typescript@6.0.3)
@@ -1019,9 +1018,6 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  alien-signals@3.2.1:
-    resolution: {integrity: sha512-I8FjmltrfnDFoZedi5CG8DghVYNhzb/Ijluz7tCSJH0xpd0484Kowhbb1XDYOxfJpU1p5wnM2X54dA+IfGyD1g==}
-
   ansis@4.3.0:
     resolution: {integrity: sha512-44mvgtPvohuU/70DdY5Oz2AIrLJ9k6/5x4KmoSvPwO+5Moijo0+N9D0fKbbYZQWP1hNm5CpOf+E01jhxG/r8xg==}
     engines: {node: '>=14'}
@@ -1367,6 +1363,11 @@ packages:
   sirv@3.0.2:
     resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
     engines: {node: '>=18'}
+
+  skills@1.5.9:
+    resolution: {integrity: sha512-BjxnhlIy5IrQ30q1nGgNDSf4gy84iNA2o4Ieq4im/HsRvOjGtqvDNpb/xx15FZryXMnAPeDUWqU1ndPRQ0IyOQ==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   sort-object-keys@2.1.0:
     resolution: {integrity: sha512-SOiEnthkJKPv2L6ec6HMwhUcN0/lppkeYuN1x63PbyPRrgSPIuBJCiYxYyvWRTtjMlOi14vQUCGUJqS6PLVm8g==}
@@ -2432,8 +2433,6 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  alien-signals@3.2.1: {}
-
   ansis@4.3.0: {}
 
   antd@6.4.3(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
@@ -2826,6 +2825,10 @@ snapshots:
       mrmime: 2.0.1
       totalist: 3.0.1
 
+  skills@1.5.9:
+    dependencies:
+      yaml: 2.8.3
+
   sort-object-keys@2.1.0: {}
 
   sort-package-json@3.6.0:
@@ -3046,5 +3049,4 @@ snapshots:
 
   xmlchars@2.2.0: {}
 
-  yaml@2.8.3:
-    optional: true
+  yaml@2.8.3: {}
