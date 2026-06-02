@@ -32,3 +32,7 @@ enum Colors {
 - 倾向于编写功能单一的小类，公有方法数量少于 5 个，属性数量少于 10 个
 - `Class` 文件命名使用 `pascal case` (e.g. `UserRepository.ts`)
 - `Function` 文件命名使用 `Camel Case` (e.g. `findDiscountRule.ts`)
+
+### 代码格式
+
+- 无格式要求，调整代码过程中，不进行任何格式上的调整
