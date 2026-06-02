@@ -6,7 +6,7 @@
 
 ## 设计规范
 
-- 对于无法从表单组件属性推断的配置（如尺寸策略、placeholder 模板等），通过抽象配置对象 `SisyphusAntdConfig` 集中管理，由 `SisyphusAntdProvider` 注入
+- 对于无法从表单组件属性推断的配置（如尺寸策略、`placeholder` 模板等），通过抽象配置对象 `SisyphusAntdConfig` 集中管理，由 `SisyphusAntdProvider` 注入
 - 对于 `antd` 原生支持的配置内容（例如：主题、国际化），不要纳入抽象配置对象管理，由业务方自行负责
 
 ## 组件映射
@@ -15,7 +15,8 @@
 
 | 表单组件         | antd 实现                      | 说明             |
 | :--------------- | :----------------------------- | :--------------- |
-| `Input`          | `Input`                        | 单行输入         |
+| `Input`          | `Input`                        | 单行文本输入     |
+| `InputNumber`    | `InputNumber`                  | 数值输入         |
 | `TextArea`       | `Input.TextArea`               | 多行输入         |
 | `Switch`         | `Switch`                       | 开关             |
 | `Select`         | `Select`                       | 单选             |
@@ -49,16 +50,31 @@ graph TD
 | :---------------- | :------------ |
 | `name`            | `name`        |
 | `title`           | `label`       |
-| `dataType`        | `type`        |
 | `constraints.min` | `minLength`   |
 | `constraints.max` | `maxLength`   |
 
 **推断规则**：
 
-- `dataType='number'` 时，`type='number'`；否则 `type='text'`
-- `maxLength > 100` 时，映射为 `TextAreaProperties`
+- 仅处理 `dataType='string'` 场景，`maxLength > 100` 时映射为 `TextAreaProperties`
 
 **隐式继承**：`size`, `placeholder`, `allowClear`
+
+#### InputNumber → InputNumber
+
+| 表单组件属性            | antd 组件属性 |
+| :---------------------- | :------------ |
+| `name`                  | `name`        |
+| `title`                 | `label`       |
+| `constraints.min`       | `min`         |
+| `constraints.max`       | `max`         |
+| `constraints.step`      | `step`        |
+| `constraints.precision` | `precision`   |
+
+**推断规则**：
+
+- `dataType='number'` + `mode='point'` + `quantity='single'` 时推断为 `InputNumber`
+
+**隐式继承**：`size`, `placeholder`
 
 #### TextArea → Input.TextArea
 
@@ -176,10 +192,11 @@ graph TD
 
 **列表项组件映射**：
 
-| item.type  | antd 组件                            | 说明     |
-| :--------- | :----------------------------------- | :------- |
-| `'Input'`  | `Input`                              | 单行输入 |
-| `'Picker'` | 按 `item.semantic` 映射（见 Picker） | 选择器   |
+| item.type       | antd 组件                            | 说明         |
+| :-------------- | :----------------------------------- | :----------- |
+| `'Input'`       | `Input`                              | 单行文本输入 |
+| `'InputNumber'` | `InputNumber`                        | 数值输入     |
+| `'Picker'`      | 按 `item.semantic` 映射（见 Picker） | 选择器       |
 
 **数量约束映射**：
 

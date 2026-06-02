@@ -26,6 +26,29 @@
 - 编辑器组件与原始 `DSL` 无关联关系，仅消费 `@sisyphus/core` 提供的调度器
 - 编辑器组件通过 `View` 后缀
 
+### Signal 响应式集成
+
+编辑器组件通过 `@preact/signals-react` 实现 Signal 到 React 的响应式更新。采用手动 `useSignals()` 方式启用信号追踪：
+
+```tsx
+import { useSignals } from '@preact/signals-react/runtime';
+
+function EditorComponent({ scheduler }: EditorComponentProps): ReactElement {
+  // 必须在组件顶部调用，启用 Signal 依赖追踪
+  useSignals();
+
+  // 读取 Signal.value 时，组件会自动订阅变更并重渲染
+  const value = scheduler.someSignal.value;
+  // ...
+}
+```
+
+**重要约定**：
+
+- 所有读取 `Signal.value` 的组件必须在函数体顶部调用 `useSignals()`
+- 不依赖 Babel transform，确保在任何构建工具下均可正常工作
+- `useSignals()` 必须在任何 `Signal.value` 读取之前调用
+
 ## 分层架构
 
 - **接入层**：对外暴露业务方直接使用的组件与 `API`，封装内部编辑器组件的实现细节，简化业务方接入成本
