@@ -13,7 +13,7 @@ importers:
         version: 22.19.19
       '@vitest/ui':
         specifier: ^3.0.0
-        version: 3.2.4(vitest@3.2.6)
+        version: 3.2.6(vitest@3.2.6)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -46,7 +46,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^3.0.0
-        version: 3.2.6(@types/node@22.19.19)(@vitest/ui@3.2.4)(jsdom@29.1.1)(yaml@2.9.0)
+        version: 3.2.6(@types/node@22.19.19)(@vitest/ui@3.2.6)(jsdom@29.1.1)(yaml@2.9.0)
 
   packages/antd:
     dependencies:
@@ -91,9 +91,6 @@ importers:
       react:
         specifier: ^19.0.0
         version: 19.2.6
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.6(react@19.2.6)
     devDependencies:
       '@testing-library/react':
         specifier: ^16.0.0
@@ -104,6 +101,9 @@ importers:
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.15
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.6(react@19.2.6)
 
 packages:
 
@@ -1077,9 +1077,6 @@ packages:
       vite:
         optional: true
 
-  '@vitest/pretty-format@3.2.4':
-    resolution: {integrity: sha512-IVNZik8IVRJRTr9fxlitMKeJeXFFFN0JaB9PHPGQ8NKQbGpfjlTx9zO4RefN8gp7eqjNy8nyK3NZmBzOPeIxtA==}
-
   '@vitest/pretty-format@3.2.6':
     resolution: {integrity: sha512-lb7XXXzmm2h2ASzFnRvQpDo6onT1NmMJA3tkGTWiBFtRJ9lxGY3d3mm/Apt36gej2bkkOVLL/yTOtufDaFa/jA==}
 
@@ -1092,13 +1089,10 @@ packages:
   '@vitest/spy@3.2.6':
     resolution: {integrity: sha512-oq6BbH68WzcWmwtBrU9nqLeaXTR4XwJF7FSLkKEZo4i6eoXcrxjcwSuTvWBIRUTC6VC72nXYunzqgZA+IKdtxg==}
 
-  '@vitest/ui@3.2.4':
-    resolution: {integrity: sha512-hGISOaP18plkzbWEcP/QvtRW1xDXF2+96HbEX6byqQhAUbiS5oH6/9JwW+QsQCIYON2bI6QZBF+2PvOmrRZ9wA==}
+  '@vitest/ui@3.2.6':
+    resolution: {integrity: sha512-mATfG3zVdhobE9U1rIpvtYD3DGuSSxqZ3Aj/8ityGqKXy8YDJ9BoAjZmAz6dZ1IZ1xI5V+MerkCczvVa+3QK9Q==}
     peerDependencies:
-      vitest: 3.2.4
-
-  '@vitest/utils@3.2.4':
-    resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
+      vitest: 3.2.6
 
   '@vitest/utils@3.2.6':
     resolution: {integrity: sha512-lI23nIs4bnT3T8NIoh+vFaz5s2/DdP0Jgt2jxwgWljvwn82cLJtyi/If+fjFyoLMGIOz0U/fKvWE0d4jsNQEfg==}
@@ -2719,10 +2713,6 @@ snapshots:
     optionalDependencies:
       vite: 7.3.3(@types/node@22.19.19)(yaml@2.9.0)
 
-  '@vitest/pretty-format@3.2.4':
-    dependencies:
-      tinyrainbow: 2.0.0
-
   '@vitest/pretty-format@3.2.6':
     dependencies:
       tinyrainbow: 2.0.0
@@ -2743,22 +2733,16 @@ snapshots:
     dependencies:
       tinyspy: 4.0.4
 
-  '@vitest/ui@3.2.4(vitest@3.2.6)':
+  '@vitest/ui@3.2.6(vitest@3.2.6)':
     dependencies:
-      '@vitest/utils': 3.2.4
+      '@vitest/utils': 3.2.6
       fflate: 0.8.3
       flatted: 3.4.2
       pathe: 2.0.3
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 2.0.0
-      vitest: 3.2.6(@types/node@22.19.19)(@vitest/ui@3.2.4)(jsdom@29.1.1)(yaml@2.9.0)
-
-  '@vitest/utils@3.2.4':
-    dependencies:
-      '@vitest/pretty-format': 3.2.4
-      loupe: 3.2.1
-      tinyrainbow: 2.0.0
+      vitest: 3.2.6(@types/node@22.19.19)(@vitest/ui@3.2.6)(jsdom@29.1.1)(yaml@2.9.0)
 
   '@vitest/utils@3.2.6':
     dependencies:
@@ -3464,7 +3448,7 @@ snapshots:
       fsevents: 2.3.3
       yaml: 2.9.0
 
-  vitest@3.2.6(@types/node@22.19.19)(@vitest/ui@3.2.4)(jsdom@29.1.1)(yaml@2.9.0):
+  vitest@3.2.6(@types/node@22.19.19)(@vitest/ui@3.2.6)(jsdom@29.1.1)(yaml@2.9.0):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/expect': 3.2.6
@@ -3491,7 +3475,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 22.19.19
-      '@vitest/ui': 3.2.4(vitest@3.2.6)
+      '@vitest/ui': 3.2.6(vitest@3.2.6)
       jsdom: 29.1.1
     transitivePeerDependencies:
       - jiti

@@ -23,11 +23,16 @@
   "devDependencies": {
     "@testing-library/react": "^16.0.0",
     "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0"
+    "@types/react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "peerDependencies": {
     "@preact/signals-react": ">=3.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@preact/signals-react": {
+      "optional": true
+    }
   }
 }
