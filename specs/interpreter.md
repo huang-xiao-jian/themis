@@ -174,7 +174,7 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
 
 ## 推断规则因子 Operator
 
-推断逻辑：根据 `dataType` + `semantic` 确定“数据域”，再结合 `mode`（点/区间）和 `quantity`（单/多）确定“操作域”，从而锁定可用的 `operator` 列表
+推断逻辑：仅根据 `dataType` 确定“数据域”，再结合 `mode`（点/区间）与 `quantity`（单/多）确定“操作域”，从而锁定可用的 `operator` 列表。`semantic` 作为 `dataType` 的精细化扩充，**当前阶段不参与 `operator` 推断**。
 
 ### 数据类型推断 DataType
 
@@ -187,17 +187,6 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
 | string   | point | single   | `=`, `≠`, `contains`, `within`, `starts_with`, `ends_with`        |
 | string   | point | multiple | `in`, `not in`                                                    |
 | boolean  | point | single   | `is`                                                              |
-
-### 场景类型推断 Semantic
-
-以下 `Semantic` 本质上遵循 `dataType=number` 的 `operator` 推断逻辑：
-
-- `rate`
-- `date`
-- `time`
-- `datetime`
-- `duration`
-- `percentage`
 
 ## 推断表单组件 Intermediate Representation
 
