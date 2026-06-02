@@ -1,35 +1,77 @@
 # @sisyphus/react
 
-作为 **框架适配层**，负责将内核提供的表单组件属性渲染为具体的 UI 组件。组件推断逻辑由 `@sisyphus/core` 负责，渲染层仅关注属性解释与组件渲染。
+作为 **框架适配层**，负责将内核 `@sisyphus/core` 提供的 **封装逻辑** 代理渲染为具体的 `UI` 组件
 
 ## 前置依赖
 
-- [内核设计](../core/spec.md)
-- [表单组件设计](../interpreter.md)
+- [规则及规则因子描述](../spec.md)
+- [规则因子解释器](../interpreter.md)
+- [规则配置内核](../core/spec.md)
 
 ## 技术栈
 
 - [react19](https://github.com/facebook/react)
+- [@preact/signals-react](https://github.com/preactjs/signals/tree/main/packages/react) Signal binding
 
 ## 设计目标
 
-- 明确组件库适配协议
-- 明确编辑器组件渲染机制
+- **明确组件库适配协议**：定义框架与组件库适配包之间的契约
+- **明确编辑器组件渲染机制**：通过插件代理机制解耦框架与具体 `UI` 实现
+- **明确分层架构**：区分业务方直接使用的接入层与内部组件实现的应用层
+- **沿用 Composition Pattern**：通过组合而非继承组织编辑器组件层级结构
 
-## 编辑器组件
+## 设计约定
 
-渲染机制：使用组件代理机制，`@sisyphus/react` 内部实现编辑器组件，通过插件协议进行代理渲染
+- 响应式集成基于 `@preact/signals-react`，作为运行时标准，不纳入分层架构范畴，编辑器组件直接消费 `Signal`
+- 编辑器组件与原始 `DSL` 无关联关系，仅消费 `@sisyphus/core` 提供的调度器
+- 编辑器组件通过 `View` 后缀
 
-### 编辑器组件设计目标
+## 分层架构
 
-明确 **编辑器组件** 的属性，用于插件协议注册的组件和渲染器工厂，定义规则编辑视图层级的结构。
+- **接入层**：对外暴露业务方直接使用的组件与 `API`，封装内部编辑器组件的实现细节，简化业务方接入成本
+- **应用层**：定义编辑器组件协议与渲染机制，通过插件协议与组件库适配包协同完成实际渲染
 
-### 编辑器组件设计规范
+```mermaid
+graph TB
+  subgraph AccessLayer[Receptionist Layer]
+    WorkspaceEditor
+    SisyphusScopeProvider
+    createSisyphusScope
+  end
 
-- 编辑器组件与原始 `DSL` 无关联关系
-- 编辑器组件通过 `View` 后缀与表单组件区分
+  subgraph ApplicationLayer[Application Layer]
+    subgraph EditorComponents[Editor Components]
+      AtomicRuleView
+      AtomicRuleGroupView
+      RuleWorkspaceView
+    end
 
-### AtomicRuleView - 原子规则编辑组件
+    subgraph RenderingProtocol[Rendering Protocol]
+      ComponentRenderer
+      ComponentRendererRegistry
+      SisyphusPlugin
+    end
+  end
+
+  WorkspaceEditor --> RuleWorkspaceView
+  RuleWorkspaceView --> AtomicRuleGroupView
+  AtomicRuleGroupView --> AtomicRuleView
+
+  createSisyphusScope --> SisyphusPlugin
+  SisyphusPlugin --> ComponentRendererRegistry
+  ComponentRendererRegistry --> ComponentRenderer
+  SisyphusScopeProvider --> ComponentRenderer
+```
+
+### 应用层
+
+应用层负责定义编辑器组件协议与渲染机制，编辑器组件本身不持有具体 `UI` 实现，由组件库适配包通过插件协议注册具体实现。
+
+#### 编辑器组件
+
+编辑器组件作为规则编辑视图层级的最小结构单元，用于插件协议注册的组件和渲染器工厂。
+
+##### AtomicRuleView - 原子规则编辑组件
 
 整合 `name`、`operator`、`threshold` 的完整原子规则编辑器，作为规则配置的最小编辑单元：
 
@@ -42,7 +84,7 @@ interface AtomicRuleViewProperties {
 }
 ```
 
-### AtomicRuleGroupView - 规则组编辑组件
+##### AtomicRuleGroupView - 规则组编辑组件
 
 管理多个原子规则编辑器，用于组织同一层级的规则集合：
 
@@ -55,7 +97,7 @@ interface AtomicRuleGroupViewProperties {
 }
 ```
 
-### RuleWorkspaceView - 工作空间编辑组件
+##### RuleWorkspaceView - 工作空间编辑组件
 
 管理多个规则组编辑器，作为规则配置的顶层容器：
 
@@ -68,22 +110,7 @@ interface RuleWorkspaceViewProperties {
 }
 ```
 
-### WorkspaceEditor - 业务方入口组件
-
-`WorkspaceEditor` 是业务方直接使用的顶层组件，封装了内部编辑器组件的实现细节：
-
-```ts
-interface WorkspaceEditorProps {
-  /** 工作空间实例 */
-  workspace: RuleWorkspaceScheduler;
-}
-
-function WorkspaceEditor(props: WorkspaceEditorProps): React.ReactElement;
-```
-
-**说明**：`WorkspaceEditor` 内部渲染 `RuleWorkspaceView`，业务方无需感知具体的编辑器组件实现
-
-### 编辑器组件属性类型别名
+##### 编辑器组件属性类型别名
 
 ```ts
 type EditorComponentProperties =
@@ -92,9 +119,11 @@ type EditorComponentProperties =
   | RuleWorkspaceViewProperties;
 ```
 
-## 插件协议
+#### 渲染机制
 
-采用 `SisyphusPlugin` 协议定义框架与组件适配包之间的契约：
+采用组件代理机制：`@sisyphus/react` 仅定义编辑器组件的属性协议与渲染契约，具体的 UI 实现由组件库适配包通过 `SisyphusPlugin` 协议注册。
+
+##### ComponentRendererRegistry - 渲染器注册表
 
 ```ts
 /** 编辑器组件渲染器注册表 */
@@ -108,18 +137,30 @@ interface ComponentRendererRegistry {
 }
 ```
 
+##### ComponentRenderer - 渲染器协议
+
+```ts
+interface ComponentRenderer {
+  /** 渲染编辑器组件属性 */
+  render(props: EditorComponentProperties): React.ReactElement;
+}
+```
+
+##### SisyphusContext - 插件上下文
+
 ```ts
 /** Sisyphus 上下文（插件可访问） */
 interface SisyphusContext {
   /** 组件渲染器注册表 */
   readonly registry: ComponentRendererRegistry;
 }
+```
 
-interface ComponentRenderer {
-  /** 渲染编辑器组件属性 */
-  render(props: EditorComponentProperties): React.ReactElement;
-}
+##### SisyphusPlugin - 插件协议
 
+定义框架与组件适配包之间的契约，由组件库适配包（如 `@sisyphus/antd`）实现：
+
+```ts
 /** 组件渲染器插件 */
 interface SisyphusPlugin {
   /** 插件名称 */
@@ -127,7 +168,22 @@ interface SisyphusPlugin {
   /** 安装插件 */
   install(context: SisyphusContext): void;
 }
+```
 
+**组件库适配层职责**：
+
+- 注册编辑器组件实现（`AtomicRuleView`、`AtomicRuleGroupView`、`RuleWorkspaceView`）
+- 实现表单组件渲染（`Thresholder`）
+
+### 接入层
+
+接入层封装应用层的实现细节，对业务方暴露最少认知成本的 `API`：业务方仅需感知 `WorkspaceEditor`、`SisyphusScopeProvider` 与 `createSisyphusScope`
+
+#### createSisyphusScope - 创建应用实例
+
+通过 `createSisyphusScope` 工厂函数创建 `SisyphusScope` 实例，业务方通过传入插件列表完成组件库的注册：
+
+```ts
 /** Sisyphus 实例化参数 */
 interface SisyphusScopeOptions {
   /** 安装组件渲染器插件 */
@@ -143,7 +199,9 @@ interface SisyphusScope {
 function createSisyphusScope(options: SisyphusScopeOptions): SisyphusScope;
 ```
 
-### SisyphusScopeProvider - 作用域提供者
+#### SisyphusScopeProvider - 作用域提供者
+
+将 `SisyphusScope` 注入 `React` 上下文，供内部编辑器组件通过 `Hook` 获取渲染器：
 
 ```ts
 interface SisyphusScopeProviderProps {
@@ -152,126 +210,40 @@ interface SisyphusScopeProviderProps {
   /** 子元素 */
   children: React.ReactNode;
 }
+
+function SisyphusScopeProvider(props: SisyphusScopeProviderProps): React.ReactElement;
 ```
+
+#### WorkspaceEditor - 业务方入口组件
+
+`WorkspaceEditor` 是业务方直接使用的顶层组件，封装了内部编辑器组件的实现细节：
+
+```ts
+import { RuleWorkspaceScheduler } from '../core/spec.md';
+
+interface WorkspaceEditorProps {
+  /** 工作空间实例 */
+  workspace: RuleWorkspaceScheduler;
+}
+
+function WorkspaceEditor(props: WorkspaceEditorProps): React.ReactElement;
+```
+
+**说明**：`WorkspaceEditor` 内部渲染 `RuleWorkspaceView`，业务方无需感知具体的编辑器组件实现。
 
 ## 技术支持
 
 ### useSisyphusScope - 获取作用域实例
 
+供编辑器组件从 `React` 上下文中获取 `SisyphusScope`，进而取到 `ComponentRenderer` 进行代理渲染：
+
 ```ts
 function useSisyphusScope(): SisyphusScope;
 ```
 
-### useSignal - 响应式状态 Hook
-
-将 `alien-signals` 的 `Signal` 转换为 `React` 响应式状态，自动订阅 `Signal` 变化并触发组件重渲染：
-
-```ts
-import { type Signal } from 'alien-signals';
-
-/**
- * 将 Signal 转换为 React 可用的状态
- * @param signal - alien-signals 的 Signal 实例
- * @returns Signal 的当前值，Signal 变化时自动触发重渲染
- */
-function useSignal<T>(signal: Signal<T>): T;
-```
-
-**使用场景**：订阅 Scheduler 的 Signal 属性（如 `name`、`operator`、`threshold`），用于表单控件绑定：
-
-```tsx
-interface AtomicRuleViewProperties {
-  readonly type: 'AtomicRuleView';
-  readonly scheduler: AtomicRuleScheduler;
-}
-
-function AtomicRuleView({ scheduler }: AtomicRuleViewProperties) {
-  const name = useSignal(scheduler.name);
-  const operator = useSignal(scheduler.operator);
-  const threshold = useSignal(scheduler.threshold);
-  const thresholder = useSignal(scheduler.thresholder);
-
-  return <div>{/* 渲染 name 选择器、operator 选择器、threshold 控件 */}</div>;
-}
-```
-
-### useComputed - 计算属性 Hook
-
-基于 Signal 创建计算属性，自动追踪依赖并在依赖变化时重新计算：
-
-```ts
-import { type Signal, type Computed } from 'alien-signals';
-
-/**
- * 将 Computed 转换为 React 可用的值
- * @param computed - alien-signals 的 Computed 实例
- * @returns 计算后的当前值，依赖 Signal 变化时自动重新计算并触发重渲染
- */
-function useComputed<T>(computed: Computed<T>): T;
-```
-
-**使用场景**：派生编辑器组件的展示状态，如判断配置是否完整：
-
-```tsx
-function AtomicRuleView({ scheduler }: AtomicRuleViewProperties) {
-  // 基础状态
-  const name = useSignal(scheduler.name);
-  const operator = useSignal(scheduler.operator);
-  const threshold = useSignal(scheduler.threshold);
-
-  // 计算属性：配置是否完整
-  const isComplete = useComputed(
-    () => scheduler.factor() !== null && name() !== null && operator() !== null
-  );
-
-  return <div className={isComplete ? 'complete' : 'incomplete'}>{/* 渲染控件 */}</div>;
-}
-```
-
-### useEffectScope - 副作用作用域 Hook
-
-管理副作用的生命周期，自动清理 Effect：
-
-```ts
-import { type EffectScope } from 'alien-signals';
-
-/**
- * 创建 Effect 作用域，组件卸载时自动停止所有 Effect
- * @returns EffectScope 实例，用于注册副作用
- */
-function useEffectScope(): EffectScope;
-```
-
-**使用场景**：与后端同步、订阅外部数据源等需要清理的场景：
-
-```tsx
-function WorkspaceEditor({ workspace }: WorkspaceEditorProps) {
-  const scope = useEffectScope();
-
-  // 注册 Effect：自动同步到后端
-  scope.run(() => {
-    effect(() => {
-      const groups = workspace.groups();
-      // 同步逻辑
-    });
-  });
-
-  return <RuleWorkspaceView scheduler={workspace} />;
-}
-```
-
-**说明**：`useEffectScope` 在组件卸载时自动停止所有注册的 Effect，避免内存泄漏
-
-### 组件库适配层职责
-
-组件库适配包（如 `@sisyphus/antd`）负责：
-
-- 注册编辑器组件实现（`AtomicRuleView`、`AtomicRuleGroupView`、`RuleWorkspaceView`）
-- 实现表单组件渲染（`Thresholder`）
-
 ## 使用示例
 
-业务方仅感知 `WorkspaceEditor` 层级，通过 `SisyphusScopeProvider` 注入渲染器：
+业务方仅感知接入层 `API`：通过 `createSisyphusScope` 创建实例、`SisyphusScopeProvider` 注入作用域、`WorkspaceEditor` 渲染顶层编辑器：
 
 ```tsx
 import { SisyphusScopeProvider, WorkspaceEditor, createSisyphusScope } from '@sisyphus/react';
