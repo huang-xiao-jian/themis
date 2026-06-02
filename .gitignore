@@ -177,3 +177,6 @@ dist/
 
 # husky
 .husky/_
+
+*storybook.log
+storybook-static
