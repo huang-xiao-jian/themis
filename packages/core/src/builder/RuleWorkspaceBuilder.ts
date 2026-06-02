@@ -43,11 +43,6 @@ export class RuleWorkspaceBuilder {
       new DefaultDynamicResourceFactory(registry)
     );
     const thresholderInferrer = new ThresholderInferrer(resourceFactory);
-    return new RuleWorkspaceScheduler(
-      this.factors,
-      this.fetchers,
-      thresholderInferrer,
-      this.ruleGroups
-    );
+    return new RuleWorkspaceScheduler(this.factors, thresholderInferrer, this.ruleGroups);
   }
 }
