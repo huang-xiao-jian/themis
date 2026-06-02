@@ -1,3 +1,6 @@
+export { DataType } from '../dsl/DataType'
+export { Semantic } from '../dsl/Semantic'
+
 export type { BaseProperties } from './BaseProperties'
 export type { InputProperties } from './InputProperties'
 export type { TextAreaProperties } from './TextAreaProperties'

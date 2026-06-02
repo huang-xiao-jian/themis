@@ -1,3 +1,6 @@
+import { DataType } from '../dsl/DataType'
+import { Mode } from '../dsl/Mode'
+import { Quantity } from '../dsl/Quantity'
 import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition'
 import type { FieldConstraints } from '../dsl/FieldConstraints'
 import type { BaseProperties } from '../component/BaseProperties'
@@ -74,7 +77,7 @@ export class ThresholderInferrer {
     if (factor.resource) {
       const resource = this.resourceFactory.create(factor)
       if (resource) {
-        if (factor.quantity === 'multiple') {
+        if (factor.quantity === Quantity.MULTIPLE) {
           return this.buildMultipleSelect(factor, resource)
         }
         return this.buildSelect(factor, resource)
@@ -82,15 +85,15 @@ export class ThresholderInferrer {
     }
 
     // 2. boolean → Switch
-    if (factor.dataType === 'boolean') {
+    if (factor.dataType === DataType.BOOLEAN) {
       return this.buildSwitch(factor)
     }
 
     const isAuto = !!factor.semantic
 
     // 3. 区间模式
-    if (factor.mode === 'range') {
-      if (factor.quantity === 'multiple') {
+    if (factor.mode === Mode.RANGE) {
+      if (factor.quantity === Quantity.MULTIPLE) {
         return this.buildListRangeBuilder(factor, isAuto)
       }
       if (isAuto) {
@@ -100,7 +103,7 @@ export class ThresholderInferrer {
     }
 
     // 4. point 模式
-    if (factor.quantity === 'multiple') {
+    if (factor.quantity === Quantity.MULTIPLE) {
       return this.buildListBuilder(factor, isAuto)
     }
     if (isAuto) {
@@ -151,7 +154,7 @@ export class ThresholderInferrer {
    * number 也走 Input（Input 内部支持 step/precision）
    */
   private buildManualPointSingle(factor: RuleFactorDefinition): InputProperties | TextAreaProperties {
-    if (factor.dataType === 'string') {
+    if (factor.dataType === DataType.STRING) {
       const max = factor.constraints?.max
       if (typeof max === 'number' && max > 100) {
         return { ...buildBase(factor), type: 'TextArea' }
@@ -167,7 +170,7 @@ export class ThresholderInferrer {
     const itemConstraints = extractBaseConstraints(factor)
     const itemBase = {
       dataType: factor.dataType,
-    } as { dataType: 'string' | 'number' | 'boolean'; semantic?: typeof factor.semantic; constraints?: FieldConstraints }
+    } as { dataType: DataType; semantic?: typeof factor.semantic; constraints?: FieldConstraints }
 
     if (factor.semantic) {
       itemBase.semantic = factor.semantic
@@ -198,7 +201,7 @@ export class ThresholderInferrer {
   ): ListRangeBuilderProperties {
     const itemConstraints = extractBaseConstraints(factor)
     const itemBase = { dataType: factor.dataType } as {
-      dataType: 'string' | 'number' | 'boolean'
+      dataType: DataType
       semantic?: typeof factor.semantic
       constraints?: FieldConstraints
     }

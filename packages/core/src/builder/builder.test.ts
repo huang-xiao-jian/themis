@@ -4,6 +4,7 @@ import { createRuleWorkspace } from './createRuleWorkspace'
 import { allFactors } from '../__fixtures__/factors'
 import { providePaginatedFilterableFetcher } from '../fetcher/providePaginatedFilterableFetcher'
 import { sampleGroup } from '../__fixtures__/rules'
+import { DataType } from '../dsl/DataType'
 import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition'
 
 describe('RuleWorkspaceBuilder', () => {
@@ -45,7 +46,7 @@ describe('RuleWorkspaceBuilder', () => {
       {
         name: 'employee_dyn',
         title: '员工',
-        dataType: 'string',
+        dataType: DataType.STRING,
         resource: { name: 'Employee', features: ['pagination', 'filter'] as const },
       },
     ]

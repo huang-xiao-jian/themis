@@ -3,6 +3,7 @@ import { DefaultResourceFactory } from './ResourceFactory'
 import { DefaultStaticResourceFactory } from './StaticResourceFactory'
 import { DefaultDynamicResourceFactory } from './DynamicResourceFactory'
 import { FetcherRegistry } from './FetcherRegistry'
+import { DataType } from '../dsl/DataType'
 import {
   booleanFactor,
   dynamicResourceFactor,
@@ -46,7 +47,7 @@ describe('DefaultResourceFactory', () => {
     const resource = factory.create({
       name: 'foo',
       title: 'Foo',
-      dataType: 'string',
+      dataType: DataType.STRING,
       resource: { name: 'Foo' },
     }) as DynamicResource<unknown>
     expect(resource).not.toBeNull()

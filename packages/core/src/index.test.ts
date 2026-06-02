@@ -3,32 +3,35 @@ import { createRuleWorkspace } from './index'
 import { RuleWorkspaceBuilder } from './builder/RuleWorkspaceBuilder'
 import { providePaginatedFilterableFetcher } from './fetcher/providePaginatedFilterableFetcher'
 import { provideElementaryFetcher } from './fetcher/provideElementaryFetcher'
+import { DataType } from './dsl/DataType'
+import { Mode } from './dsl/Mode'
+import { Quantity } from './dsl/Quantity'
 import type { RuleFactorDefinition } from './dsl'
 
 const factors: readonly RuleFactorDefinition[] = [
   {
     name: 'employee',
     title: '员工',
-    dataType: 'string',
+    dataType: DataType.STRING,
     resource: { name: 'Employee', features: ['pagination', 'filter'] },
   },
   {
     name: 'deliver_city',
     title: '目标城市',
-    dataType: 'string',
+    dataType: DataType.STRING,
     resource: { name: 'City' },
   },
   {
     name: 'order_amount',
     title: '订单金额',
-    dataType: 'number',
-    mode: 'range',
-    quantity: 'multiple',
+    dataType: DataType.NUMBER,
+    mode: Mode.RANGE,
+    quantity: Quantity.MULTIPLE,
   },
   {
     name: 'is_active',
     title: '是否激活',
-    dataType: 'boolean',
+    dataType: DataType.BOOLEAN,
   },
 ]
 
@@ -239,13 +242,13 @@ describe('End-to-end: single Fetcher serves multiple Resources', () => {
       {
         name: 'employee',
         title: '员工',
-        dataType: 'string',
+        dataType: DataType.STRING,
         resource: { name: 'Employee', features: ['pagination', 'filter'] },
       },
       {
         name: 'department',
         title: '部门',
-        dataType: 'string',
+        dataType: DataType.STRING,
         resource: { name: 'Department', features: ['pagination', 'filter'] },
       },
     ]

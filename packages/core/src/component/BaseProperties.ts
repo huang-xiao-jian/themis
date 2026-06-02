@@ -1,3 +1,5 @@
+import { DataType } from '../dsl/DataType'
+import { Semantic } from '../dsl/Semantic'
 import type { FieldConstraints } from '../dsl/FieldConstraints'
 
 /**
@@ -11,9 +13,9 @@ export interface BaseProperties {
   /** 字段标题 */
   readonly title: string
   /** 数据类型 */
-  readonly dataType: 'string' | 'number' | 'boolean'
+  readonly dataType: DataType
   /** 语义化场景 */
-  readonly semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage'
+  readonly semantic?: Semantic
   /** 数据约束 */
   readonly constraints?: FieldConstraints
 }

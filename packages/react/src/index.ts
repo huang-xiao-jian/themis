@@ -1,4 +1,11 @@
-// 重新导出 @sisyphus/core 类型，便于消费方使用
+// 重新导出 @sisyphus/core 类型与枚举，便于消费方使用
+export {
+  DataType,
+  Mode,
+  Quantity,
+  Semantic,
+} from '@sisyphus/core'
+
 export type {
   FieldDataSource,
   FieldConstraints,

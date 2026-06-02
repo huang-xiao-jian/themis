@@ -4,6 +4,10 @@ import { DefaultResourceFactory } from '../factory/ResourceFactory'
 import { DefaultStaticResourceFactory } from '../factory/StaticResourceFactory'
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory'
 import { FetcherRegistry } from '../factory/FetcherRegistry'
+import { DataType } from '../dsl/DataType'
+import { Mode } from '../dsl/Mode'
+import { Quantity } from '../dsl/Quantity'
+import { Semantic } from '../dsl/Semantic'
 import {
   booleanFactor,
   dateRangeSingleFactor,
@@ -107,10 +111,10 @@ describe('ThresholderInferrer - decision tree coverage', () => {
     const result = inferrer.infer({
       name: 'visit_date',
       title: '访问日期',
-      dataType: 'number',
-      semantic: 'date',
-      mode: 'point',
-      quantity: 'single',
+      dataType: DataType.NUMBER,
+      semantic: Semantic.DATE,
+      mode: Mode.POINT,
+      quantity: Quantity.SINGLE,
     }) as { type: string }
     expect(result.type).toBe('Picker')
   })
@@ -120,10 +124,10 @@ describe('ThresholderInferrer - decision tree coverage', () => {
     const result = inferrer.infer({
       name: 'visit_date',
       title: '访问日期',
-      dataType: 'number',
-      semantic: 'date',
-      mode: 'point',
-      quantity: 'multiple',
+      dataType: DataType.NUMBER,
+      semantic: Semantic.DATE,
+      mode: Mode.POINT,
+      quantity: Quantity.MULTIPLE,
     }) as { type: string; item: { type: string } }
     expect(result.type).toBe('ListBuilder')
     expect(result.item.type).toBe('Picker')
@@ -134,10 +138,10 @@ describe('ThresholderInferrer - decision tree coverage', () => {
     const result = inferrer.infer({
       name: 'visit_date',
       title: '访问日期',
-      dataType: 'number',
-      semantic: 'date',
-      mode: 'range',
-      quantity: 'multiple',
+      dataType: DataType.NUMBER,
+      semantic: Semantic.DATE,
+      mode: Mode.RANGE,
+      quantity: Quantity.MULTIPLE,
     }) as { type: string; item: { type: string } }
     expect(result.type).toBe('ListRangeBuilder')
     expect(result.item.type).toBe('RangePicker')
@@ -157,7 +161,7 @@ describe('ThresholderInferrer - decision tree coverage', () => {
     const inferrer = makeInferrer()
     const result = inferrer.infer({
       ...staticResourceFactor,
-      quantity: 'multiple',
+      quantity: Quantity.MULTIPLE,
     }) as { type: string; resource: { name: string } }
     expect(result.type).toBe('MultipleSelect')
     expect(result.resource.name).toBe('City')
@@ -172,7 +176,7 @@ describe('ThresholderInferrer - decision tree coverage', () => {
     const factor = {
       name: 'employee_dyn',
       title: '员工',
-      dataType: 'string',
+      dataType: DataType.STRING,
       resource: { name: 'Employee' },
     } as const
     const result = inferrer.infer(factor) as { type: string; resource: { name: string } }

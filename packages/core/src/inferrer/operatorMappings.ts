@@ -1,19 +1,7 @@
+import { DataType } from '../dsl/DataType'
+import { Mode } from '../dsl/Mode'
+import { Quantity } from '../dsl/Quantity'
 import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition'
-
-/**
- * 数据类型
- */
-type DataType = 'string' | 'number' | 'boolean'
-
-/**
- * 模式
- */
-type Mode = 'point' | 'range'
-
-/**
- * 数量
- */
-type Quantity = 'single' | 'multiple'
 
 /**
  * number / 语义化场景 的 Operator 表
@@ -55,23 +43,23 @@ const BOOLEAN_POINT_SINGLE: readonly string[] = ['is']
  */
 function resolveDataDomain(factor: RuleFactorDefinition): DataType {
   if (factor.semantic) {
-    return 'number'
+    return DataType.NUMBER
   }
   return factor.dataType
 }
 
 /**
- * 解析模式（默认 point）
+ * 解析模式（默认 POINT）
  */
 function resolveMode(factor: RuleFactorDefinition): Mode {
-  return factor.mode ?? 'point'
+  return factor.mode ?? Mode.POINT
 }
 
 /**
- * 解析数量（默认 single）
+ * 解析数量（默认 SINGLE）
  */
 function resolveQuantity(factor: RuleFactorDefinition): Quantity {
-  return factor.quantity ?? 'single'
+  return factor.quantity ?? Quantity.SINGLE
 }
 
 /**
@@ -85,21 +73,21 @@ export function resolveOperatorTable(factor: RuleFactorDefinition): readonly str
   const quantity = resolveQuantity(factor)
 
   // boolean 永远走 is，不受 mode/quantity 影响
-  if (dataDomain === 'boolean') {
+  if (dataDomain === DataType.BOOLEAN) {
     return BOOLEAN_POINT_SINGLE
   }
 
-  if (dataDomain === 'number') {
-    if (mode === 'point' && quantity === 'single') return NUMBER_POINT_SINGLE
-    if (mode === 'point' && quantity === 'multiple') return NUMBER_POINT_MULTIPLE
-    if (mode === 'range' && quantity === 'single') return NUMBER_RANGE_SINGLE
-    if (mode === 'range' && quantity === 'multiple') return NUMBER_RANGE_MULTIPLE
+  if (dataDomain === DataType.NUMBER) {
+    if (mode === Mode.POINT && quantity === Quantity.SINGLE) return NUMBER_POINT_SINGLE
+    if (mode === Mode.POINT && quantity === Quantity.MULTIPLE) return NUMBER_POINT_MULTIPLE
+    if (mode === Mode.RANGE && quantity === Quantity.SINGLE) return NUMBER_RANGE_SINGLE
+    if (mode === Mode.RANGE && quantity === Quantity.MULTIPLE) return NUMBER_RANGE_MULTIPLE
   }
 
-  if (dataDomain === 'string') {
+  if (dataDomain === DataType.STRING) {
     // string 仅支持 point 模式
-    if (mode === 'point' && quantity === 'single') return STRING_POINT_SINGLE
-    if (mode === 'point' && quantity === 'multiple') return STRING_POINT_MULTIPLE
+    if (mode === Mode.POINT && quantity === Quantity.SINGLE) return STRING_POINT_SINGLE
+    if (mode === Mode.POINT && quantity === Quantity.MULTIPLE) return STRING_POINT_MULTIPLE
   }
 
   // 其他组合没有合法 Operator 列表，返回空
