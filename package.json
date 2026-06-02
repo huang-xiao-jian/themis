@@ -8,14 +8,6 @@
     "test": "turbo test",
     "typecheck": "turbo typecheck"
   },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "prettier --write"
-    ],
-    "*.{json,css,md}": [
-      "prettier --write"
-    ]
-  },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@vitest/ui": "^3.0.0",
