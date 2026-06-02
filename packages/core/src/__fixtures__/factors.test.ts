@@ -1,49 +1,49 @@
-import { describe, expect, it } from 'vitest'
-import { DataType } from '../dsl/DataType'
-import { Mode } from '../dsl/Mode'
-import { Quantity } from '../dsl/Quantity'
+import { describe, expect, it } from 'vitest';
+import type { RuleFactorDefinition } from '../dsl';
+import { DataType } from '../dsl/DataType';
+import { Mode } from '../dsl/Mode';
+import { Quantity } from '../dsl/Quantity';
 import {
-  booleanFactor,
-  numberPointSingleFactor,
-  numberRangeMultipleFactor,
-  numberRangeSingleFactor,
-  stringPointMultipleFactor,
-  stringPointSingleFactor,
-} from './factors'
-import type { RuleFactorDefinition } from '../dsl'
+  BOOLEAN_FACTOR,
+  NUMBER_POINT_SINGLE_FACTOR,
+  NUMBER_RANGE_MULTIPLE_FACTOR,
+  NUMBER_RANGE_SINGLE_FACTOR,
+  STRING_POINT_MULTIPLE_FACTOR,
+  STRING_POINT_SINGLE_FACTOR,
+} from './factors';
 
 describe('factors fixtures', () => {
-  it('booleanFactor is assignable to RuleFactorDefinition', () => {
-    const _check: RuleFactorDefinition = booleanFactor
-    expect(_check.dataType).toBe(DataType.BOOLEAN)
-  })
+  it('BOOLEAN_FACTOR is assignable to RuleFactorDefinition', () => {
+    const _check: RuleFactorDefinition = BOOLEAN_FACTOR;
+    expect(_check.dataType).toBe(DataType.BOOLEAN);
+  });
 
-  it('stringPointSingleFactor is assignable to RuleFactorDefinition', () => {
-    const _check: RuleFactorDefinition = stringPointSingleFactor
-    expect(_check.dataType).toBe(DataType.STRING)
-    expect(_check.mode).toBe(Mode.POINT)
-    expect(_check.quantity).toBe(Quantity.SINGLE)
-  })
+  it('STRING_POINT_SINGLE_FACTOR is assignable to RuleFactorDefinition', () => {
+    const _check: RuleFactorDefinition = STRING_POINT_SINGLE_FACTOR;
+    expect(_check.dataType).toBe(DataType.STRING);
+    expect(_check.mode).toBe(Mode.POINT);
+    expect(_check.quantity).toBe(Quantity.SINGLE);
+  });
 
-  it('stringPointMultipleFactor is assignable to RuleFactorDefinition', () => {
-    const _check: RuleFactorDefinition = stringPointMultipleFactor
-    expect(_check.quantity).toBe(Quantity.MULTIPLE)
-  })
+  it('STRING_POINT_MULTIPLE_FACTOR is assignable to RuleFactorDefinition', () => {
+    const _check: RuleFactorDefinition = STRING_POINT_MULTIPLE_FACTOR;
+    expect(_check.quantity).toBe(Quantity.MULTIPLE);
+  });
 
-  it('numberPointSingleFactor is assignable to RuleFactorDefinition', () => {
-    const _check: RuleFactorDefinition = numberPointSingleFactor
-    expect(_check.dataType).toBe(DataType.NUMBER)
-  })
+  it('NUMBER_POINT_SINGLE_FACTOR is assignable to RuleFactorDefinition', () => {
+    const _check: RuleFactorDefinition = NUMBER_POINT_SINGLE_FACTOR;
+    expect(_check.dataType).toBe(DataType.NUMBER);
+  });
 
-  it('numberRangeSingleFactor is assignable to RuleFactorDefinition', () => {
-    const _check: RuleFactorDefinition = numberRangeSingleFactor
-    expect(_check.mode).toBe(Mode.RANGE)
-    expect(_check.quantity).toBe(Quantity.SINGLE)
-  })
+  it('NUMBER_RANGE_SINGLE_FACTOR is assignable to RuleFactorDefinition', () => {
+    const _check: RuleFactorDefinition = NUMBER_RANGE_SINGLE_FACTOR;
+    expect(_check.mode).toBe(Mode.RANGE);
+    expect(_check.quantity).toBe(Quantity.SINGLE);
+  });
 
-  it('numberRangeMultipleFactor is assignable to RuleFactorDefinition', () => {
-    const _check: RuleFactorDefinition = numberRangeMultipleFactor
-    expect(_check.mode).toBe(Mode.RANGE)
-    expect(_check.quantity).toBe(Quantity.MULTIPLE)
-  })
-})
+  it('NUMBER_RANGE_MULTIPLE_FACTOR is assignable to RuleFactorDefinition', () => {
+    const _check: RuleFactorDefinition = NUMBER_RANGE_MULTIPLE_FACTOR;
+    expect(_check.mode).toBe(Mode.RANGE);
+    expect(_check.quantity).toBe(Quantity.MULTIPLE);
+  });
+});

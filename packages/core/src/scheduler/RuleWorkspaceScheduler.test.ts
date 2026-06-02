@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { allFactors } from '../__fixtures__/factors';
-import { sampleGroup } from '../__fixtures__/rules';
+import { ALL_FACTORS } from '../__fixtures__/factors';
+import { SAMPLE_GROUP } from '../__fixtures__/rules';
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory';
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
@@ -20,14 +20,14 @@ function makeInferrer() {
 describe('RuleWorkspaceScheduler - creation', () => {
   it('starts with empty groups when no snapshots', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     expect(workspace.snapshots).toEqual([]);
     expect(workspace.groups.value).toEqual([]);
   });
 
   it('restores groups from snapshots in edit scenario', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer, [sampleGroup]);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer, [SAMPLE_GROUP]);
     expect(workspace.snapshots).toHaveLength(1);
     expect(workspace.groups.value).toHaveLength(1);
     expect(workspace.groups.value[0]).toBeInstanceOf(AtomicRuleGroupScheduler);
@@ -37,7 +37,7 @@ describe('RuleWorkspaceScheduler - creation', () => {
 describe('RuleWorkspaceScheduler - addGroup/removeGroup', () => {
   it('addGroup creates a new group scheduler', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     const group = workspace.addGroup('g-1');
     expect(workspace.groups.value).toHaveLength(1);
     expect(group.id).toBe('g-1');
@@ -45,7 +45,7 @@ describe('RuleWorkspaceScheduler - addGroup/removeGroup', () => {
 
   it('removeGroup destroys and removes the group', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     workspace.addGroup('g-1');
     workspace.removeGroup('g-1');
     expect(workspace.groups.value).toEqual([]);
@@ -53,13 +53,13 @@ describe('RuleWorkspaceScheduler - addGroup/removeGroup', () => {
 
   it('removeGroup on non-existent id is a no-op', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     expect(() => workspace.removeGroup('nope')).not.toThrow();
   });
 
   it('addGroup throws after destroy', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     workspace.destroy();
     expect(() => workspace.addGroup('g-1')).toThrow(/destroyed/);
   });
@@ -68,13 +68,13 @@ describe('RuleWorkspaceScheduler - addGroup/removeGroup', () => {
 describe('RuleWorkspaceScheduler - validate & build', () => {
   it('validate returns false when no groups', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     expect(workspace.validate()).toBe(false);
   });
 
   it('validate returns false when any group is invalid', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     const group = workspace.addGroup('g-1');
     const rule = group.addRule('rule-1');
     rule.onFieldChange({ field: 'name', value: 'is_active' });
@@ -84,7 +84,7 @@ describe('RuleWorkspaceScheduler - validate & build', () => {
 
   it('validate returns true when everything is complete', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     const group = workspace.addGroup('g-1');
     const rule = group.addRule('rule-1');
     rule.onFieldChange({ field: 'name', value: 'is_active' });
@@ -95,7 +95,7 @@ describe('RuleWorkspaceScheduler - validate & build', () => {
 
   it('build returns readonly AtomicRuleGroup[]', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     const group = workspace.addGroup('g-1');
     const rule = group.addRule('rule-1');
     rule.onFieldChange({ field: 'name', value: 'is_active' });
@@ -110,7 +110,7 @@ describe('RuleWorkspaceScheduler - validate & build', () => {
 
   it('build throws when incomplete', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     workspace.addGroup('g-1');
     expect(() => workspace.build()).toThrow(/incomplete/);
   });
@@ -119,14 +119,14 @@ describe('RuleWorkspaceScheduler - validate & build', () => {
 describe('RuleWorkspaceScheduler - destroy', () => {
   it('destroy is idempotent', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     workspace.destroy();
     expect(() => workspace.destroy()).not.toThrow();
   });
 
   it('destroy clears all groups', () => {
     const inferrer = makeInferrer();
-    const workspace = new RuleWorkspaceScheduler(allFactors, inferrer);
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     workspace.addGroup('g-1');
     workspace.addGroup('g-2');
     workspace.destroy();
