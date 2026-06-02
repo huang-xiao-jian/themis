@@ -3,11 +3,11 @@
  */
 export interface PaginatedResult<T> {
   /** 当前页数据 */
-  readonly data: readonly T[]
+  readonly data: readonly T[];
   /** 当前页码 */
-  readonly page: number
+  readonly page: number;
   /** 每页大小 */
-  readonly pageSize: number
+  readonly pageSize: number;
   /** 总记录数 */
-  readonly total: number
+  readonly total: number;
 }

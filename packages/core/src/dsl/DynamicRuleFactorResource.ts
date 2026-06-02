@@ -1,7 +1,7 @@
 /**
  * 动态资源支持的特性
  */
-export type DynamicRuleFactorResourceFeature = 'pagination' | 'filter'
+export type DynamicRuleFactorResourceFeature = 'pagination' | 'filter';
 
 /**
  * 动态资源描述
@@ -10,7 +10,7 @@ export type DynamicRuleFactorResourceFeature = 'pagination' | 'filter'
  */
 export interface DynamicRuleFactorResource {
   /** 资源名称，全局唯一 */
-  readonly name: string
+  readonly name: string;
   /** 资源支持的特性（分页、服务端过滤） */
-  readonly features?: readonly DynamicRuleFactorResourceFeature[]
+  readonly features?: readonly DynamicRuleFactorResourceFeature[];
 }

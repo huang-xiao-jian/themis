@@ -1,4 +1,4 @@
-import type { BaseProperties } from './BaseProperties'
+import type { BaseProperties } from './BaseProperties';
 
 /**
  * 选择器
@@ -7,5 +7,5 @@ import type { BaseProperties } from './BaseProperties'
  * 适配层根据 semantic 路由到 DatePicker / TimePicker / Slider 等
  */
 export interface PickerProperties extends BaseProperties {
-  readonly type: 'Picker'
+  readonly type: 'Picker';
 }

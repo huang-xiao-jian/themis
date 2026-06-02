@@ -1,4 +1,4 @@
-export { FetcherRegistry } from './FetcherRegistry'
-export { StaticResourceFactory, DefaultStaticResourceFactory } from './StaticResourceFactory'
-export { DynamicResourceFactory, DefaultDynamicResourceFactory } from './DynamicResourceFactory'
-export { ResourceFactory, DefaultResourceFactory, type Resource } from './ResourceFactory'
+export { DefaultDynamicResourceFactory, DynamicResourceFactory } from './DynamicResourceFactory';
+export { FetcherRegistry } from './FetcherRegistry';
+export { DefaultResourceFactory, ResourceFactory, type Resource } from './ResourceFactory';
+export { DefaultStaticResourceFactory, StaticResourceFactory } from './StaticResourceFactory';

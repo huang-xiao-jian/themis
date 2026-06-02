@@ -1,5 +1,5 @@
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition'
-import type { FieldDataSource } from '../dsl/FieldDataSource'
+import type { FieldDataSource } from '../dsl/FieldDataSource';
+import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
 
 /**
  * 规则因子选项推断器
@@ -14,6 +14,6 @@ export class FactorOptionsInferrer {
   ): readonly FieldDataSource[] {
     return allFactors
       .filter((f) => !usedFactorNames.has(f.name))
-      .map((f) => ({ label: f.title, value: f.name }))
+      .map((f) => ({ label: f.title, value: f.name }));
   }
 }

@@ -1,13 +1,13 @@
-import type { InputProperties } from './InputProperties'
-import type { TextAreaProperties } from './TextAreaProperties'
-import type { RangeInputProperties } from './RangeInputProperties'
-import type { SwitchProperties } from './SwitchProperties'
-import type { SelectProperties } from './SelectProperties'
-import type { MultipleSelectProperties } from './MultipleSelectProperties'
-import type { PickerProperties } from './PickerProperties'
-import type { RangePickerProperties } from './RangePickerProperties'
-import type { ListBuilderProperties } from './ListBuilderProperties'
-import type { ListRangeBuilderProperties } from './ListRangeBuilderProperties'
+import type { InputProperties } from './InputProperties';
+import type { ListBuilderProperties } from './ListBuilderProperties';
+import type { ListRangeBuilderProperties } from './ListRangeBuilderProperties';
+import type { MultipleSelectProperties } from './MultipleSelectProperties';
+import type { PickerProperties } from './PickerProperties';
+import type { RangeInputProperties } from './RangeInputProperties';
+import type { RangePickerProperties } from './RangePickerProperties';
+import type { SelectProperties } from './SelectProperties';
+import type { SwitchProperties } from './SwitchProperties';
+import type { TextAreaProperties } from './TextAreaProperties';
 
 /**
  * 表单组件属性联合类型
@@ -24,4 +24,4 @@ export type ThresholdComponentProperties =
   | PickerProperties
   | RangePickerProperties
   | ListBuilderProperties
-  | ListRangeBuilderProperties
+  | ListRangeBuilderProperties;

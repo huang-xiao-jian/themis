@@ -1,13 +1,13 @@
-export type { StaticResource } from './StaticResource'
 export type {
   DynamicResource,
   ElementaryDynamicResource,
-  PaginatedDynamicResource,
   FilterableDynamicResource,
+  PaginatedDynamicResource,
   PaginatedFilterableDynamicResource,
-} from './DynamicResource'
-export { StaticResourceImpl } from './StaticResourceImpl'
-export { ElementaryDynamicResourceImpl } from './ElementaryDynamicResourceImpl'
-export { PaginatedDynamicResourceImpl } from './PaginatedDynamicResourceImpl'
-export { FilterableDynamicResourceImpl } from './FilterableDynamicResourceImpl'
-export { PaginatedFilterableDynamicResourceImpl } from './PaginatedFilterableDynamicResourceImpl'
+} from './DynamicResource';
+export { ElementaryDynamicResourceImpl } from './ElementaryDynamicResourceImpl';
+export { FilterableDynamicResourceImpl } from './FilterableDynamicResourceImpl';
+export { PaginatedDynamicResourceImpl } from './PaginatedDynamicResourceImpl';
+export { PaginatedFilterableDynamicResourceImpl } from './PaginatedFilterableDynamicResourceImpl';
+export type { StaticResource } from './StaticResource';
+export { StaticResourceImpl } from './StaticResourceImpl';

@@ -1,10 +1,10 @@
-import { DataType } from './DataType'
-import { Mode } from './Mode'
-import { Quantity } from './Quantity'
-import { Semantic } from './Semantic'
-import type { DynamicRuleFactorResource } from './DynamicRuleFactorResource'
-import type { FieldConstraints } from './FieldConstraints'
-import { StaticRuleFactorResource } from './StaticRuleFactorResource'
+import { DataType } from './DataType';
+import type { DynamicRuleFactorResource } from './DynamicRuleFactorResource';
+import type { FieldConstraints } from './FieldConstraints';
+import { Mode } from './Mode';
+import { Quantity } from './Quantity';
+import { Semantic } from './Semantic';
+import { StaticRuleFactorResource } from './StaticRuleFactorResource';
 
 /**
  * 规则因子定义（DSL 主入口）
@@ -13,21 +13,21 @@ import { StaticRuleFactorResource } from './StaticRuleFactorResource'
  */
 export interface RuleFactorDefinition {
   /** 规则因子唯一名称 */
-  readonly name: string
+  readonly name: string;
   /** 显示标题 */
-  readonly title: string
+  readonly title: string;
   /** 描述信息（可选） */
-  readonly description?: string
+  readonly description?: string;
   /** 原始数据类型 */
-  readonly dataType: DataType
+  readonly dataType: DataType;
   /** 语义化场景 */
-  readonly semantic?: Semantic
+  readonly semantic?: Semantic;
   /** 模式：单点 / 区间，默认 POINT */
-  readonly mode?: Mode
+  readonly mode?: Mode;
   /** 数量：单值 / 多值，默认 SINGLE */
-  readonly quantity?: Quantity
+  readonly quantity?: Quantity;
   /** 关联资源（受限选项）。包含 options 字段时为静态，否则为动态 */
-  readonly resource?: DynamicRuleFactorResource | StaticRuleFactorResource
+  readonly resource?: DynamicRuleFactorResource | StaticRuleFactorResource;
   /** 数据约束 */
-  readonly constraints?: FieldConstraints
+  readonly constraints?: FieldConstraints;
 }

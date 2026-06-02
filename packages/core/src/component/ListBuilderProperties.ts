@@ -1,6 +1,6 @@
-import { DataType } from '../dsl/DataType'
-import { Semantic } from '../dsl/Semantic'
-import type { FieldConstraints } from '../dsl/FieldConstraints'
+import { DataType } from '../dsl/DataType';
+import type { FieldConstraints } from '../dsl/FieldConstraints';
+import { Semantic } from '../dsl/Semantic';
 
 /**
  * 列表项级别属性
@@ -9,13 +9,13 @@ import type { FieldConstraints } from '../dsl/FieldConstraints'
  */
 export interface ListBuilderItemProperties {
   /** 列表项组件类型 */
-  readonly type: 'Input' | 'Picker'
+  readonly type: 'Input' | 'Picker';
   /** 列表项数据类型 */
-  readonly dataType: DataType
+  readonly dataType: DataType;
   /** 列表项语义化场景 */
-  readonly semantic?: Semantic
+  readonly semantic?: Semantic;
   /** 列表项数据约束 */
-  readonly constraints?: FieldConstraints
+  readonly constraints?: FieldConstraints;
 }
 
 /**
@@ -23,14 +23,14 @@ export interface ListBuilderItemProperties {
  */
 export interface ListBuilderBaseProperties {
   /** 字段标识 */
-  readonly name: string
+  readonly name: string;
   /** 字段标题 */
-  readonly title: string
+  readonly title: string;
   /** 列表项数量约束 */
   readonly constraints?: {
-    readonly minItems?: number
-    readonly maxItems?: number
-  }
+    readonly minItems?: number;
+    readonly maxItems?: number;
+  };
 }
 
 /**
@@ -39,7 +39,7 @@ export interface ListBuilderBaseProperties {
  * 适用场景：string/number + manual + point + quantity=multiple
  */
 export interface ListBuilderProperties extends ListBuilderBaseProperties {
-  readonly type: 'ListBuilder'
+  readonly type: 'ListBuilder';
   /** 列表项属性 */
-  readonly item: ListBuilderItemProperties
+  readonly item: ListBuilderItemProperties;
 }

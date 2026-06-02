@@ -8,5 +8,5 @@ export interface FilterableFetcher<T = unknown> {
    * @param resourceName 资源名称
    * @param keyword 过滤关键词
    */
-  fetch(resourceName: string, keyword: string): Promise<readonly T[]>
+  fetch(resourceName: string, keyword: string): Promise<readonly T[]>;
 }

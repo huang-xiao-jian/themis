@@ -1,4 +1,4 @@
-import type { PaginatedResult } from './PaginatedResult'
+import type { PaginatedResult } from './PaginatedResult';
 
 /**
  * 分页 + 过滤动态资源 Fetcher
@@ -17,5 +17,5 @@ export interface PaginatedFilterableFetcher<T = unknown> {
     keyword: string,
     page: number,
     pageSize: number
-  ): Promise<PaginatedResult<T>>
+  ): Promise<PaginatedResult<T>>;
 }

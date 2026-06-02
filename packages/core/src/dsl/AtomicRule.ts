@@ -5,13 +5,13 @@
  */
 export interface AtomicRule<T = unknown> {
   /** 唯一标识 */
-  readonly id: string
+  readonly id: string;
   /** 目标数据（规则因子名称） */
-  readonly name: string
+  readonly name: string;
   /** 匹配方式 */
-  readonly operator: string
+  readonly operator: string;
   /** 匹配阈值 */
-  readonly threshold: T
+  readonly threshold: T;
 }
 
 /**
@@ -21,5 +21,5 @@ export interface AtomicRule<T = unknown> {
  */
 export interface AtomicRuleGroup {
   /** 规则组内的原子规则列表 */
-  readonly rules: readonly AtomicRule[]
+  readonly rules: readonly AtomicRule[];
 }

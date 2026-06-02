@@ -1,4 +1,4 @@
-import type { BaseProperties } from './BaseProperties'
+import type { BaseProperties } from './BaseProperties';
 
 /**
  * 多行文本输入
@@ -6,5 +6,5 @@ import type { BaseProperties } from './BaseProperties'
  * 适用场景：string + manual + point + single + max 长度 > 100
  */
 export interface TextAreaProperties extends BaseProperties {
-  readonly type: 'TextArea'
+  readonly type: 'TextArea';
 }

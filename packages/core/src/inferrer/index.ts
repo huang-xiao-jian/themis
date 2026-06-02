@@ -1,4 +1,4 @@
-export { OperatorInferrer } from './OperatorInferrer'
-export { ThresholderInferrer } from './ThresholderInferrer'
-export { FactorOptionsInferrer } from './FactorOptionsInferrer'
-export { resolveOperatorTable } from './operatorMappings'
+export { FactorOptionsInferrer } from './FactorOptionsInferrer';
+export { OperatorInferrer } from './OperatorInferrer';
+export { resolveOperatorTable } from './operatorMappings';
+export { ThresholderInferrer } from './ThresholderInferrer';

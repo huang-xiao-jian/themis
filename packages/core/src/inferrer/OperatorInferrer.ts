@@ -1,6 +1,6 @@
-import type { FieldDataSource } from '../dsl/FieldDataSource'
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition'
-import { resolveOperatorTable } from './operatorMappings'
+import type { FieldDataSource } from '../dsl/FieldDataSource';
+import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import { resolveOperatorTable } from './operatorMappings';
 
 /**
  * Operator 推断器
@@ -9,7 +9,7 @@ import { resolveOperatorTable } from './operatorMappings'
  */
 export class OperatorInferrer {
   infer(factor: RuleFactorDefinition): readonly FieldDataSource[] {
-    const operators = resolveOperatorTable(factor)
-    return operators.map((op) => ({ label: op, value: op }))
+    const operators = resolveOperatorTable(factor);
+    return operators.map((op) => ({ label: op, value: op }));
   }
 }
