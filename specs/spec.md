@@ -115,10 +115,51 @@ interface DynamicRuleFactorResource {
 
 ### 数据元属性 RuleFactorMetadata
 
-- `dataType` 原始数据类型，支持：`string` / `number` / `boolean`
-- `mode` 声明单点值或者区间值，支持：`point` / `range`
-- `quantity` 声明多值或者单值，支持：`single` / `multiple`
-- `semantic` 语义化场景，作为原始数据类型的精细化扩充
+- `dataType` 原始数据类型，支持 `DataType` 枚举：`STRING` / `NUMBER` / `BOOLEAN`
+- `mode` 声明单点值或者区间值，支持 `Mode` 枚举：`POINT` / `RANGE`
+- `quantity` 声明多值或者单值，支持 `Quantity` 枚举：`SINGLE` / `MULTIPLE`
+- `semantic` 语义化场景，作为原始数据类型的精细化扩充，支持 `Semantic` 枚举
+
+枚举声明（字符串风格，键名 `SCREAMING_SNAKE_CASE`，值与原字符串字面量保持一致以兼容运行时序列化）：
+
+```ts
+/**
+ * 原始数据类型
+ */
+enum DataType {
+  STRING = 'string',
+  NUMBER = 'number',
+  BOOLEAN = 'boolean',
+}
+
+/**
+ * 模式：单点 / 区间
+ */
+enum Mode {
+  POINT = 'point',
+  RANGE = 'range',
+}
+
+/**
+ * 数量：单值 / 多值
+ */
+enum Quantity {
+  SINGLE = 'single',
+  MULTIPLE = 'multiple',
+}
+
+/**
+ * 语义化场景，作为 dataType 的精细化扩充
+ */
+enum Semantic {
+  RATE = 'rate',
+  DATE = 'date',
+  TIME = 'time',
+  DATETIME = 'datetime',
+  DURATION = 'duration',
+  PERCENTAGE = 'percentage',
+}
+```
 
 `mode` + `quantity` 正交逻辑：
 
@@ -168,10 +209,10 @@ interface RuleFactorDefinition {
   name: string;
   title: string;
   description?: string;
-  dataType: 'string' | 'number' | 'boolean';
-  semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
-  mode?: 'point' | 'range';
-  quantity?: 'single' | 'multiple';
+  dataType: DataType;
+  semantic?: Semantic;
+  mode?: Mode;
+  quantity?: Quantity;
   resource?: {
     name: string;
     features?: ('pagination' | 'filter')[];

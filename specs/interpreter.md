@@ -277,6 +277,8 @@ graph TD
 抽象表单组件统一继承 `BaseProperties`，组件特定属性按需扩展，**特别说明：以下属性定义为最终传递给抽象组件的属性，而不是推断过程中的属性**
 
 ```ts
+import { DataType, Semantic } from './spec.md';
+
 /**
  * 抽象表单组件基础属性
  */
@@ -286,9 +288,9 @@ interface BaseProperties {
   /** 字段标题 */
   title: string;
   /** 数据类型 */
-  dataType: 'string' | 'number' | 'boolean';
+  dataType: DataType;
   /** 语义化场景 */
-  semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
+  semantic?: Semantic;
   /** 数据约束 */
   constraints?: FieldConstraints;
 }
@@ -417,14 +419,16 @@ interface RangePickerProperties extends BaseProperties {
 适用于多值单点输入场景，用于构建多个单点值：
 
 ```ts
+import { DataType, Semantic } from './spec.md';
+
 /** 列表项级别属性 */
 interface ListBuilderItemProperties {
   /** 列表项组件类型 */
   readonly type: 'Input' | 'Picker';
   /** 列表项数据类型 */
-  readonly dataType: 'string' | 'number' | 'boolean';
+  readonly dataType: DataType;
   /** 列表项语义化场景（可选） */
-  readonly semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
+  readonly semantic?: Semantic;
   /** 列表项数据约束（可选） */
   readonly constraints?: FieldConstraints;
 }
@@ -457,14 +461,16 @@ interface ListBuilderProperties extends ListBuilderBaseProperties {
 适用于多值区间输入场景，用于构建多个区间值：
 
 ```ts
+import { DataType, Semantic } from './spec.md';
+
 /** 列表项级别属性 */
 interface ListRangeBuilderItemProperties {
   /** 列表项组件类型 */
   readonly type: 'RangeInput' | 'RangePicker';
   /** 列表项数据类型 */
-  readonly dataType: 'string' | 'number' | 'boolean';
+  readonly dataType: DataType;
   /** 列表项语义化场景（可选） */
-  readonly semantic?: 'rate' | 'date' | 'time' | 'datetime' | 'duration' | 'percentage';
+  readonly semantic?: Semantic;
   /** 列表项数据约束（可选） */
   readonly constraints?: FieldConstraints;
 }

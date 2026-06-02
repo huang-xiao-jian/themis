@@ -15,6 +15,16 @@
 - Function name: `Camel Case` (e.g. `findDiscountRule`)
 - Interface name: `PascalCase` without `I` prefix
 - Enum name: `PascalCase`
+- Enum key: `SCREAMING_SNAKE_CASE` (`MAX_RETRY_COUNT`)
+
+字符串风格的 `Enum` 声明：
+
+```ts
+enum Colors {
+  RED = 'red',
+  GREEN = 'green',
+}
+```
 
 ### 组织规范
 

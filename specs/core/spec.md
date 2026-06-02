@@ -554,6 +554,7 @@ classDiagram
 ### 新建场景
 
 ```ts
+import { DataType, Mode, Quantity } from '@sisyphus/core';
 import { RuleWorkspaceBuilder, providePaginatedFilterableFetcher } from '@sisyphus/core';
 
 // 1. 定义 DSL
@@ -562,27 +563,27 @@ const factors: RuleFactorDefinition[] = [
   {
     name: 'employee',
     title: '员工',
-    dataType: 'string',
+    dataType: DataType.STRING,
     resource: { name: 'Employee', features: ['pagination', 'filter'] },
   },
   {
     name: 'department',
     title: '部门',
-    dataType: 'string',
+    dataType: DataType.STRING,
     resource: { name: 'Department', features: ['pagination', 'filter'] },
   },
   {
     name: 'deliver_city',
     title: '目标城市',
-    dataType: 'string',
+    dataType: DataType.STRING,
     resource: { name: 'City' }, // 无 features = StaticResource（由内核默认提供）
   },
   {
     name: 'order_amount',
     title: '订单金额',
-    dataType: 'number',
-    mode: 'range',
-    quantity: 'multiple',
+    dataType: DataType.NUMBER,
+    mode: Mode.RANGE,
+    quantity: Quantity.MULTIPLE,
   },
 ];
 
