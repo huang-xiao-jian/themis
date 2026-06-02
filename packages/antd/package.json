@@ -18,15 +18,20 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@preact/signals-react": ">=3.0.0",
     "@sisyphus/core": "workspace:*",
     "@sisyphus/react": "workspace:*"
   },
   "devDependencies": {
+    "@preact/signals-react": "^3.0.0",
+    "@testing-library/react": "^16.0.0",
     "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0"
+    "@types/react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "peerDependencies": {
-    "antd": ">=5.0.0",
-    "react": ">=18.0.0"
+    "@ant-design/icons": ">=6.0.0",
+    "antd": ">=6.0.0",
+    "react": ">=19.0.0"
   }
 }

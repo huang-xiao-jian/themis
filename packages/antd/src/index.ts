@@ -1,2 +1,6 @@
-// 重新导出 @sisyphus/core 全部内容，便于消费方使用
-export * from '@sisyphus/core';
+// Plugin
+export { createAntdPlugin } from './createAntdPlugin';
+
+// Config
+export type { SisyphusAntdConfig } from './config/SisyphusAntdConfig';
+export { SisyphusAntdProvider } from './config/SisyphusAntdProvider';
