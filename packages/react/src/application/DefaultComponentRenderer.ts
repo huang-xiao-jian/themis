@@ -1,4 +1,4 @@
-import React from 'react';
+import { createElement, type ReactElement } from 'react';
 import { DefaultComponentRendererRegistry } from './DefaultComponentRendererRegistry';
 import type { ComponentRenderer, EditorComponentProperties } from './protocol';
 
@@ -10,7 +10,7 @@ export class DefaultComponentRenderer implements ComponentRenderer {
     this.registry = registry;
   }
 
-  render(props: EditorComponentProperties): React.ReactElement {
+  render(props: EditorComponentProperties): ReactElement {
     switch (props.type) {
       case 'AtomicRuleView': {
         const Component = this.registry.getAtomicRuleView();
@@ -19,7 +19,7 @@ export class DefaultComponentRenderer implements ComponentRenderer {
             '[sisyphus] AtomicRuleView component is not registered. Did you forget to call registerAtomicRuleView()?'
           );
         }
-        return React.createElement(Component, props);
+        return createElement(Component, props);
       }
       case 'AtomicRuleGroupView': {
         const Component = this.registry.getAtomicRuleGroupView();
@@ -28,7 +28,7 @@ export class DefaultComponentRenderer implements ComponentRenderer {
             '[sisyphus] AtomicRuleGroupView component is not registered. Did you forget to call registerAtomicRuleGroupView()?'
           );
         }
-        return React.createElement(Component, props);
+        return createElement(Component, props);
       }
       case 'RuleWorkspaceView': {
         const Component = this.registry.getRuleWorkspaceView();
@@ -37,7 +37,7 @@ export class DefaultComponentRenderer implements ComponentRenderer {
             '[sisyphus] RuleWorkspaceView component is not registered. Did you forget to call registerRuleWorkspaceView()?'
           );
         }
-        return React.createElement(Component, props);
+        return createElement(Component, props);
       }
       default: {
         const exhaustiveCheck: never = props;

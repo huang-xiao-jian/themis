@@ -1,6 +1,6 @@
 import type { AtomicRuleScheduler } from '@sisyphus/core';
 import { render } from '@testing-library/react';
-import type React from 'react';
+import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import type { SisyphusScope } from '../access/SisyphusScope';
 import { SisyphusScopeContext } from '../access/useSisyphusScope';
@@ -22,7 +22,7 @@ describe('AtomicRuleView', () => {
       }),
     } as unknown as SisyphusScope;
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
+    const wrapper = ({ children }: { children: ReactNode }) => (
       <SisyphusScopeContext.Provider value={mockScope}>{children}</SisyphusScopeContext.Provider>
     );
 
@@ -51,7 +51,7 @@ describe('AtomicRuleView', () => {
       }),
     } as unknown as SisyphusScope;
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
+    const wrapper = ({ children }: { children: ReactNode }) => (
       <SisyphusScopeContext.Provider value={mockScope}>{children}</SisyphusScopeContext.Provider>
     );
 

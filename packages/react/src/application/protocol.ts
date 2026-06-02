@@ -3,7 +3,7 @@ import type {
   AtomicRuleScheduler,
   RuleWorkspaceScheduler,
 } from '@sisyphus/core';
-import type React from 'react';
+import type { ComponentType, ReactElement } from 'react';
 
 /** AtomicRuleView 组件属性 */
 export interface AtomicRuleViewProperties {
@@ -38,17 +38,17 @@ export type EditorComponentProperties =
 /** 编辑器组件渲染器注册表 */
 export interface ComponentRendererRegistry {
   /** 注册 AtomicRuleView 组件 */
-  registerAtomicRuleView(component: React.ComponentType<AtomicRuleViewProperties>): void;
+  registerAtomicRuleView(component: ComponentType<AtomicRuleViewProperties>): void;
   /** 注册 AtomicRuleGroupView 组件 */
-  registerAtomicRuleGroupView(component: React.ComponentType<AtomicRuleGroupViewProperties>): void;
+  registerAtomicRuleGroupView(component: ComponentType<AtomicRuleGroupViewProperties>): void;
   /** 注册 RuleWorkspaceView 组件 */
-  registerRuleWorkspaceView(component: React.ComponentType<RuleWorkspaceViewProperties>): void;
+  registerRuleWorkspaceView(component: ComponentType<RuleWorkspaceViewProperties>): void;
 }
 
 /** 组件渲染器协议 */
 export interface ComponentRenderer {
   /** 渲染编辑器组件 */
-  render(props: EditorComponentProperties): React.ReactElement;
+  render(props: EditorComponentProperties): ReactElement;
 }
 
 /** Sisyphus 上下文（插件可访问） */

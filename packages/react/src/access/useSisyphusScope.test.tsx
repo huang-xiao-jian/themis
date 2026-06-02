@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import type React from 'react';
+import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { SisyphusScope } from './SisyphusScope';
 import { SisyphusScopeContext, useSisyphusScope } from './useSisyphusScope';
@@ -8,7 +8,7 @@ describe('useSisyphusScope', () => {
   it('should return scope when used within SisyphusScopeContext', () => {
     // Arrange
     const mockScope = { renderer: vi.fn() } as unknown as SisyphusScope;
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
+    const wrapper = ({ children }: { children: ReactNode }) => (
       <SisyphusScopeContext.Provider value={mockScope}>{children}</SisyphusScopeContext.Provider>
     );
 

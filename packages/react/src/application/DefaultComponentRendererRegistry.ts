@@ -1,4 +1,4 @@
-import type React from 'react';
+import type { ComponentType } from 'react';
 import type {
   AtomicRuleGroupViewProperties,
   AtomicRuleViewProperties,
@@ -8,33 +8,31 @@ import type {
 
 /** 编辑器组件注册表默认实现 */
 export class DefaultComponentRendererRegistry implements ComponentRendererRegistry {
-  private atomicRuleViewComponent: React.ComponentType<AtomicRuleViewProperties> | null = null;
-  private atomicRuleGroupViewComponent: React.ComponentType<AtomicRuleGroupViewProperties> | null =
-    null;
-  private ruleWorkspaceViewComponent: React.ComponentType<RuleWorkspaceViewProperties> | null =
-    null;
+  private atomicRuleViewComponent: ComponentType<AtomicRuleViewProperties> | null = null;
+  private atomicRuleGroupViewComponent: ComponentType<AtomicRuleGroupViewProperties> | null = null;
+  private ruleWorkspaceViewComponent: ComponentType<RuleWorkspaceViewProperties> | null = null;
 
-  registerAtomicRuleView(component: React.ComponentType<AtomicRuleViewProperties>): void {
+  registerAtomicRuleView(component: ComponentType<AtomicRuleViewProperties>): void {
     this.atomicRuleViewComponent = component;
   }
 
-  registerAtomicRuleGroupView(component: React.ComponentType<AtomicRuleGroupViewProperties>): void {
+  registerAtomicRuleGroupView(component: ComponentType<AtomicRuleGroupViewProperties>): void {
     this.atomicRuleGroupViewComponent = component;
   }
 
-  registerRuleWorkspaceView(component: React.ComponentType<RuleWorkspaceViewProperties>): void {
+  registerRuleWorkspaceView(component: ComponentType<RuleWorkspaceViewProperties>): void {
     this.ruleWorkspaceViewComponent = component;
   }
 
-  getAtomicRuleView(): React.ComponentType<AtomicRuleViewProperties> | null {
+  getAtomicRuleView(): ComponentType<AtomicRuleViewProperties> | null {
     return this.atomicRuleViewComponent;
   }
 
-  getAtomicRuleGroupView(): React.ComponentType<AtomicRuleGroupViewProperties> | null {
+  getAtomicRuleGroupView(): ComponentType<AtomicRuleGroupViewProperties> | null {
     return this.atomicRuleGroupViewComponent;
   }
 
-  getRuleWorkspaceView(): React.ComponentType<RuleWorkspaceViewProperties> | null {
+  getRuleWorkspaceView(): ComponentType<RuleWorkspaceViewProperties> | null {
     return this.ruleWorkspaceViewComponent;
   }
 }

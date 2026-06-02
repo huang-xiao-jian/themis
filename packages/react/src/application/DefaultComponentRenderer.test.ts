@@ -3,7 +3,7 @@ import type {
   AtomicRuleScheduler,
   RuleWorkspaceScheduler,
 } from '@sisyphus/core';
-import React from 'react';
+import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { DefaultComponentRenderer } from './DefaultComponentRenderer';
 import { DefaultComponentRendererRegistry } from './DefaultComponentRendererRegistry';
@@ -22,7 +22,7 @@ describe('DefaultComponentRenderer', () => {
     // Arrange
     const registry = new DefaultComponentRendererRegistry();
     const StubComponent = (props: AtomicRuleViewProperties) =>
-      React.createElement('div', null, props.scheduler.id);
+      createElement('div', null, props.scheduler.id);
     registry.registerAtomicRuleView(StubComponent);
     const renderer = new DefaultComponentRenderer(registry);
 
@@ -43,7 +43,7 @@ describe('DefaultComponentRenderer', () => {
     // Arrange
     const registry = new DefaultComponentRendererRegistry();
     const StubComponent = (props: AtomicRuleGroupViewProperties) =>
-      React.createElement('div', null, props.scheduler.id);
+      createElement('div', null, props.scheduler.id);
     registry.registerAtomicRuleGroupView(StubComponent);
     const renderer = new DefaultComponentRenderer(registry);
 
@@ -63,7 +63,7 @@ describe('DefaultComponentRenderer', () => {
   it('should render registered RuleWorkspaceView component', () => {
     // Arrange
     const registry = new DefaultComponentRendererRegistry();
-    const StubComponent = (_props: RuleWorkspaceViewProperties) => React.createElement('div');
+    const StubComponent = (_props: RuleWorkspaceViewProperties) => createElement('div');
     registry.registerRuleWorkspaceView(StubComponent);
     const renderer = new DefaultComponentRenderer(registry);
 
