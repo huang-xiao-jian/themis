@@ -81,6 +81,29 @@ interface PaginatedFilterableFetcher<T = FieldDataSource> {
 }
 ```
 
+#### Fetcher Type 枚举
+
+`FetcherProvider` 通过 `type` 字段区分亚型，枚举集中声明 `type` 取值：
+
+```ts
+/**
+ * Fetcher 类型枚举
+ *
+ * 标识 FetcherProvider 的能力组合（是否支持分页、是否支持服务端过滤），
+ * 与 DynamicRuleFactorResource.features 共同决定 DynamicResource 亚型
+ */
+enum FetcherType {
+  /** 基础动态资源 - 不支持分页、不支持服务端过滤 */
+  ELEMENTARY = 'elementary',
+  /** 分页动态资源 - 支持分页、不支持服务端过滤 */
+  PAGINATED = 'paginated',
+  /** 可过滤动态资源 - 不支持分页、支持服务端过滤 */
+  FILTERABLE = 'filterable',
+  /** 分页+过滤动态资源 - 支持分页、支持服务端过滤 */
+  PAGINATED_FILTERABLE = 'paginatedFilterable',
+}
+```
+
 #### 资源工厂与 Fetcher 管理
 
 ##### 依赖关系
@@ -117,7 +140,7 @@ classDiagram
  * Elementary 资源 Provider
  */
 interface ElementaryFetcherProvider<T extends FieldDataSource> {
-  readonly type: 'elementary';
+  readonly type: FetcherType.ELEMENTARY;
   readonly fetcher: ElementaryFetcher<T>;
 }
 
@@ -125,7 +148,7 @@ interface ElementaryFetcherProvider<T extends FieldDataSource> {
  * 分页资源 Provider
  */
 interface PaginatedFetcherProvider<T extends FieldDataSource> {
-  readonly type: 'paginated';
+  readonly type: FetcherType.PAGINATED;
   readonly fetcher: PaginatedFetcher<T>;
 }
 
@@ -133,7 +156,7 @@ interface PaginatedFetcherProvider<T extends FieldDataSource> {
  * 可过滤资源 Provider
  */
 interface FilterableFetcherProvider<T extends FieldDataSource> {
-  readonly type: 'filterable';
+  readonly type: FetcherType.FILTERABLE;
   readonly fetcher: FilterableFetcher<T>;
 }
 
@@ -141,7 +164,7 @@ interface FilterableFetcherProvider<T extends FieldDataSource> {
  * 分页+过滤资源 Provider
  */
 interface PaginatedFilterableFetcherProvider<T extends FieldDataSource> {
-  readonly type: 'paginatedFilterable';
+  readonly type: FetcherType.PAGINATED_FILTERABLE;
   readonly fetcher: PaginatedFilterableFetcher<T>;
 }
 
@@ -182,9 +205,7 @@ abstract class FetcherRegistry {
    * @param type FetcherProvider 类型，与 features 组合决定亚型
    * @returns 匹配的 FetcherProvider，未找到返回 undefined
    */
-  abstract find(
-    type: FetcherProvider<FieldDataSource>['type']
-  ): FetcherProvider<FieldDataSource> | undefined;
+  abstract find(type: FetcherType): FetcherProvider<FieldDataSource> | undefined;
 
   /**
    * 获取全部 Provider
