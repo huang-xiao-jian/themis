@@ -33,6 +33,21 @@ enum Colors {
 - `Class` 文件命名使用 `pascal case` (e.g. `UserRepository.ts`)
 - `Function` 文件命名使用 `Camel Case` (e.g. `findDiscountRule.ts`)
 
+### 导入规范
+
+- 禁止使用命名空间导入（如 `import React from 'react'` 或 `import type React from 'react'`）
+- 必须使用具名导入，按需引入所需的类型或函数
+
+```ts
+// ✅ 正确
+import type { ReactElement, ReactNode, ComponentType } from 'react';
+import { createElement, createContext, useContext } from 'react';
+
+// ❌ 错误
+import React from 'react';
+import type React from 'react';
+```
+
 ### 代码格式
 
 - 代码格式约定参考 [prettier](../.prettierrc) 配置
