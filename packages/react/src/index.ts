@@ -1,2 +1,30 @@
-import { sum } from '@sisyphus/core';
-export { sum };
+// 重新导出 @sisyphus/core 类型，便于消费方使用
+export type {
+  FieldDataSource,
+  FieldConstraints,
+  RuleFactorDefinition,
+  AtomicRule,
+  AtomicRuleGroup,
+  StaticRuleFactorResource,
+  DynamicRuleFactorResource,
+  DynamicRuleFactorResourceFeature,
+  ThresholdComponentProperties,
+  BaseProperties,
+  InputProperties,
+  TextAreaProperties,
+  RangeInputProperties,
+  SwitchProperties,
+  SelectProperties,
+  MultipleSelectProperties,
+  PickerProperties,
+  RangePickerProperties,
+  ListBuilderProperties,
+  ListRangeBuilderProperties,
+  FetcherProvider,
+  Pagination,
+  PaginatedResult,
+  ElementaryFetcher,
+  PaginatedFetcher,
+  FilterableFetcher,
+  PaginatedFilterableFetcher,
+} from '@sisyphus/core'
