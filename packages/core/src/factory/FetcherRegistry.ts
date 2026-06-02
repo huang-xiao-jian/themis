@@ -1,11 +1,5 @@
-import type { FetcherProvider } from '../fetcher/FetcherProvider'
-
-/**
- * Fetcher Provider Type
- *
- * 按 type 判别 Provider 类型，便于 FetcherRegistry.find() 查找
- */
-export type FetcherProviderType = FetcherProvider<unknown>['type']
+import type { FetcherProvider } from '../fetcher/FetcherProvider';
+import { FetcherType } from '../fetcher/FetcherType';
 
 /**
  * Fetcher Registry
@@ -14,13 +8,13 @@ export type FetcherProviderType = FetcherProvider<unknown>['type']
  * Fetcher 与具体资源名称解耦，多个 Resource 可复用同一个 Fetcher
  */
 export class FetcherRegistry {
-  private readonly list: FetcherProvider<unknown>[] = []
+  private readonly list: FetcherProvider<unknown>[] = [];
 
   /**
    * 注册一个 FetcherProvider
    */
   register(provider: FetcherProvider<unknown>): void {
-    this.list.push(provider)
+    this.list.push(provider);
   }
 
   /**
@@ -28,14 +22,14 @@ export class FetcherRegistry {
    * @param type FetcherProvider 类型，与 features 组合决定亚型
    * @returns 匹配的 FetcherProvider，未找到返回 undefined
    */
-  find(type: FetcherProviderType): FetcherProvider<unknown> | undefined {
-    return this.list.find((p) => p.type === type)
+  find(type: FetcherType): FetcherProvider<unknown> | undefined {
+    return this.list.find((p) => p.type === type);
   }
 
   /**
    * 获取全部 Provider
    */
   all(): readonly FetcherProvider<unknown>[] {
-    return this.list
+    return this.list;
   }
 }

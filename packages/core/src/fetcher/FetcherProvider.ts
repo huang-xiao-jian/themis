@@ -1,38 +1,39 @@
-import type { ElementaryFetcher } from './ElementaryFetcher'
-import type { PaginatedFetcher } from './PaginatedFetcher'
-import type { FilterableFetcher } from './FilterableFetcher'
-import type { PaginatedFilterableFetcher } from './PaginatedFilterableFetcher'
+import type { ElementaryFetcher } from './ElementaryFetcher';
+import { FetcherType } from './FetcherType';
+import type { FilterableFetcher } from './FilterableFetcher';
+import type { PaginatedFetcher } from './PaginatedFetcher';
+import type { PaginatedFilterableFetcher } from './PaginatedFilterableFetcher';
 
 /**
  * Elementary 资源 Provider
  */
 export interface ElementaryFetcherProvider<T = unknown> {
-  readonly type: 'elementary'
-  readonly fetcher: ElementaryFetcher<T>
+  readonly type: FetcherType.ELEMENTARY;
+  readonly fetcher: ElementaryFetcher<T>;
 }
 
 /**
  * 分页资源 Provider
  */
 export interface PaginatedFetcherProvider<T = unknown> {
-  readonly type: 'paginated'
-  readonly fetcher: PaginatedFetcher<T>
+  readonly type: FetcherType.PAGINATED;
+  readonly fetcher: PaginatedFetcher<T>;
 }
 
 /**
  * 可过滤资源 Provider
  */
 export interface FilterableFetcherProvider<T = unknown> {
-  readonly type: 'filterable'
-  readonly fetcher: FilterableFetcher<T>
+  readonly type: FetcherType.FILTERABLE;
+  readonly fetcher: FilterableFetcher<T>;
 }
 
 /**
  * 分页+过滤资源 Provider
  */
 export interface PaginatedFilterableFetcherProvider<T = unknown> {
-  readonly type: 'paginatedFilterable'
-  readonly fetcher: PaginatedFilterableFetcher<T>
+  readonly type: FetcherType.PAGINATED_FILTERABLE;
+  readonly fetcher: PaginatedFilterableFetcher<T>;
 }
 
 /**
@@ -45,4 +46,4 @@ export type FetcherProvider<T = unknown> =
   | ElementaryFetcherProvider<T>
   | PaginatedFetcherProvider<T>
   | FilterableFetcherProvider<T>
-  | PaginatedFilterableFetcherProvider<T>
+  | PaginatedFilterableFetcherProvider<T>;

@@ -1,5 +1,6 @@
-import type { PaginatedFilterableFetcher } from './PaginatedFilterableFetcher'
-import type { PaginatedFilterableFetcherProvider } from './FetcherProvider'
+import type { PaginatedFilterableFetcherProvider } from './FetcherProvider';
+import { FetcherType } from './FetcherType';
+import type { PaginatedFilterableFetcher } from './PaginatedFilterableFetcher';
 
 /**
  * 创建 PaginatedFilterable Fetcher Provider
@@ -10,7 +11,7 @@ export function providePaginatedFilterableFetcher<T>(
   fetcher: PaginatedFilterableFetcher<T>
 ): PaginatedFilterableFetcherProvider<T> {
   return {
-    type: 'paginatedFilterable',
+    type: FetcherType.PAGINATED_FILTERABLE,
     fetcher,
-  }
+  };
 }

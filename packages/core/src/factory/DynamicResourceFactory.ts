@@ -1,21 +1,22 @@
-import type { FieldDataSource } from '../dsl/FieldDataSource'
-import type { DynamicRuleFactorResource } from '../dsl/DynamicRuleFactorResource'
-import type { DynamicResource } from '../resource/DynamicResource'
-import { ElementaryDynamicResourceImpl } from '../resource/ElementaryDynamicResourceImpl'
-import { PaginatedDynamicResourceImpl } from '../resource/PaginatedDynamicResourceImpl'
-import { FilterableDynamicResourceImpl } from '../resource/FilterableDynamicResourceImpl'
-import { PaginatedFilterableDynamicResourceImpl } from '../resource/PaginatedFilterableDynamicResourceImpl'
-import type { ElementaryFetcher } from '../fetcher/ElementaryFetcher'
-import type { PaginatedFetcher } from '../fetcher/PaginatedFetcher'
-import type { FilterableFetcher } from '../fetcher/FilterableFetcher'
-import type { PaginatedFilterableFetcher } from '../fetcher/PaginatedFilterableFetcher'
-import type { FetcherRegistry } from './FetcherRegistry'
+import type { DynamicRuleFactorResource } from '../dsl/DynamicRuleFactorResource';
+import type { FieldDataSource } from '../dsl/FieldDataSource';
+import type { ElementaryFetcher } from '../fetcher/ElementaryFetcher';
+import { FetcherType } from '../fetcher/FetcherType';
+import type { FilterableFetcher } from '../fetcher/FilterableFetcher';
+import type { PaginatedFetcher } from '../fetcher/PaginatedFetcher';
+import type { PaginatedFilterableFetcher } from '../fetcher/PaginatedFilterableFetcher';
+import type { DynamicResource } from '../resource/DynamicResource';
+import { ElementaryDynamicResourceImpl } from '../resource/ElementaryDynamicResourceImpl';
+import { FilterableDynamicResourceImpl } from '../resource/FilterableDynamicResourceImpl';
+import { PaginatedDynamicResourceImpl } from '../resource/PaginatedDynamicResourceImpl';
+import { PaginatedFilterableDynamicResourceImpl } from '../resource/PaginatedFilterableDynamicResourceImpl';
+import type { FetcherRegistry } from './FetcherRegistry';
 
 /**
  * 动态资源工厂抽象类
  */
 export abstract class DynamicResourceFactory {
-  abstract create(resource: DynamicRuleFactorResource): DynamicResource<FieldDataSource>
+  abstract create(resource: DynamicRuleFactorResource): DynamicResource<FieldDataSource>;
 }
 
 /**
@@ -35,66 +36,63 @@ export abstract class DynamicResourceFactory {
  */
 export class DefaultDynamicResourceFactory extends DynamicResourceFactory {
   constructor(private readonly registry: FetcherRegistry) {
-    super()
+    super();
   }
 
   override create(resource: DynamicRuleFactorResource): DynamicResource<FieldDataSource> {
-    const features = new Set(resource.features ?? [])
-    const hasPagination = features.has('pagination')
-    const hasFilter = features.has('filter')
+    const features = new Set(resource.features ?? []);
+    const hasPagination = features.has('pagination');
+    const hasFilter = features.has('filter');
 
     if (hasPagination && hasFilter) {
       // 必须注册 paginatedFilterable
-      const provider = this.registry.find('paginatedFilterable')
+      const provider = this.registry.find(FetcherType.PAGINATED_FILTERABLE);
       if (!provider) {
         throw new Error(
-          `[sisyphus] No FetcherProvider with type "paginatedFilterable" registered. ` +
+          `[sisyphus] No FetcherProvider with type "${FetcherType.PAGINATED_FILTERABLE}" registered. ` +
             `Resource "${resource.name}" requires a PaginatedFilterableFetcher.`
-        )
+        );
       }
       const fetcher = (provider as { fetcher: PaginatedFilterableFetcher<FieldDataSource> })
-        .fetcher
-      return new PaginatedFilterableDynamicResourceImpl<FieldDataSource>(
-        resource.name,
-        fetcher
-      )
+        .fetcher;
+      return new PaginatedFilterableDynamicResourceImpl<FieldDataSource>(resource.name, fetcher);
     }
 
     if (hasPagination) {
       // 精确匹配 paginated；不做 fallback
-      const provider = this.registry.find('paginated')
+      const provider = this.registry.find(FetcherType.PAGINATED);
       if (!provider) {
         throw new Error(
-          `[sisyphus] No FetcherProvider with type "paginated" registered. ` +
+          `[sisyphus] No FetcherProvider with type "${FetcherType.PAGINATED}" registered. ` +
             `Resource "${resource.name}" requires a PaginatedFetcher.`
-        )
+        );
       }
-      const fetcher = (provider as { fetcher: PaginatedFetcher<FieldDataSource> }).fetcher
-      return new PaginatedDynamicResourceImpl<FieldDataSource>(resource.name, fetcher)
+      const fetcher = (provider as { fetcher: PaginatedFetcher<FieldDataSource> }).fetcher;
+      return new PaginatedDynamicResourceImpl<FieldDataSource>(resource.name, fetcher);
     }
 
     if (hasFilter) {
       // 精确匹配 filterable；不做 fallback
-      const provider = this.registry.find('filterable')
+      const provider = this.registry.find(FetcherType.FILTERABLE);
       if (!provider) {
         throw new Error(
-          `[sisyphus] No FetcherProvider with type "filterable" registered. ` +
+          `[sisyphus] No FetcherProvider with type "${FetcherType.FILTERABLE}" registered. ` +
             `Resource "${resource.name}" requires a FilterableFetcher.`
-        )
+        );
       }
-      const fetcher = (provider as { fetcher: FilterableFetcher<FieldDataSource> }).fetcher
-      return new FilterableDynamicResourceImpl<FieldDataSource>(resource.name, fetcher)
+      const fetcher = (provider as { fetcher: FilterableFetcher<FieldDataSource> }).fetcher;
+      return new FilterableDynamicResourceImpl<FieldDataSource>(resource.name, fetcher);
     }
 
     // 无 features：fallback 到 Elementary（最基础动态资源）
-    const provider = this.registry.find('elementary')
+    const provider = this.registry.find(FetcherType.ELEMENTARY);
     if (!provider) {
       throw new Error(
-        `[sisyphus] No FetcherProvider with type "elementary" registered. ` +
+        `[sisyphus] No FetcherProvider with type "${FetcherType.ELEMENTARY}" registered. ` +
           `Resource "${resource.name}" requires an elementary fetcher, or declare features.`
-      )
+      );
     }
-    const fetcher = (provider as { fetcher: ElementaryFetcher<FieldDataSource> }).fetcher
-    return new ElementaryDynamicResourceImpl<FieldDataSource>(resource.name, fetcher)
+    const fetcher = (provider as { fetcher: ElementaryFetcher<FieldDataSource> }).fetcher;
+    return new ElementaryDynamicResourceImpl<FieldDataSource>(resource.name, fetcher);
   }
 }

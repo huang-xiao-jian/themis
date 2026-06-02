@@ -1,5 +1,6 @@
-import type { ElementaryFetcher } from './ElementaryFetcher'
-import type { ElementaryFetcherProvider } from './FetcherProvider'
+import type { ElementaryFetcher } from './ElementaryFetcher';
+import type { ElementaryFetcherProvider } from './FetcherProvider';
+import { FetcherType } from './FetcherType';
 
 /**
  * 创建 Elementary Fetcher Provider
@@ -12,7 +13,7 @@ export function provideElementaryFetcher<T>(
   fetcher: ElementaryFetcher<T>
 ): ElementaryFetcherProvider<T> {
   return {
-    type: 'elementary',
+    type: FetcherType.ELEMENTARY,
     fetcher,
-  }
+  };
 }

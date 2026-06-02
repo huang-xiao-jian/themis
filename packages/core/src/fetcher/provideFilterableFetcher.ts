@@ -1,5 +1,6 @@
-import type { FilterableFetcher } from './FilterableFetcher'
-import type { FilterableFetcherProvider } from './FetcherProvider'
+import type { FilterableFetcherProvider } from './FetcherProvider';
+import { FetcherType } from './FetcherType';
+import type { FilterableFetcher } from './FilterableFetcher';
 
 /**
  * 创建 Filterable Fetcher Provider
@@ -10,7 +11,7 @@ export function provideFilterableFetcher<T>(
   fetcher: FilterableFetcher<T>
 ): FilterableFetcherProvider<T> {
   return {
-    type: 'filterable',
+    type: FetcherType.FILTERABLE,
     fetcher,
-  }
+  };
 }
