@@ -78,10 +78,10 @@ classDiagram
 
 **职责说明**：
 
-- `FetcherRegistry`：业务方注册和管理 `Fetcher`，支持基于资源名称查询
-- `StaticResourceFactory`：将 `StaticRuleFactorResource` 转换为 `StaticResource` 实体
-- `DynamicResourceFactory`：将 `DynamicRuleFactorResource` 转换为对应亚型 `DynamicResource` 实体
-- `ResourceFactory`：`Facade`，统一入口，根据 `RuleFactorDefinition.resource` 形态自动选择工厂
+- `FetcherRegistry`：负责注册和管理 `Fetcher`，支持基于资源名称查询
+- `StaticResourceFactory`：负责将 `StaticRuleFactorResource` 转换为 `StaticResource` 实体
+- `DynamicResourceFactory`：负责将 `DynamicRuleFactorResource` 转换为对应亚型 `DynamicResource` 实体
+- `ResourceFactory`：作为统一 `Facade` 入口，根据 `RuleFactorDefinition.resource` 形态自动选择工厂
 
 ##### 抽象设计
 
@@ -246,18 +246,6 @@ class OperatorInferrer {
 class ThresholderInferrer {
   infer(factor: RuleFactorDefinition): ThresholdComponentProperties;
 }
-
-/**
- * 规则因子选项推断器
- *
- * 从全部规则因子列表中排除已使用的规则因子
- */
-class FactorOptionsInferrer {
-  infer(
-    allFactors: readonly RuleFactorDefinition[],
-    usedFactorNames: ReadonlySet<string>
-  ): readonly FieldDataSource[];
-}
 ```
 
 ### 应用层
@@ -308,24 +296,6 @@ interface AtomicRuleScheduler {
 }
 ```
 
-`AtomicRuleScheduler` 与领域层推断器的协作流程：
-
-```mermaid
-classDiagram
-  class AtomicRuleScheduler {
-    <<interface>>
-  }
-  class OperatorInferrer {
-    <<class>>
-  }
-  class ThresholderInferrer {
-    <<class>>
-  }
-
-  AtomicRuleScheduler ..> OperatorInferrer : Dependency
-  AtomicRuleScheduler ..> ThresholderInferrer : Dependency
-```
-
 用户选择规则因子的联动流程:
 
 ```mermaid
@@ -354,6 +324,21 @@ sequenceDiagram
 规则组设置器管理原子规则集合：
 
 ```ts
+/**
+ * 规则因子选项推断器
+ *
+ * 1. 数据源：factors.signal（RuleWorkspace 共享的规则因子定义列表）
+ * 2. 排除规则：已存在于 rules.signal 中的原子规则的 name
+ * 3. 输出格式：转换为 FieldDataSource[] 供 Select 组件使用
+ * 4. 作用域：AtomicRuleGroup 级别，每个规则组独立计算
+ */
+class FactorOptionsInferrer {
+  infer(
+    allFactors: readonly RuleFactorDefinition[],
+    usedFactorNames: ReadonlySet<string>
+  ): readonly FieldDataSource[];
+}
+
 /** 规则组初始化数据（编辑场景） */
 interface AtomicRuleGroup {
   /** 已有的原子规则列表 */
@@ -369,7 +354,7 @@ interface AtomicRuleGroupScheduler {
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
   /** 可用的规则因子列表 */
   readonly factors: Signal<readonly RuleFactorDefinition[]>;
-  /** 适配选择器的选项集合，需要排除已使用的规则因子 */
+  /** 适配选择器的规则因子选项集合，需要排除 Group 内部已使用的规则因子 */
   readonly factorOptions: Signal<readonly FieldDataSource[]>;
 
   /** 创建原子规则设置器（新建场景） */
@@ -383,20 +368,7 @@ interface AtomicRuleGroupScheduler {
 }
 ```
 
-`factorOptions` 用于在规则组中选择规则因子时提供可选列表，需排除 `Group` 内部已配置的规则因子
-
 **特别说明**：`FactorOptionsInferrer` 属于 `AtomicRuleGroup` 级别，每个规则组独立维护自己的 `factorOptions`，不同规则组之间 **不共享**。
-
-```ts
-/**
- * factorOptions 推断规则
- *
- * 1. 数据源：factors.signal（RuleWorkspace 共享的规则因子定义列表）
- * 2. 排除规则：已存在于 rules.signal 中的原子规则的 name
- * 3. 输出格式：转换为 FieldDataSource[] 供 Select 组件使用
- * 4. 作用域：AtomicRuleGroup 级别，每个规则组独立计算
- */
-```
 
 #### RuleWorkspaceScheduler
 
@@ -425,6 +397,55 @@ interface RuleWorkspaceScheduler {
   /** 销毁工作空间，释放所有资源（订阅、缓存等） */
   destroy(): void;
 }
+```
+
+### 领域模型
+
+```mermaid
+classDiagram
+  class AtomicRule {
+    <<interface>>
+  }
+
+  class AtomicRuleGroup {
+    <<interface>>
+  }
+
+  class AtomicRuleGroupScheduler {
+    <<class>>
+  }
+
+  class AtomicRuleScheduler {
+    <<class>>
+  }
+
+  class OperatorInferrer {
+    <<class>>
+  }
+
+  class ThresholderInferrer {
+    <<class>>
+  }
+
+  class FactorOptionsInferrer {
+    <<class>>
+  }
+
+  class RuleWorkspaceScheduler {
+    <<class>>
+  }
+
+  AtomicRuleGroup ..> AtomicRule : Dependency
+
+  AtomicRuleScheduler ..> AtomicRule : Dependency
+  AtomicRuleScheduler ..> OperatorInferrer : Dependency
+  AtomicRuleScheduler ..> ThresholderInferrer : Dependency
+
+  AtomicRuleGroupScheduler ..> AtomicRuleGroup : Dependency
+  AtomicRuleGroupScheduler ..> AtomicRuleScheduler : Dependency
+  AtomicRuleGroupScheduler ..> FactorOptionsInferrer : Dependency
+
+  RuleWorkspaceScheduler ..> AtomicRuleGroupScheduler : Dependency
 ```
 
 ## 业务方使用示例
