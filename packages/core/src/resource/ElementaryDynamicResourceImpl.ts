@@ -23,7 +23,7 @@ export class ElementaryDynamicResourceImpl<T> implements ElementaryDynamicResour
   onRefresh = (): void => {
     this.loading.value = true
     this.fetcher
-      .fetch()
+      .fetch(this.name)
       .then((data) => {
         this.options.value = [...data]
       })

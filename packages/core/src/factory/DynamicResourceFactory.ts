@@ -26,7 +26,12 @@ export abstract class DynamicResourceFactory {
  * - 仅 filter：FilterableDynamicResource
  * - pagination + filter：PaginatedFilterableDynamicResource
  *
- * 注册表中查不到对应 Fetcher 时抛错
+ * 按 type 从 FetcherRegistry 中查找 FetcherProvider（精确匹配，不做 fallback）：
+ *   - paginated + filter：paginatedFilterable
+ *   - 仅 pagination：paginated
+ *   - 仅 filter：filterable
+ *   - 无 features：elementary
+ * 找不到对应类型的 FetcherProvider 时抛错
  */
 export class DefaultDynamicResourceFactory extends DynamicResourceFactory {
   constructor(private readonly registry: FetcherRegistry) {
@@ -35,22 +40,16 @@ export class DefaultDynamicResourceFactory extends DynamicResourceFactory {
 
   override create(resource: DynamicRuleFactorResource): DynamicResource<FieldDataSource> {
     const features = new Set(resource.features ?? [])
-    const provider = this.registry.get(resource.name)
-    if (!provider) {
-      throw new Error(
-        `[sisyphus] No FetcherProvider registered for resource "${resource.name}". ` +
-          `Register a provider via FetcherRegistry.register() before creating the resource.`
-      )
-    }
-
     const hasPagination = features.has('pagination')
     const hasFilter = features.has('filter')
 
     if (hasPagination && hasFilter) {
-      if (provider.type !== 'paginatedFilterable') {
+      // 必须注册 paginatedFilterable
+      const provider = this.registry.find('paginatedFilterable')
+      if (!provider) {
         throw new Error(
-          `[sisyphus] Resource "${resource.name}" declared features [pagination, filter] ` +
-            `but registered provider type is "${provider.type}".`
+          `[sisyphus] No FetcherProvider with type "paginatedFilterable" registered. ` +
+            `Resource "${resource.name}" requires a PaginatedFilterableFetcher.`
         )
       }
       const fetcher = (provider as { fetcher: PaginatedFilterableFetcher<FieldDataSource> })
@@ -62,10 +61,12 @@ export class DefaultDynamicResourceFactory extends DynamicResourceFactory {
     }
 
     if (hasPagination) {
-      if (provider.type !== 'paginated' && provider.type !== 'paginatedFilterable') {
+      // 精确匹配 paginated；不做 fallback
+      const provider = this.registry.find('paginated')
+      if (!provider) {
         throw new Error(
-          `[sisyphus] Resource "${resource.name}" declared feature [pagination] ` +
-            `but registered provider type is "${provider.type}".`
+          `[sisyphus] No FetcherProvider with type "paginated" registered. ` +
+            `Resource "${resource.name}" requires a PaginatedFetcher.`
         )
       }
       const fetcher = (provider as { fetcher: PaginatedFetcher<FieldDataSource> }).fetcher
@@ -73,10 +74,12 @@ export class DefaultDynamicResourceFactory extends DynamicResourceFactory {
     }
 
     if (hasFilter) {
-      if (provider.type !== 'filterable' && provider.type !== 'paginatedFilterable') {
+      // 精确匹配 filterable；不做 fallback
+      const provider = this.registry.find('filterable')
+      if (!provider) {
         throw new Error(
-          `[sisyphus] Resource "${resource.name}" declared feature [filter] ` +
-            `but registered provider type is "${provider.type}".`
+          `[sisyphus] No FetcherProvider with type "filterable" registered. ` +
+            `Resource "${resource.name}" requires a FilterableFetcher.`
         )
       }
       const fetcher = (provider as { fetcher: FilterableFetcher<FieldDataSource> }).fetcher
@@ -84,10 +87,11 @@ export class DefaultDynamicResourceFactory extends DynamicResourceFactory {
     }
 
     // 无 features：fallback 到 Elementary（最基础动态资源）
-    if (provider.type !== 'elementary') {
+    const provider = this.registry.find('elementary')
+    if (!provider) {
       throw new Error(
-        `[sisyphus] Resource "${resource.name}" declared no features but registered ` +
-          `provider type is "${provider.type}". Use provideElementaryFetcher() or declare features.`
+        `[sisyphus] No FetcherProvider with type "elementary" registered. ` +
+          `Resource "${resource.name}" requires an elementary fetcher, or declare features.`
       )
     }
     const fetcher = (provider as { fetcher: ElementaryFetcher<FieldDataSource> }).fetcher

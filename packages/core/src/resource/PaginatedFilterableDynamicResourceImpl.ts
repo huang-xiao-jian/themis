@@ -50,7 +50,7 @@ export class PaginatedFilterableDynamicResourceImpl<T>
     const { page, pageSize } = this.pagination.value
     this.loading.value = true
     this.fetcher
-      .fetch(this.keyword.value, page, pageSize)
+      .fetch(this.name, this.keyword.value, page, pageSize)
       .then((result) => {
         this.options.value = [...result.data]
         this.pagination.value = {

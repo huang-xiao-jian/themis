@@ -32,25 +32,52 @@
 
 业务方按场景组合提供 `Fetcher`，作为具体的实现细节
 
+**重要设计约定**：`Fetcher` 只与 `Resource` 的 `features` 相关，不与具体 `Resource.name` 绑定。
+`Resource.name` 在请求时通过 `fetch()` 的第一参数传入，从而**一个 `Fetcher` 可被多个 `Resource` 复用**，便于业务方按 features 复用同一种数据获取实现（例如多个 Resource 都走同一套分页过滤 API）。
+`Resource.name` 的语义是数据查询的**业务主键 / 路由参数**，由 DSL `RuleFactorDefinition.resource.name` 决定，而非由 Fetcher 端指定。
+
 ```ts
 // 基础动态资源 Fetcher - 无分页、无过滤
 interface ElementaryFetcher<T = FieldDataSource> {
-  fetch(): Promise<T[]>;
+  /**
+   * @param resourceName 资源名称，来源于 DSL 中 `RuleFactorDefinition.resource.name`
+   */
+  fetch(resourceName: string): Promise<T[]>;
 }
 
 // 分页动态资源 Fetcher
 interface PaginatedFetcher<T = FieldDataSource> {
-  fetch(page: number, pageSize: number): Promise<PaginatedResult<T>>;
+  /**
+   * @param resourceName 资源名称，来源于 DSL 中 `RuleFactorDefinition.resource.name`
+   * @param page 当前页码（从 1 开始）
+   * @param pageSize 每页条数
+   */
+  fetch(resourceName: string, page: number, pageSize: number): Promise<PaginatedResult<T>>;
 }
 
 // 过滤动态资源 Fetcher
 interface FilterableFetcher<T = FieldDataSource> {
-  fetch(keyword: string): Promise<T[]>;
+  /**
+   * @param resourceName 资源名称，来源于 DSL 中 `RuleFactorDefinition.resource.name`
+   * @param keyword 过滤关键词
+   */
+  fetch(resourceName: string, keyword: string): Promise<T[]>;
 }
 
 // 分页+过滤动态资源 Fetcher
 interface PaginatedFilterableFetcher<T = FieldDataSource> {
-  fetch(keyword: string, page: number, pageSize: number): Promise<PaginatedResult<T>>;
+  /**
+   * @param resourceName 资源名称，来源于 DSL 中 `RuleFactorDefinition.resource.name`
+   * @param keyword 过滤关键词
+   * @param page 当前页码（从 1 开始）
+   * @param pageSize 每页条数
+   */
+  fetch(
+    resourceName: string,
+    keyword: string,
+    page: number,
+    pageSize: number
+  ): Promise<PaginatedResult<T>>;
 }
 ```
 
@@ -78,14 +105,58 @@ classDiagram
 
 **职责说明**：
 
-- `FetcherRegistry`：负责注册和管理 `Fetcher`，支持基于资源名称查询
+- `FetcherRegistry`：负责持有 `FetcherProvider` 列表，提供按 `type` 查找 `Fetcher` 的能力。`FetcherRegistry` **不**负责按资源名称映射 `Fetcher`（资源名称是 `Fetcher` 调用时的请求参数，不是注册时的元数据）
 - `StaticResourceFactory`：负责将 `StaticRuleFactorResource` 转换为 `StaticResource` 实体
-- `DynamicResourceFactory`：负责将 `DynamicRuleFactorResource` 转换为对应亚型 `DynamicResource` 实体
+- `DynamicResourceFactory`：负责将 `DynamicRuleFactorResource` 转换为对应亚型 `DynamicResource` 实体。内部按 `features` 决定亚型，再从 `FetcherRegistry` 中按 `type` 选取匹配的 `Fetcher`
 - `ResourceFactory`：作为统一 `Facade` 入口，根据 `RuleFactorDefinition.resource` 形态自动选择工厂
 
 ##### 抽象设计
 
 ```ts
+/**
+ * Elementary 资源 Provider
+ */
+interface ElementaryFetcherProvider<T extends FieldDataSource> {
+  readonly type: 'elementary';
+  readonly fetcher: ElementaryFetcher<T>;
+}
+
+/**
+ * 分页资源 Provider
+ */
+interface PaginatedFetcherProvider<T extends FieldDataSource> {
+  readonly type: 'paginated';
+  readonly fetcher: PaginatedFetcher<T>;
+}
+
+/**
+ * 可过滤资源 Provider
+ */
+interface FilterableFetcherProvider<T extends FieldDataSource> {
+  readonly type: 'filterable';
+  readonly fetcher: FilterableFetcher<T>;
+}
+
+/**
+ * 分页+过滤资源 Provider
+ */
+interface PaginatedFilterableFetcherProvider<T extends FieldDataSource> {
+  readonly type: 'paginatedFilterable';
+  readonly fetcher: PaginatedFilterableFetcher<T>;
+}
+
+/**
+ * FetcherProvider 联合类型（按 type 判别）
+ *
+ * 重要：不包含 resourceName 字段。Fetcher 行为与具体资源名称解耦，
+ * 资源名称作为请求参数在 fetch() 调用时传入
+ */
+type FetcherProvider<T extends FieldDataSource> =
+  | ElementaryFetcherProvider<T>
+  | PaginatedFetcherProvider<T>
+  | FilterableFetcherProvider<T>
+  | PaginatedFilterableFetcherProvider<T>;
+
 /**
  * 运行时 Resource 实体联合类型
  *
@@ -98,6 +169,28 @@ type DynamicResource<T> =
   | PaginatedDynamicResource<T>
   | FilterableDynamicResource<T>
   | PaginatedFilterableDynamicResource<T>;
+
+/**
+ * Fetcher Registry
+ *
+ * 职责：按 features 决定亚型时，查找匹配的 Fetcher。
+ * Fetcher 与具体资源名称解耦，多个 Resource 可复用同一个 Fetcher
+ */
+abstract class FetcherRegistry {
+  /**
+   * 查找首个匹配指定 type 的 Fetcher
+   * @param type FetcherProvider 类型，与 features 组合决定亚型
+   * @returns 匹配的 FetcherProvider，未找到返回 undefined
+   */
+  abstract find(
+    type: FetcherProvider<FieldDataSource>['type']
+  ): FetcherProvider<FieldDataSource> | undefined;
+
+  /**
+   * 获取全部 Provider
+   */
+  abstract all(): readonly FetcherProvider<FieldDataSource>[];
+}
 
 /**
  * 静态资源工厂
@@ -117,7 +210,7 @@ abstract class StaticResourceFactory {
  * 动态资源工厂
  *
  * 职责：创建 DynamicResource（根据 resource.features 组合确定亚型）
- * 依赖：FetcherRegistry（由业务方提供）
+ * 依赖：FetcherRegistry（按 type 选取 Fetcher）
  */
 abstract class DynamicResourceFactory {
   /**
@@ -150,15 +243,9 @@ abstract class ResourceFactory {
 
 通过 `provideXXXFetcher` 工厂函数创建类型安全的 `Fetcher` 注册项：
 
-```ts
-interface FetcherProvider<T extends FieldDataSource> {
-  readonly fetcher:
-    | ElementaryFetcher<T>
-    | PaginatedFetcher<T>
-    | FilterableFetcher<T>
-    | PaginatedFilterableFetcher<T>;
-}
+**重要**：不需传入 `resourceName`。一个 `Fetcher` 可被多个 `Resource` 复用，资源名称在调用时透传。
 
+```ts
 function provideElementaryFetcher<T extends FieldDataSource>(
   fetcher: ElementaryFetcher<T>
 ): ElementaryFetcherProvider<T>;
@@ -174,6 +261,20 @@ function provideFilterableFetcher<T extends FieldDataSource>(
 function providePaginatedFilterableFetcher<T extends FieldDataSource>(
   fetcher: PaginatedFilterableFetcher<T>
 ): PaginatedFilterableFetcherProvider<T>;
+```
+
+**与 `Fetcher` 调用约定的联动**：
+
+```ts
+const PAGINATED_FILTERABLE_FETCHER = providePaginatedFilterableFetcher<FieldDataSource>({
+  fetch(resourceName, keyword, page, pageSize) {
+    // resourceName 来源于 DSL `RuleFactorDefinition.resource.name`
+    // 业务方可按 resourceName 路由到不同业务服务
+    if (resourceName === 'Employee') return api.searchEmployees(keyword, page, pageSize);
+    if (resourceName === 'Department') return api.searchDepartments(keyword, page, pageSize);
+    throw new Error(`[sisyphus] Unknown resource: ${resourceName}`);
+  },
+});
 ```
 
 #### Builder Pattern 入口
@@ -456,12 +557,19 @@ classDiagram
 import { RuleWorkspaceBuilder, providePaginatedFilterableFetcher } from '@sisyphus/core';
 
 // 1. 定义 DSL
+// 多个因子可以共享同一种 features 组合的 Fetcher（例：employee / department 都走分页过滤）
 const factors: RuleFactorDefinition[] = [
   {
     name: 'employee',
     title: '员工',
     dataType: 'string',
     resource: { name: 'Employee', features: ['pagination', 'filter'] },
+  },
+  {
+    name: 'department',
+    title: '部门',
+    dataType: 'string',
+    resource: { name: 'Department', features: ['pagination', 'filter'] },
   },
   {
     name: 'deliver_city',
@@ -479,10 +587,19 @@ const factors: RuleFactorDefinition[] = [
 ];
 
 // 2. 提供 Fetcher（仅 DynamicResource 需要，StaticResource 由内核默认提供）
+// Fetcher 只与 features 相关，resourceName 在调用时透传
+// 同一个 Fetcher 可被 Employee / Department 复用
 const fetchers = [
   providePaginatedFilterableFetcher({
-    fetch(keyword, page, pageSize) {
-      return api.searchEmployees(keyword, page, pageSize);
+    fetch(resourceName, keyword, page, pageSize) {
+      switch (resourceName) {
+        case 'Employee':
+          return api.searchEmployees(keyword, page, pageSize);
+        case 'Department':
+          return api.searchDepartments(keyword, page, pageSize);
+        default:
+          throw new Error(`[sisyphus] Unknown resource: ${resourceName}`);
+      }
     },
   }),
 ];

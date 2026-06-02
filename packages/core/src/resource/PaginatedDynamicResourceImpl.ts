@@ -36,7 +36,7 @@ export class PaginatedDynamicResourceImpl<T> implements PaginatedDynamicResource
     const { page, pageSize } = this.pagination.value
     this.loading.value = true
     this.fetcher
-      .fetch(page, pageSize)
+      .fetch(this.name, page, pageSize)
       .then((result) => {
         this.options.value = [...result.data]
         this.pagination.value = {

@@ -2,12 +2,13 @@ import { describe, expect, it, vi } from 'vitest'
 import { FilterableDynamicResourceImpl } from './FilterableDynamicResourceImpl'
 
 describe('FilterableDynamicResourceImpl', () => {
-  it('onFilter invokes fetcher with the keyword', async () => {
+  it('onFilter invokes fetcher with the resourceName and keyword', async () => {
     const fetch = vi.fn().mockResolvedValue([{ label: 'A', value: 'a' }])
     const resource = new FilterableDynamicResourceImpl('Foo', { fetch })
     resource.onFilter('hello')
     await new Promise((r) => setTimeout(r, 0))
-    expect(fetch).toHaveBeenCalledWith('hello')
+    // resourceName 作为请求参数透传给 fetcher
+    expect(fetch).toHaveBeenCalledWith('Foo', 'hello')
     expect(resource.options.value).toEqual([{ label: 'A', value: 'a' }])
   })
 
@@ -18,8 +19,8 @@ describe('FilterableDynamicResourceImpl', () => {
     await new Promise((r) => setTimeout(r, 0))
     resource.onRefresh()
     await new Promise((r) => setTimeout(r, 0))
-    expect(fetch).toHaveBeenNthCalledWith(1, 'a')
-    expect(fetch).toHaveBeenNthCalledWith(2, 'a')
+    expect(fetch).toHaveBeenNthCalledWith(1, 'Foo', 'a')
+    expect(fetch).toHaveBeenNthCalledWith(2, 'Foo', 'a')
   })
 
   it('loading toggles around fetch', async () => {

@@ -6,31 +6,31 @@ import { providePaginatedFilterableFetcher } from '../fetcher/providePaginatedFi
 import type { PaginatedResult } from '../fetcher/PaginatedResult'
 
 describe('provideElementaryFetcher', () => {
-  it('returns a provider with type=elementary and resourceName', () => {
+  it('returns a provider with type=elementary and no resourceName', () => {
     const fetch = vi.fn().mockResolvedValue([])
-    const provider = provideElementaryFetcher('City', { fetch })
+    const provider = provideElementaryFetcher({ fetch })
     expect(provider.type).toBe('elementary')
-    expect(provider.resourceName).toBe('City')
+    expect('resourceName' in provider).toBe(false)
   })
 
-  it('exposes fetcher that can be invoked', async () => {
+  it('exposes fetcher that receives resourceName as first arg', async () => {
     const fetch = vi.fn().mockResolvedValue([{ label: '北京', value: 'bj' }])
-    const provider = provideElementaryFetcher('City', { fetch })
-    const result = await provider.fetcher.fetch()
-    expect(fetch).toHaveBeenCalledTimes(1)
+    const provider = provideElementaryFetcher({ fetch })
+    const result = await provider.fetcher.fetch('City')
+    expect(fetch).toHaveBeenCalledWith('City')
     expect(result).toEqual([{ label: '北京', value: 'bj' }])
   })
 })
 
 describe('providePaginatedFetcher', () => {
-  it('returns a provider with type=paginated', () => {
+  it('returns a provider with type=paginated and no resourceName', () => {
     const fetch = vi.fn().mockResolvedValue({ data: [], page: 1, pageSize: 20, total: 0 })
-    const provider = providePaginatedFetcher('City', { fetch })
+    const provider = providePaginatedFetcher({ fetch })
     expect(provider.type).toBe('paginated')
-    expect(provider.resourceName).toBe('City')
+    expect('resourceName' in provider).toBe(false)
   })
 
-  it('invokes fetcher with page and pageSize', async () => {
+  it('invokes fetcher with resourceName, page and pageSize', async () => {
     const result: PaginatedResult<unknown> = {
       data: [],
       page: 2,
@@ -38,39 +38,39 @@ describe('providePaginatedFetcher', () => {
       total: 0,
     }
     const fetch = vi.fn().mockResolvedValue(result)
-    const provider = providePaginatedFetcher('City', { fetch })
-    const out = await provider.fetcher.fetch(2, 10)
-    expect(fetch).toHaveBeenCalledWith(2, 10)
+    const provider = providePaginatedFetcher({ fetch })
+    const out = await provider.fetcher.fetch('City', 2, 10)
+    expect(fetch).toHaveBeenCalledWith('City', 2, 10)
     expect(out).toBe(result)
   })
 })
 
 describe('provideFilterableFetcher', () => {
-  it('returns a provider with type=filterable', () => {
+  it('returns a provider with type=filterable and no resourceName', () => {
     const fetch = vi.fn().mockResolvedValue([])
-    const provider = provideFilterableFetcher('Employee', { fetch })
+    const provider = provideFilterableFetcher({ fetch })
     expect(provider.type).toBe('filterable')
-    expect(provider.resourceName).toBe('Employee')
+    expect('resourceName' in provider).toBe(false)
   })
 
-  it('invokes fetcher with keyword', async () => {
+  it('invokes fetcher with resourceName and keyword', async () => {
     const fetch = vi.fn().mockResolvedValue([{ label: '张三', value: 'z3' }])
-    const provider = provideFilterableFetcher('Employee', { fetch })
-    const out = await provider.fetcher.fetch('张三')
-    expect(fetch).toHaveBeenCalledWith('张三')
+    const provider = provideFilterableFetcher({ fetch })
+    const out = await provider.fetcher.fetch('Employee', '张三')
+    expect(fetch).toHaveBeenCalledWith('Employee', '张三')
     expect(out).toEqual([{ label: '张三', value: 'z3' }])
   })
 })
 
 describe('providePaginatedFilterableFetcher', () => {
-  it('returns a provider with type=paginatedFilterable', () => {
+  it('returns a provider with type=paginatedFilterable and no resourceName', () => {
     const fetch = vi.fn().mockResolvedValue({ data: [], page: 1, pageSize: 20, total: 0 })
-    const provider = providePaginatedFilterableFetcher('Employee', { fetch })
+    const provider = providePaginatedFilterableFetcher({ fetch })
     expect(provider.type).toBe('paginatedFilterable')
-    expect(provider.resourceName).toBe('Employee')
+    expect('resourceName' in provider).toBe(false)
   })
 
-  it('invokes fetcher with keyword, page and pageSize', async () => {
+  it('invokes fetcher with resourceName, keyword, page and pageSize', async () => {
     const result: PaginatedResult<unknown> = {
       data: [],
       page: 1,
@@ -78,9 +78,9 @@ describe('providePaginatedFilterableFetcher', () => {
       total: 0,
     }
     const fetch = vi.fn().mockResolvedValue(result)
-    const provider = providePaginatedFilterableFetcher('Employee', { fetch })
-    const out = await provider.fetcher.fetch('张三', 1, 20)
-    expect(fetch).toHaveBeenCalledWith('张三', 1, 20)
+    const provider = providePaginatedFilterableFetcher({ fetch })
+    const out = await provider.fetcher.fetch('Employee', '张三', 1, 20)
+    expect(fetch).toHaveBeenCalledWith('Employee', '张三', 1, 20)
     expect(out).toBe(result)
   })
 })

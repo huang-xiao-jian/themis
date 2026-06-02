@@ -4,36 +4,38 @@ import { provideElementaryFetcher } from '../fetcher/provideElementaryFetcher'
 import { providePaginatedFetcher } from '../fetcher/providePaginatedFetcher'
 
 describe('FetcherRegistry', () => {
-  it('returns undefined for unregistered resource', () => {
+  it('returns undefined for unregistered type', () => {
     const registry = new FetcherRegistry()
-    expect(registry.get('City')).toBeUndefined()
-    expect(registry.has('City')).toBe(false)
+    expect(registry.find('elementary')).toBeUndefined()
   })
 
-  it('register and get returns the same provider', () => {
+  it('register and find returns the same provider', () => {
     const registry = new FetcherRegistry()
-    const provider = provideElementaryFetcher<unknown>('City', { fetch: () => Promise.resolve([]) })
+    const provider = provideElementaryFetcher<unknown>({ fetch: () => Promise.resolve([]) })
     registry.register(provider)
-    expect(registry.get('City')).toBe(provider)
-    expect(registry.has('City')).toBe(true)
+    expect(registry.find('elementary')).toBe(provider)
   })
 
-  it('later registration overrides earlier one with same name', () => {
+  it('find returns the first provider matching the type', () => {
     const registry = new FetcherRegistry()
-    const first = provideElementaryFetcher<unknown>('City', { fetch: () => Promise.resolve([]) })
-    const second = providePaginatedFetcher<unknown>('City', {
-      fetch: () => Promise.resolve({ data: [], page: 1, pageSize: 20, total: 0 }),
-    })
+    const first = provideElementaryFetcher<unknown>({ fetch: () => Promise.resolve([]) })
+    const second = provideElementaryFetcher<unknown>({ fetch: () => Promise.resolve([]) })
     registry.register(first)
     registry.register(second)
-    expect(registry.get('City')).toBe(second)
-    expect(registry.all()).toHaveLength(1)
+    expect(registry.find('elementary')).toBe(first)
+    expect(registry.all()).toHaveLength(2)
   })
 
-  it('all() returns all registered providers', () => {
+  it('all() returns all registered providers in insertion order', () => {
     const registry = new FetcherRegistry()
-    registry.register(provideElementaryFetcher<unknown>('A', { fetch: () => Promise.resolve([]) }))
-    registry.register(provideElementaryFetcher<unknown>('B', { fetch: () => Promise.resolve([]) }))
+    const a = provideElementaryFetcher<unknown>({ fetch: () => Promise.resolve([]) })
+    const b = providePaginatedFetcher<unknown>({
+      fetch: () => Promise.resolve({ data: [], page: 1, pageSize: 20, total: 0 }),
+    })
+    registry.register(a)
+    registry.register(b)
     expect(registry.all()).toHaveLength(2)
+    expect(registry.all()[0]).toBe(a)
+    expect(registry.all()[1]).toBe(b)
   })
 })

@@ -18,7 +18,8 @@ describe('ElementaryDynamicResourceImpl', () => {
     await new Promise((r) => setTimeout(r, 0))
     expect(resource.loading.value).toBe(false)
     expect(resource.options.value).toEqual([{ label: 'A', value: 'a' }])
-    expect(fetch).toHaveBeenCalledTimes(1)
+    // resourceName 作为请求参数透传给 fetcher
+    expect(fetch).toHaveBeenCalledWith('Foo')
   })
 
   it('onRefresh resets loading even when fetch rejects', async () => {

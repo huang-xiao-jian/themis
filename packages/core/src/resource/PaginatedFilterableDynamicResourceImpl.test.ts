@@ -14,9 +14,11 @@ describe('PaginatedFilterableDynamicResourceImpl', () => {
   it('onFilter updates keyword and resets to page=1', async () => {
     const fetch = vi
       .fn()
-      .mockImplementation((_kw: string, page: number): Promise<PaginatedResult<unknown>> => {
-        return Promise.resolve({ data: [], page, pageSize: 20, total: 0 })
-      })
+      .mockImplementation(
+        (_name: string, _kw: string, page: number): Promise<PaginatedResult<unknown>> => {
+          return Promise.resolve({ data: [], page, pageSize: 20, total: 0 })
+        }
+      )
     const resource = new PaginatedFilterableDynamicResourceImpl('Foo', { fetch })
     // 模拟翻到第 3 页
     resource.onFlip(3)
@@ -31,7 +33,12 @@ describe('PaginatedFilterableDynamicResourceImpl', () => {
     const fetch = vi
       .fn()
       .mockImplementation(
-        (_kw: string, page: number, _size: number): Promise<PaginatedResult<unknown>> => {
+        (
+          _name: string,
+          _kw: string,
+          page: number,
+          _size: number
+        ): Promise<PaginatedResult<unknown>> => {
           return Promise.resolve({ data: [], page, pageSize: 20, total: 0 })
         }
       )
@@ -44,11 +51,12 @@ describe('PaginatedFilterableDynamicResourceImpl', () => {
     expect(resource.pagination.value.page).toBe(2)
   })
 
-  it('passes keyword, page and pageSize to fetcher', async () => {
+  it('passes resourceName, keyword, page and pageSize to fetcher', async () => {
     const fetch = vi.fn().mockResolvedValue({ data: [], page: 1, pageSize: 20, total: 0 })
     const resource = new PaginatedFilterableDynamicResourceImpl('Foo', { fetch })
     resource.onFilter('hello')
     await new Promise((r) => setTimeout(r, 0))
-    expect(fetch).toHaveBeenCalledWith('hello', 1, 20)
+    // resourceName 作为请求参数透传给 fetcher
+    expect(fetch).toHaveBeenCalledWith('Foo', 'hello', 1, 20)
   })
 })

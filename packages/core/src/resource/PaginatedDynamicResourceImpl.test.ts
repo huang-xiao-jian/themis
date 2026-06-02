@@ -30,16 +30,19 @@ describe('PaginatedDynamicResourceImpl', () => {
   it('onFlip updates page and re-fetches', async () => {
     const fetch = vi
       .fn()
-      .mockImplementation((page: number): Promise<PaginatedResult<unknown>> => {
-        return Promise.resolve({ data: [{ page }], page, pageSize: 20, total: 100 })
-      })
+      .mockImplementation(
+        (_name: string, page: number): Promise<PaginatedResult<unknown>> => {
+          return Promise.resolve({ data: [{ page }], page, pageSize: 20, total: 100 })
+        }
+      )
     const resource = new PaginatedDynamicResourceImpl('Foo', { fetch })
     resource.onRefresh()
     await new Promise((r) => setTimeout(r, 0))
     resource.onFlip(3)
     await new Promise((r) => setTimeout(r, 0))
     expect(resource.pagination.value.page).toBe(3)
-    expect(fetch).toHaveBeenCalledWith(3, 20)
+    // resourceName 作为请求参数透传给 fetcher
+    expect(fetch).toHaveBeenLastCalledWith('Foo', 3, 20)
   })
 
   it('exposes loading flag that flips around fetch', async () => {

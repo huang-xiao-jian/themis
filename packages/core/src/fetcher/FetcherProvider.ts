@@ -8,7 +8,6 @@ import type { PaginatedFilterableFetcher } from './PaginatedFilterableFetcher'
  */
 export interface ElementaryFetcherProvider<T = unknown> {
   readonly type: 'elementary'
-  readonly resourceName: string
   readonly fetcher: ElementaryFetcher<T>
 }
 
@@ -17,7 +16,6 @@ export interface ElementaryFetcherProvider<T = unknown> {
  */
 export interface PaginatedFetcherProvider<T = unknown> {
   readonly type: 'paginated'
-  readonly resourceName: string
   readonly fetcher: PaginatedFetcher<T>
 }
 
@@ -26,7 +24,6 @@ export interface PaginatedFetcherProvider<T = unknown> {
  */
 export interface FilterableFetcherProvider<T = unknown> {
   readonly type: 'filterable'
-  readonly resourceName: string
   readonly fetcher: FilterableFetcher<T>
 }
 
@@ -35,12 +32,14 @@ export interface FilterableFetcherProvider<T = unknown> {
  */
 export interface PaginatedFilterableFetcherProvider<T = unknown> {
   readonly type: 'paginatedFilterable'
-  readonly resourceName: string
   readonly fetcher: PaginatedFilterableFetcher<T>
 }
 
 /**
- * FetcherProvider 联合类型
+ * FetcherProvider 联合类型（按 type 判别）
+ *
+ * 重要：不包含 resourceName 字段。Fetcher 行为与具体资源名称解耦，
+ * 资源名称作为请求参数在 fetch() 调用时传入
  */
 export type FetcherProvider<T = unknown> =
   | ElementaryFetcherProvider<T>

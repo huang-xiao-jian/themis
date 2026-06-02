@@ -8,12 +8,17 @@
 
 ### 命名规范
 
-- Classes: `pascal case` (e.g. `UserRepository`)
-- Methods: `camel case` (e.g. `findAvailableDiscount`)
+- Classes: `PascalCase` (e.g. `UserRepository`)
+- Class members: `Camel Case` (e.g. `findAvailableDiscount`)
 - Private members: use `private` descriptor only, avoid special prefix (.e.g `#` or `_`)
+- Constant variables: `SCREAMING_SNAKE_CASE` (`MAX_RETRY_COUNT`)
+- Function name: `Camel Case` (e.g. `findDiscountRule`)
+- Interface name: `PascalCase` without `I` prefix
+- Enum name: `PascalCase`
 
 ### 组织规范
 
 - 通过声明接口来定义契约
 - 倾向于编写功能单一的小类，公有方法数量少于 5 个，属性数量少于 10 个
-- 文件命名使用 `pascal case` (e.g. `UserRepository.ts`)
+- `Class` 文件命名使用 `pascal case` (e.g. `UserRepository.ts`)
+- `Function` 文件命名使用 `Camel Case` (e.g. `findDiscountRule.ts`)

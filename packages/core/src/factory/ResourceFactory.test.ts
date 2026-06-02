@@ -41,7 +41,7 @@ describe('DefaultResourceFactory', () => {
 
   it('creates ElementaryDynamicResource when features is empty array', () => {
     const registry = new FetcherRegistry()
-    registry.register(provideElementaryFetcher<unknown>('Foo', { fetch: vi.fn().mockResolvedValue([]) }))
+    registry.register(provideElementaryFetcher<unknown>({ fetch: vi.fn().mockResolvedValue([]) }))
     const factory = makeFactory(registry)
     const resource = factory.create({
       name: 'foo',
@@ -58,7 +58,7 @@ describe('DefaultResourceFactory', () => {
   it('creates PaginatedFilterableDynamicResource when features=[pagination, filter]', () => {
     const registry = new FetcherRegistry()
     registry.register(
-      providePaginatedFilterableFetcher<unknown>('Employee', {
+      providePaginatedFilterableFetcher<unknown>({
         fetch: vi.fn().mockResolvedValue({ data: [], page: 1, pageSize: 20, total: 0 }),
       })
     )
@@ -72,13 +72,14 @@ describe('DefaultResourceFactory', () => {
   it('throws when no Fetcher registered for dynamic resource', () => {
     const registry = new FetcherRegistry()
     const factory = makeFactory(registry)
-    expect(() => factory.create(dynamicResourceFactor)).toThrow(/No FetcherProvider/)
+    expect(() => factory.create(dynamicResourceFactor)).toThrow(/paginatedFilterable/)
   })
 
   it('throws when feature mismatch with provider type', () => {
     const registry = new FetcherRegistry()
-    registry.register(provideElementaryFetcher<unknown>('Employee', { fetch: vi.fn().mockResolvedValue([]) }))
+    registry.register(provideElementaryFetcher<unknown>({ fetch: vi.fn().mockResolvedValue([]) }))
     const factory = makeFactory(registry)
-    expect(() => factory.create(dynamicResourceFactor)).toThrow(/pagination/)
+    // dynamic resource 需要 paginatedFilterable，注册的是 elementary → 报 paginatedFilterable 缺失
+    expect(() => factory.create(dynamicResourceFactor)).toThrow(/paginatedFilterable/)
   })
 })

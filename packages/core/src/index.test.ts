@@ -33,10 +33,10 @@ const factors: readonly RuleFactorDefinition[] = [
 ]
 
 const fetchers = [
-  providePaginatedFilterableFetcher('Employee', {
+  providePaginatedFilterableFetcher({
     fetch: vi.fn().mockResolvedValue({ data: [], page: 1, pageSize: 20, total: 0 }),
   }),
-  provideElementaryFetcher('City', {
+  provideElementaryFetcher({
     fetch: vi.fn().mockResolvedValue([
       { label: '北京', value: 'bj' },
       { label: '上海', value: 'sh' },
@@ -190,7 +190,7 @@ describe('End-to-end: error scenarios', () => {
     // 选择 employee（带 dynamic resource）会触发 ThresholderInferrer → ResourceFactory.create
     rule.onFieldChange({ field: 'name', value: 'employee' })
     // thresholder 会求值并抛错
-    expect(() => rule.thresholder.value).toThrow(/No FetcherProvider/)
+    expect(() => rule.thresholder.value).toThrow(/paginatedFilterable/)
   })
 
   it('throws when validate false and build is called', () => {
@@ -205,5 +205,67 @@ describe('End-to-end: error scenarios', () => {
     group.addRule('rule-1') // 空的 rule
     expect(group.validate()).toBe(false)
     expect(() => group.build()).toThrow(/incomplete/)
+  })
+})
+
+describe('End-to-end: single Fetcher serves multiple Resources', () => {
+  it('the same Fetcher is reused across Resources of the same feature type', () => {
+    // Employee / Department 都声明 features=[pagination, filter]
+    // 业务方只提供一个 PaginatedFilterableFetcher，按 resourceName 路由
+    const fetchMock = vi.fn().mockImplementation(
+      (resourceName: string, keyword: string, _page: number, _pageSize: number) => {
+        if (resourceName === 'Employee') {
+          return Promise.resolve({
+            data: [{ label: '张三', value: 'z3' }],
+            page: 1,
+            pageSize: 20,
+            total: 1,
+          })
+        }
+        if (resourceName === 'Department') {
+          return Promise.resolve({
+            data: [{ label: '研发部', value: 'rd' }],
+            page: 1,
+            pageSize: 20,
+            total: 1,
+          })
+        }
+        return Promise.reject(new Error(`Unknown resource: ${resourceName}`))
+      }
+    )
+    const sharedFetcher = providePaginatedFilterableFetcher({ fetch: fetchMock })
+
+    const multiFactors: readonly RuleFactorDefinition[] = [
+      {
+        name: 'employee',
+        title: '员工',
+        dataType: 'string',
+        resource: { name: 'Employee', features: ['pagination', 'filter'] },
+      },
+      {
+        name: 'department',
+        title: '部门',
+        dataType: 'string',
+        resource: { name: 'Department', features: ['pagination', 'filter'] },
+      },
+    ]
+
+    const workspace = createRuleWorkspace({
+      factors: multiFactors,
+      fetchers: [sharedFetcher],
+    })
+
+    // 选择 employee 因子 → 触发 ResourceFactory.create
+    // ResourceFactory 应从共享 Fetcher 中选 'paginatedFilterable' 类型
+    const group = workspace.addGroup('group-1')
+    const rule = group.addRule('rule-1')
+    rule.onFieldChange({ field: 'name', value: 'employee' })
+    expect(rule.factor.value?.name).toBe('employee')
+    expect(rule.thresholder.value?.type).toBe('Select')
+
+    // 切换到 department 因子，复用同一个 Fetcher
+    rule.onFieldChange({ field: 'name', value: 'department' })
+    expect(rule.factor.value?.name).toBe('department')
+    expect(rule.thresholder.value?.type).toBe('Select')
   })
 })

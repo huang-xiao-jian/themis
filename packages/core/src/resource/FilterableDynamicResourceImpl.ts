@@ -32,7 +32,7 @@ export class FilterableDynamicResourceImpl<T> implements FilterableDynamicResour
   private fetchCurrent(): void {
     this.loading.value = true
     this.fetcher
-      .fetch(this.currentKeyword)
+      .fetch(this.name, this.currentKeyword)
       .then((data) => {
         this.options.value = [...data]
       })

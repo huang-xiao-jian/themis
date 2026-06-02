@@ -166,7 +166,7 @@ describe('ThresholderInferrer - decision tree coverage', () => {
   it('dynamic resource + single (elementary) → Select with ElementaryDynamicResource', () => {
     const registry = new FetcherRegistry()
     registry.register(
-      provideElementaryFetcher('Employee', { fetch: () => Promise.resolve([]) })
+      provideElementaryFetcher({ fetch: () => Promise.resolve([]) })
     )
     const inferrer = makeInferrer(registry)
     const factor = {
@@ -209,13 +209,13 @@ describe('ThresholderInferrer - decision tree coverage', () => {
 describe('ThresholderInferrer - registry wiring', () => {
   it('throws when dynamic resource has no registered Fetcher', () => {
     const inferrer = makeInferrer()
-    expect(() => inferrer.infer(dynamicResourceFactor)).toThrow(/No FetcherProvider/)
+    expect(() => inferrer.infer(dynamicResourceFactor)).toThrow(/paginatedFilterable/)
   })
 
   it('accepts paginatedFilterable Fetcher for dynamic resource', () => {
     const registry = new FetcherRegistry()
     registry.register(
-      providePaginatedFilterableFetcher('Employee', {
+      providePaginatedFilterableFetcher({
         fetch: () => Promise.resolve({ data: [], page: 1, pageSize: 20, total: 0 }),
       })
     )

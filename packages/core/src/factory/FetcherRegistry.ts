@@ -1,39 +1,41 @@
 import type { FetcherProvider } from '../fetcher/FetcherProvider'
 
 /**
+ * Fetcher Provider Type
+ *
+ * 按 type 判别 Provider 类型，便于 FetcherRegistry.find() 查找
+ */
+export type FetcherProviderType = FetcherProvider<unknown>['type']
+
+/**
  * Fetcher Registry
  *
- * 集中管理 FetcherProvider，提供按 resourceName 注册 / 查询的能力
+ * 职责：按 features 决定亚型时，查找匹配的 Fetcher。
+ * Fetcher 与具体资源名称解耦，多个 Resource 可复用同一个 Fetcher
  */
 export class FetcherRegistry {
-  private readonly map: Map<string, FetcherProvider<unknown>> = new Map()
+  private readonly list: FetcherProvider<unknown>[] = []
 
   /**
    * 注册一个 FetcherProvider
-   * 同一 resourceName 后注册者覆盖前注册者
    */
   register(provider: FetcherProvider<unknown>): void {
-    this.map.set(provider.resourceName, provider)
+    this.list.push(provider)
   }
 
   /**
-   * 按资源名称查询
+   * 查找首个匹配指定 type 的 Fetcher
+   * @param type FetcherProvider 类型，与 features 组合决定亚型
+   * @returns 匹配的 FetcherProvider，未找到返回 undefined
    */
-  get(name: string): FetcherProvider<unknown> | undefined {
-    return this.map.get(name)
+  find(type: FetcherProviderType): FetcherProvider<unknown> | undefined {
+    return this.list.find((p) => p.type === type)
   }
 
   /**
-   * 是否注册了指定资源
-   */
-  has(name: string): boolean {
-    return this.map.has(name)
-  }
-
-  /**
-   * 获取所有已注册的 FetcherProvider
+   * 获取全部 Provider
    */
   all(): readonly FetcherProvider<unknown>[] {
-    return Array.from(this.map.values())
+    return this.list
   }
 }

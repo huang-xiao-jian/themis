@@ -36,7 +36,7 @@ describe('RuleWorkspaceBuilder', () => {
   })
 
   it('withFetchers registers providers in the internal registry', () => {
-    const fetcher = providePaginatedFilterableFetcher('Employee', {
+    const fetcher = providePaginatedFilterableFetcher({
       fetch: vi.fn().mockResolvedValue({ data: [], page: 1, pageSize: 20, total: 0 }),
     })
     // 创建包含 dynamic resource 的 factor
@@ -76,7 +76,7 @@ describe('createRuleWorkspace', () => {
   })
 
   it('supports fetchers and ruleGroups', () => {
-    const fetcher = providePaginatedFilterableFetcher('Employee', {
+    const fetcher = providePaginatedFilterableFetcher({
       fetch: vi.fn().mockResolvedValue({ data: [], page: 1, pageSize: 20, total: 0 }),
     })
     const ws = createRuleWorkspace({
