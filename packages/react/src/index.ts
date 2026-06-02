@@ -1,32 +1,27 @@
-// 重新导出 @sisyphus/core 类型与枚举，便于消费方使用
-export { DataType, Mode, Quantity, Semantic } from '@sisyphus/core';
-
+// Application Layer - Protocol Types
 export type {
-  AtomicRule,
-  AtomicRuleGroup,
-  BaseProperties,
-  DynamicRuleFactorResource,
-  DynamicRuleFactorResourceFeature,
-  ElementaryFetcher,
-  FetcherProvider,
-  FieldConstraints,
-  FieldDataSource,
-  FilterableFetcher,
-  InputProperties,
-  ListBuilderProperties,
-  ListRangeBuilderProperties,
-  MultipleSelectProperties,
-  PaginatedFetcher,
-  PaginatedFilterableFetcher,
-  PaginatedResult,
-  Pagination,
-  PickerProperties,
-  RangeInputProperties,
-  RangePickerProperties,
-  RuleFactorDefinition,
-  SelectProperties,
-  StaticRuleFactorResource,
-  SwitchProperties,
-  TextAreaProperties,
-  ThresholdComponentProperties,
-} from '@sisyphus/core';
+  AtomicRuleGroupViewProperties,
+  AtomicRuleViewProperties,
+  ComponentRenderer,
+  ComponentRendererRegistry,
+  EditorComponentProperties,
+  RuleWorkspaceViewProperties,
+  SisyphusContext,
+  SisyphusPlugin,
+} from './application/protocol';
+
+// Application Layer - Editor Components
+export { AtomicRuleGroupView } from './application/AtomicRuleGroupView';
+export { AtomicRuleView } from './application/AtomicRuleView';
+export { RuleWorkspaceView } from './application/RuleWorkspaceView';
+
+// Access Layer - Types
+export type { SisyphusScope, SisyphusScopeOptions } from './access/SisyphusScope';
+export type { SisyphusScopeProviderProps } from './access/SisyphusScopeProvider';
+export type { WorkspaceEditorProps } from './access/WorkspaceEditor';
+
+// Access Layer - API
+export { createSisyphusScope } from './access/createSisyphusScope';
+export { SisyphusScopeProvider } from './access/SisyphusScopeProvider';
+export { useSisyphusScope } from './access/useSisyphusScope';
+export { WorkspaceEditor } from './access/WorkspaceEditor';
