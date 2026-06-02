@@ -9,7 +9,7 @@ import { Semantic } from '../dsl/Semantic';
  */
 export interface ListBuilderItemProperties {
   /** 列表项组件类型 */
-  readonly type: 'Input' | 'Picker';
+  readonly type: 'Input' | 'InputNumber' | 'Picker';
   /** 列表项数据类型 */
   readonly dataType: DataType;
   /** 列表项语义化场景 */

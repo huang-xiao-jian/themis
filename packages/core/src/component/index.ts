@@ -2,6 +2,7 @@ export { DataType } from '../dsl/DataType';
 export { Semantic } from '../dsl/Semantic';
 
 export type { BaseProperties } from './BaseProperties';
+export type { InputNumberProperties } from './InputNumberProperties';
 export type { InputProperties } from './InputProperties';
 export type {
   ListBuilderBaseProperties,

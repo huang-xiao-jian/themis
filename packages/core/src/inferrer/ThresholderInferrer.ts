@@ -1,4 +1,5 @@
 import type { BaseProperties } from '../component/BaseProperties';
+import type { InputNumberProperties } from '../component/InputNumberProperties';
 import type { InputProperties } from '../component/InputProperties';
 import type { ListBuilderProperties } from '../component/ListBuilderProperties';
 import type { ListRangeBuilderProperties } from '../component/ListRangeBuilderProperties';
@@ -149,17 +150,21 @@ export class ThresholderInferrer {
 
   /**
    * manual + point + single
-   * string + max 是 number 且 > 100 → TextArea；否则 Input
-   * number 也走 Input（Input 内部支持 step/precision）
+   * string + max 是 number 且 > 100 → TextArea
+   * number → InputNumber
+   * 其余 → Input
    */
   private buildManualPointSingle(
     factor: RuleFactorDefinition
-  ): InputProperties | TextAreaProperties {
+  ): InputProperties | InputNumberProperties | TextAreaProperties {
     if (factor.dataType === DataType.STRING) {
       const max = factor.constraints?.max;
       if (typeof max === 'number' && max > 100) {
         return { ...buildBase(factor), type: 'TextArea' };
       }
+    }
+    if (factor.dataType === DataType.NUMBER) {
+      return { ...buildBase(factor), type: 'InputNumber' };
     }
     return { ...buildBase(factor), type: 'Input' };
   }
@@ -182,7 +187,7 @@ export class ThresholderInferrer {
       title: factor.title,
       type: 'ListBuilder',
       item: {
-        type: isAuto ? 'Picker' : 'Input',
+        type: isAuto ? 'Picker' : factor.dataType === DataType.NUMBER ? 'InputNumber' : 'Input',
         ...itemBase,
       },
     };

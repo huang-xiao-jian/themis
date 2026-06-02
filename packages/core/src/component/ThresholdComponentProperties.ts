@@ -1,3 +1,4 @@
+import type { InputNumberProperties } from './InputNumberProperties';
 import type { InputProperties } from './InputProperties';
 import type { ListBuilderProperties } from './ListBuilderProperties';
 import type { ListRangeBuilderProperties } from './ListRangeBuilderProperties';
@@ -16,6 +17,7 @@ import type { TextAreaProperties } from './TextAreaProperties';
  */
 export type ThresholdComponentProperties =
   | InputProperties
+  | InputNumberProperties
   | TextAreaProperties
   | RangeInputProperties
   | SwitchProperties

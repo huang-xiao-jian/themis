@@ -52,13 +52,13 @@ describe('ThresholderInferrer - decision tree coverage', () => {
     expect(result.type).toBe('TextArea');
   });
 
-  it('number + point + single → Input (with step/precision constraints)', () => {
+  it('number + point + single → InputNumber (with step/precision constraints)', () => {
     const inferrer = makeInferrer();
     const result = inferrer.infer({
       ...NUMBER_POINT_SINGLE_FACTOR,
       constraints: { step: 0.01, precision: 2 },
     }) as { type: string; constraints?: { step?: number; precision?: number } };
-    expect(result.type).toBe('Input');
+    expect(result.type).toBe('InputNumber');
     expect(result.constraints?.step).toBe(0.01);
     expect(result.constraints?.precision).toBe(2);
   });
@@ -73,14 +73,14 @@ describe('ThresholderInferrer - decision tree coverage', () => {
     expect(result.item.type).toBe('Input');
   });
 
-  it('number + point + multiple → ListBuilder with item.type=Input', () => {
+  it('number + point + multiple → ListBuilder with item.type=InputNumber', () => {
     const inferrer = makeInferrer();
     const result = inferrer.infer(NUMBER_POINT_MULTIPLE_FACTOR) as {
       type: string;
       item: { type: string };
     };
     expect(result.type).toBe('ListBuilder');
-    expect(result.item.type).toBe('Input');
+    expect(result.item.type).toBe('InputNumber');
   });
 
   it('number + range + single (manual) → RangeInput', () => {
