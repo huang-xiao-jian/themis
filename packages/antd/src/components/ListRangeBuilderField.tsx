@@ -128,7 +128,7 @@ export function ListRangeBuilderField({
   const canAdd = listValue.length < maxItems;
   const canRemove = listValue.length > minItems;
 
-  const handleAdd = useCallback(() => {
+  const onAdd = useCallback(() => {
     const defaultRange =
       properties.item.type === 'RangeInput'
         ? [undefined, undefined]
@@ -138,7 +138,7 @@ export function ListRangeBuilderField({
     onChange([...listValue, defaultRange]);
   }, [listValue, onChange, properties.item]);
 
-  const handleRemove = useCallback(
+  const onRemove = useCallback(
     (index: number) => {
       const next = listValue.filter((_: unknown, i: number) => i !== index);
       onChange(next);
@@ -146,7 +146,7 @@ export function ListRangeBuilderField({
     [listValue, onChange]
   );
 
-  const handleItemChange = useCallback(
+  const onItemChange = useCallback(
     (index: number, itemValue: unknown) => {
       const next = listValue.map((v: unknown, i: number) => (i === index ? itemValue : v));
       onChange(next);
@@ -158,16 +158,16 @@ export function ListRangeBuilderField({
     <Space direction="vertical" style={{ width: '100%' }}>
       {listValue.map((itemValue: unknown, index: number) => (
         <Space key={index} align="center">
-          {renderRangeListItem(properties.item, itemValue, (v) => handleItemChange(index, v), size)}
+          {renderRangeListItem(properties.item, itemValue, (v) => onItemChange(index, v), size)}
           <Button
             type="link"
             icon={<DeleteOutlined />}
             disabled={!canRemove}
-            onClick={() => handleRemove(index)}
+            onClick={() => onRemove(index)}
           />
         </Space>
       ))}
-      <Button type="link" icon={<PlusOutlined />} disabled={!canAdd} onClick={handleAdd}>
+      <Button type="link" icon={<PlusOutlined />} disabled={!canAdd} onClick={onAdd}>
         添加
       </Button>
     </Space>

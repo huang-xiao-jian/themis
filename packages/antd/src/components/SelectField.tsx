@@ -62,14 +62,14 @@ export function SelectField({
     const loading = resource.loading.value;
     const pagination = resource.pagination.value;
 
-    const handleSearch = useCallback(
+    const onSearch = useCallback(
       (keyword: string) => {
         resource.onFilter(keyword);
       },
       [resource]
     );
 
-    const handlePopupScroll = useCallback(
+    const onPopupScroll = useCallback(
       (e: UIEvent<HTMLDivElement>) => {
         const target = e.target as HTMLDivElement;
         if (
@@ -94,8 +94,8 @@ export function SelectField({
         loading={loading}
         showSearch
         filterOption={false}
-        onSearch={handleSearch}
-        onPopupScroll={handlePopupScroll}
+        onSearch={onSearch}
+        onPopupScroll={onPopupScroll}
         notFoundContent={loading ? <Spin size="small" /> : undefined}
       />
     );
@@ -107,7 +107,7 @@ export function SelectField({
     const loading = resource.loading.value;
     const pagination = resource.pagination.value;
 
-    const handlePopupScroll = useCallback(
+    const onPopupScroll = useCallback(
       (e: UIEvent<HTMLDivElement>) => {
         const target = e.target as HTMLDivElement;
         if (
@@ -130,7 +130,7 @@ export function SelectField({
         size={size}
         mode={mode}
         loading={loading}
-        onPopupScroll={handlePopupScroll}
+        onPopupScroll={onPopupScroll}
         notFoundContent={loading ? <Spin size="small" /> : undefined}
       />
     );
@@ -141,7 +141,7 @@ export function SelectField({
     const options = resource.options.value;
     const loading = resource.loading.value;
 
-    const handleSearch = useCallback(
+    const onSearch = useCallback(
       (keyword: string) => {
         resource.onFilter(keyword);
       },
@@ -160,7 +160,7 @@ export function SelectField({
         loading={loading}
         showSearch
         filterOption={false}
-        onSearch={handleSearch}
+        onSearch={onSearch}
         notFoundContent={loading ? <Spin size="small" /> : undefined}
       />
     );

@@ -11,11 +11,11 @@ export function AntdRuleWorkspaceView({ scheduler }: RuleWorkspaceViewProperties
   useSignals();
   const groups = scheduler.groups.value;
 
-  const handleAddGroup = useCallback(() => {
+  const onAddGroup = useCallback(() => {
     scheduler.addGroup();
   }, [scheduler]);
 
-  const handleRemoveGroup = useCallback(
+  const onRemoveGroup = useCallback(
     (groupId: string) => {
       scheduler.removeGroup(groupId);
     },
@@ -34,14 +34,14 @@ export function AntdRuleWorkspaceView({ scheduler }: RuleWorkspaceViewProperties
               type="text"
               danger
               icon={<DeleteOutlined />}
-              onClick={() => handleRemoveGroup(group.id)}
+              onClick={() => onRemoveGroup(group.id)}
             />
           }
         >
           <AntdAtomicRuleGroupView type="AtomicRuleGroupView" scheduler={group} />
         </Card>
       ))}
-      <Button type="dashed" icon={<PlusOutlined />} block onClick={handleAddGroup}>
+      <Button type="dashed" icon={<PlusOutlined />} block onClick={onAddGroup}>
         添加规则组
       </Button>
     </Space>

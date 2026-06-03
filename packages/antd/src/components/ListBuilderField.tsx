@@ -142,12 +142,12 @@ export function ListBuilderField({
   const canAdd = listValue.length < maxItems;
   const canRemove = listValue.length > minItems;
 
-  const handleAdd = useCallback(() => {
+  const onAdd = useCallback(() => {
     const defaultValue = properties.item.dataType === DataType.NUMBER ? undefined : '';
     onChange([...listValue, defaultValue]);
   }, [listValue, onChange, properties.item.dataType]);
 
-  const handleRemove = useCallback(
+  const onRemove = useCallback(
     (index: number) => {
       const next = listValue.filter((_: unknown, i: number) => i !== index);
       onChange(next);
@@ -155,7 +155,7 @@ export function ListBuilderField({
     [listValue, onChange]
   );
 
-  const handleItemChange = useCallback(
+  const onItemChange = useCallback(
     (index: number, itemValue: unknown) => {
       const next = listValue.map((v: unknown, i: number) => (i === index ? itemValue : v));
       onChange(next);
@@ -167,16 +167,16 @@ export function ListBuilderField({
     <Space direction="vertical" style={{ width: '100%' }}>
       {listValue.map((itemValue: unknown, index: number) => (
         <Space key={index} align="center">
-          {renderListItem(properties.item, itemValue, (v) => handleItemChange(index, v), size)}
+          {renderListItem(properties.item, itemValue, (v) => onItemChange(index, v), size)}
           <Button
             type="link"
             icon={<DeleteOutlined />}
             disabled={!canRemove}
-            onClick={() => handleRemove(index)}
+            onClick={() => onRemove(index)}
           />
         </Space>
       ))}
-      <Button type="link" icon={<PlusOutlined />} disabled={!canAdd} onClick={handleAdd}>
+      <Button type="link" icon={<PlusOutlined />} disabled={!canAdd} onClick={onAdd}>
         添加
       </Button>
     </Space>

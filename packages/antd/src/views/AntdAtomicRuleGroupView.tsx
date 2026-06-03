@@ -15,11 +15,11 @@ export function AntdAtomicRuleGroupView({
   const factors = scheduler.factors.value;
   const canAddRule = scheduler.canAddRule.value;
 
-  const handleAddRule = useCallback(() => {
+  const onAddRule = useCallback(() => {
     scheduler.addRule();
   }, [scheduler]);
 
-  const handleRemoveRule = useCallback(
+  const onRemoveRule = useCallback(
     (ruleId: string) => {
       scheduler.removeRule(ruleId);
     },
@@ -36,7 +36,7 @@ export function AntdAtomicRuleGroupView({
               type="text"
               danger
               icon={<DeleteOutlined />}
-              onClick={() => handleRemoveRule(rule.id)}
+              onClick={() => onRemoveRule(rule.id)}
             />
           </div>
         ))}
@@ -45,7 +45,7 @@ export function AntdAtomicRuleGroupView({
           icon={<PlusOutlined />}
           block
           disabled={!canAddRule}
-          onClick={handleAddRule}
+          onClick={onAddRule}
         >
           添加规则
         </Button>

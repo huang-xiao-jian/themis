@@ -28,21 +28,21 @@ export function AntdAtomicRuleView({
   const operatorValue = scheduler.operator.value;
   const thresholdValue = scheduler.threshold.value;
 
-  const handleNameChange = useCallback(
+  const onNameChange = useCallback(
     (value: string) => {
       scheduler.onFieldChange({ field: 'name', value });
     },
     [scheduler]
   );
 
-  const handleOperatorChange = useCallback(
+  const onOperatorChange = useCallback(
     (value: string) => {
       scheduler.onFieldChange({ field: 'operator', value });
     },
     [scheduler]
   );
 
-  const handleThresholdChange = useCallback(
+  const onThresholdChange = useCallback(
     (value: unknown) => {
       scheduler.onFieldChange({ field: 'threshold', value });
     },
@@ -54,7 +54,7 @@ export function AntdAtomicRuleView({
       <Select
         value={nameValue ?? undefined}
         options={[...factors]}
-        onChange={handleNameChange}
+        onChange={onNameChange}
         placeholder={`${config.placeholderTemplate.select}规则因子`}
         allowClear
         size={config.size}
@@ -67,7 +67,7 @@ export function AntdAtomicRuleView({
       <Select
         value={operatorValue ?? undefined}
         options={[...operators]}
-        onChange={handleOperatorChange}
+        onChange={onOperatorChange}
         placeholder={`${config.placeholderTemplate.select}操作符`}
         allowClear
         size={config.size}
@@ -78,7 +78,7 @@ export function AntdAtomicRuleView({
           <ThresholdRenderer
             properties={thresholder}
             value={thresholdValue}
-            onChange={handleThresholdChange}
+            onChange={onThresholdChange}
           />
         </div>
       )}
