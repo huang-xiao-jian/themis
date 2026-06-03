@@ -1,4 +1,5 @@
 import { signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
+import { nanoid } from 'nanoid';
 import type { AtomicRuleGroup } from '../dsl/AtomicRule';
 import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
 import type { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
@@ -27,11 +28,10 @@ export class RuleWorkspaceScheduler {
     this.thresholderInferrer = thresholderInferrer;
 
     // 编辑场景：从 snapshots 构造初始 group scheduler
-    const initialGroups: AtomicRuleGroupScheduler[] = (snapshots ?? []).map(
-      (g, idx) =>
-        new AtomicRuleGroupScheduler(`group-${idx + 1}`, this.factors, thresholderInferrer, g)
-    );
-    this.groups = signal<readonly AtomicRuleGroupScheduler[]>(initialGroups);
+    this.groups = signal<readonly AtomicRuleGroupScheduler[]>([]);
+    for (const g of snapshots ?? []) {
+      this.hydrateGroup(g);
+    }
   }
 
   /**
@@ -42,15 +42,44 @@ export class RuleWorkspaceScheduler {
   }
 
   /**
-   * 新增规则组
+   * 恢复规则组设置器（编辑场景）
+   *
+   * 从已有的 AtomicRuleGroup 数据创建 scheduler，保留原始 id 及其内部规则
    */
-  addGroup(groupId: string): AtomicRuleGroupScheduler {
+  hydrateGroup(group: AtomicRuleGroup): void {
     if (this.destroyed) {
       throw new Error('[sisyphus] RuleWorkspaceScheduler is destroyed.');
     }
-    const scheduler = new AtomicRuleGroupScheduler(groupId, this.factors, this.thresholderInferrer);
+    const scheduler = new AtomicRuleGroupScheduler(
+      group.id,
+      this.factors,
+      this.thresholderInferrer,
+      group
+    );
+    this.groups.value = [...this.groups.value, scheduler];
+  }
+
+  /**
+   * 新增规则组（自动生成唯一标识）
+   */
+  addGroup(): AtomicRuleGroupScheduler {
+    if (this.destroyed) {
+      throw new Error('[sisyphus] RuleWorkspaceScheduler is destroyed.');
+    }
+    const scheduler = new AtomicRuleGroupScheduler(
+      nanoid(),
+      this.factors,
+      this.thresholderInferrer
+    );
     this.groups.value = [...this.groups.value, scheduler];
     return scheduler;
+  }
+
+  /**
+   * 获取规则组设置器
+   */
+  pickGroup(groupId: string): AtomicRuleGroupScheduler | undefined {
+    return this.groups.value.find((g) => g.id === groupId);
   }
 
   /**

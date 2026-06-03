@@ -12,8 +12,7 @@ export function AntdRuleWorkspaceView({ scheduler }: RuleWorkspaceViewProperties
   const groups = scheduler.groups.value;
 
   const handleAddGroup = useCallback(() => {
-    const groupId = `group-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    scheduler.addGroup(groupId);
+    scheduler.addGroup();
   }, [scheduler]);
 
   const handleRemoveGroup = useCallback(

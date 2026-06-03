@@ -35,19 +35,19 @@ describe('RuleWorkspaceScheduler - creation', () => {
 });
 
 describe('RuleWorkspaceScheduler - addGroup/removeGroup', () => {
-  it('addGroup creates a new group scheduler', () => {
+  it('addGroup creates a new group scheduler with auto-generated id', () => {
     const inferrer = makeInferrer();
     const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
-    const group = workspace.addGroup('g-1');
+    const group = workspace.addGroup();
     expect(workspace.groups.value).toHaveLength(1);
-    expect(group.id).toBe('g-1');
+    expect(group.id).toBeDefined();
   });
 
   it('removeGroup destroys and removes the group', () => {
     const inferrer = makeInferrer();
     const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
-    workspace.addGroup('g-1');
-    workspace.removeGroup('g-1');
+    const group = workspace.addGroup();
+    workspace.removeGroup(group.id);
     expect(workspace.groups.value).toEqual([]);
   });
 
@@ -61,7 +61,22 @@ describe('RuleWorkspaceScheduler - addGroup/removeGroup', () => {
     const inferrer = makeInferrer();
     const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
     workspace.destroy();
-    expect(() => workspace.addGroup('g-1')).toThrow(/destroyed/);
+    expect(() => workspace.addGroup()).toThrow(/destroyed/);
+  });
+});
+
+describe('RuleWorkspaceScheduler - pickGroup', () => {
+  it('pickGroup returns the group scheduler with matching id', () => {
+    const inferrer = makeInferrer();
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
+    const group = workspace.addGroup();
+    expect(workspace.pickGroup(group.id)).toBe(group);
+  });
+
+  it('pickGroup returns undefined for non-existent id', () => {
+    const inferrer = makeInferrer();
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
+    expect(workspace.pickGroup('non-existent')).toBeUndefined();
   });
 });
 
@@ -75,8 +90,8 @@ describe('RuleWorkspaceScheduler - validate & build', () => {
   it('validate returns false when any group is invalid', () => {
     const inferrer = makeInferrer();
     const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
-    const group = workspace.addGroup('g-1');
-    const rule = group.addRule('rule-1');
+    const group = workspace.addGroup();
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     // 缺 operator / threshold
     expect(workspace.validate()).toBe(false);
@@ -85,33 +100,35 @@ describe('RuleWorkspaceScheduler - validate & build', () => {
   it('validate returns true when everything is complete', () => {
     const inferrer = makeInferrer();
     const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
-    const group = workspace.addGroup('g-1');
-    const rule = group.addRule('rule-1');
+    const group = workspace.addGroup();
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     rule.onFieldChange({ field: 'operator', value: 'is' });
     rule.onFieldChange({ field: 'threshold', value: true });
     expect(workspace.validate()).toBe(true);
   });
 
-  it('build returns readonly AtomicRuleGroup[]', () => {
+  it('build returns readonly AtomicRuleGroup[] with id', () => {
     const inferrer = makeInferrer();
     const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
-    const group = workspace.addGroup('g-1');
-    const rule = group.addRule('rule-1');
+    const group = workspace.addGroup();
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     rule.onFieldChange({ field: 'operator', value: 'is' });
     rule.onFieldChange({ field: 'threshold', value: true });
     const result = workspace.build();
     expect(result).toHaveLength(1);
-    expect(result[0].rules).toEqual([
-      { id: 'rule-1', name: 'is_active', operator: 'is', threshold: true },
-    ]);
+    expect(result[0].id).toBe(group.id);
+    expect(result[0].rules).toHaveLength(1);
+    expect(result[0].rules[0].name).toBe('is_active');
+    expect(result[0].rules[0].operator).toBe('is');
+    expect(result[0].rules[0].threshold).toBe(true);
   });
 
   it('build throws when incomplete', () => {
     const inferrer = makeInferrer();
     const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
-    workspace.addGroup('g-1');
+    workspace.addGroup();
     expect(() => workspace.build()).toThrow(/incomplete/);
   });
 });
@@ -127,9 +144,53 @@ describe('RuleWorkspaceScheduler - destroy', () => {
   it('destroy clears all groups', () => {
     const inferrer = makeInferrer();
     const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
-    workspace.addGroup('g-1');
-    workspace.addGroup('g-2');
+    workspace.addGroup();
+    workspace.addGroup();
     workspace.destroy();
     expect(workspace.groups.value).toEqual([]);
+  });
+});
+
+describe('RuleWorkspaceScheduler - hydrateGroup', () => {
+  it('hydrateGroup restores group from AtomicRuleGroup data', () => {
+    const inferrer = makeInferrer();
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
+    workspace.hydrateGroup({
+      id: 'group-1',
+      rules: [{ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true }],
+    });
+    expect(workspace.groups.value).toHaveLength(1);
+    expect(workspace.groups.value[0].id).toBe('group-1');
+    expect(workspace.groups.value[0].rules.value).toHaveLength(1);
+    expect(workspace.groups.value[0].rules.value[0].id).toBe('rule-1');
+  });
+
+  it('hydrateGroup preserves original group id and nested rules', () => {
+    const inferrer = makeInferrer();
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
+    workspace.hydrateGroup({
+      id: 'group-1',
+      rules: [
+        { id: 'rule-1', name: 'is_active', operator: 'is', threshold: true },
+        { id: 'rule-2', name: 'deliver_city', operator: 'eq', threshold: 'sh' },
+      ],
+    });
+    const group = workspace.groups.value[0];
+    expect(group.id).toBe('group-1');
+    expect(group.rules.value[0].name.value).toBe('is_active');
+    expect(group.rules.value[1].name.value).toBe('deliver_city');
+    expect(workspace.validate()).toBe(true);
+  });
+
+  it('hydrateGroup throws after destroy', () => {
+    const inferrer = makeInferrer();
+    const workspace = new RuleWorkspaceScheduler(ALL_FACTORS, inferrer);
+    workspace.destroy();
+    expect(() =>
+      workspace.hydrateGroup({
+        id: 'group-1',
+        rules: [{ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true }],
+      })
+    ).toThrow(/destroyed/);
   });
 });

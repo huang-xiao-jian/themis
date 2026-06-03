@@ -18,7 +18,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@preact/signals-core": "^1.14.2"
+    "@preact/signals-core": "^1.14.2",
+    "nanoid": "^5.0.7"
   },
   "devDependencies": {
     "@types/node": "^22.0.0"

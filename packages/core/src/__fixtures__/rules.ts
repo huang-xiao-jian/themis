@@ -18,5 +18,6 @@ export const SAMPLE_RULE_2: AtomicRule = {
 };
 
 export const SAMPLE_GROUP: AtomicRuleGroup = {
+  id: 'group-1',
   rules: [SAMPLE_RULE_1, SAMPLE_RULE_2],
 };

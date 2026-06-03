@@ -51,9 +51,9 @@ describe('End-to-end: create scenario', () => {
   it('completes the full workflow from spec.md usage example', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
 
-    // addGroup / addRule
-    const group = workspace.addGroup('group-1');
-    const rule = group.addRule('rule-1');
+    // addGroup / addRule (ID auto-generated)
+    const group = workspace.addGroup();
+    const rule = group.addRule();
 
     // 选择 order_amount
     rule.onFieldChange({ field: 'name', value: 'order_amount' });
@@ -81,16 +81,14 @@ describe('End-to-end: create scenario', () => {
     expect(workspace.validate()).toBe(true);
     const result = workspace.build();
     expect(result).toHaveLength(1);
-    expect(result[0].rules).toEqual([
-      {
-        id: 'rule-1',
-        name: 'order_amount',
-        operator: 'between any',
-        threshold: [
-          [0, 100],
-          [200, 300],
-        ],
-      },
+    expect(result[0].id).toBe(group.id);
+    expect(result[0].rules).toHaveLength(1);
+    expect(result[0].rules[0].id).toBe(rule.id);
+    expect(result[0].rules[0].name).toBe('order_amount');
+    expect(result[0].rules[0].operator).toBe('between any');
+    expect(result[0].rules[0].threshold).toEqual([
+      [0, 100],
+      [200, 300],
     ]);
 
     // 销毁
@@ -101,16 +99,16 @@ describe('End-to-end: create scenario', () => {
 
   it('factors disables the name of an active rule', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup('group-1');
-    const rule = group.addRule('rule-1');
+    const group = workspace.addGroup();
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
   });
 
   it('switches factor correctly with full reset', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup('group-1');
-    const rule = group.addRule('rule-1');
+    const group = workspace.addGroup();
+    const rule = group.addRule();
 
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     rule.onFieldChange({ field: 'operator', value: 'is' });
@@ -124,11 +122,11 @@ describe('End-to-end: create scenario', () => {
 
   it('canAddRule becomes false when all factors are used', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup('group-1');
+    const group = workspace.addGroup();
     expect(group.canAddRule.value).toBe(true);
     // 添加与 factors 相同数量的 rule
     for (let i = 0; i < factors.length; i++) {
-      group.addRule(`rule-${i}`);
+      group.addRule();
     }
     expect(group.canAddRule.value).toBe(false);
   });
@@ -137,6 +135,7 @@ describe('End-to-end: create scenario', () => {
 describe('End-to-end: edit scenario', () => {
   const editGroups = [
     {
+      id: 'group-1',
       rules: [
         { id: 'rule-1', name: 'is_active', operator: 'is', threshold: true },
         { id: 'rule-2', name: 'order_amount', operator: 'between any', threshold: [[0, 100]] },
@@ -203,8 +202,8 @@ describe('End-to-end: edit scenario', () => {
 describe('End-to-end: error scenarios', () => {
   it('throws when Fetcher is not registered for dynamic resource', () => {
     const workspace = createRuleWorkspace({ factors: [factors[0]] }); // 缺 fetcher
-    const group = workspace.addGroup('group-1');
-    const rule = group.addRule('rule-1');
+    const group = workspace.addGroup();
+    const rule = group.addRule();
     // 选择 employee（带 dynamic resource）会触发 ThresholderInferrer → ResourceFactory.create
     rule.onFieldChange({ field: 'name', value: 'employee' });
     // thresholder 会求值并抛错
@@ -213,14 +212,14 @@ describe('End-to-end: error scenarios', () => {
 
   it('throws when validate false and build is called', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
-    workspace.addGroup('group-1'); // 空 group
+    workspace.addGroup(); // 空 group
     expect(() => workspace.build()).toThrow(/incomplete/);
   });
 
   it('throws when individual rule is incomplete', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup('group-1');
-    group.addRule('rule-1'); // 空的 rule
+    const group = workspace.addGroup();
+    group.addRule(); // 空的 rule
     expect(group.validate()).toBe(false);
     expect(() => group.build()).toThrow(/incomplete/);
   });
@@ -277,8 +276,8 @@ describe('End-to-end: single Fetcher serves multiple Resources', () => {
 
     // 选择 employee 因子 → 触发 ResourceFactory.create
     // ResourceFactory 应从共享 Fetcher 中选 'paginatedFilterable' 类型
-    const group = workspace.addGroup('group-1');
-    const rule = group.addRule('rule-1');
+    const group = workspace.addGroup();
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'employee' });
     expect(rule.factor.value?.name).toBe('employee');
     expect(rule.thresholder.value?.type).toBe('Select');

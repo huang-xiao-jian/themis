@@ -504,6 +504,8 @@ interface AtomicRuleGroupScheduler {
   pickRule(ruleId: string): AtomicRuleScheduler | undefined;
   /** 移除原子规则 */
   removeRule(ruleId: string): void;
+  /** 恢复原子规则设置器（编辑场景） */
+  hydrateRule(rule: AtomicRule): void;
   /** 验证所有原子规则 */
   validate(): boolean;
   /** 构建规则组 */
@@ -534,6 +536,8 @@ interface RuleWorkspaceScheduler {
   pickGroup(groupId: string): AtomicRuleGroupScheduler | undefined;
   /** 移除规则组 */
   removeGroup(groupId: string): void;
+  /** 恢复规则组设置器（编辑场景） */
+  hydrateGroup(group: AtomicRuleGroup): void;
   // 验证与构建
   /** 验证所有规则组 */
   validate(): boolean;
@@ -655,10 +659,10 @@ const fetchers = [
 const workspace = new RuleWorkspaceBuilder().withFactors(factors).withFetchers(fetchers).build();
 
 // 4. 创建规则组
-const group = workspace.addGroup('group-1');
+const group = workspace.addGroup();
 
 // 5. 创建原子规则
-const rule = group.addRule('rule-1');
+const rule = group.addRule();
 
 // 6. 用户选择规则因子（表单控件适配层负责调用）
 // 推断联动流程见 [用户选择规则因子的联动流程](#用户选择规则因子的联动流程)

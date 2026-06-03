@@ -62,20 +62,21 @@ describe('AtomicRuleGroupScheduler - create & lifecycle', () => {
 });
 
 describe('AtomicRuleGroupScheduler - addRule/removeRule', () => {
-  it('addRule appends a new rule scheduler', () => {
+  it('addRule appends a new rule scheduler with auto-generated id', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule('rule-1');
+    const rule = group.addRule();
     expect(group.rules.value).toHaveLength(1);
     expect(rule).toBeInstanceOf(AtomicRuleScheduler);
+    expect(rule.id).toBeDefined();
     expect(group.rules.value[0]).toBe(rule);
   });
 
   it('removeRule removes the scheduler and destroys it', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule('rule-1');
-    group.removeRule('rule-1');
+    const rule = group.addRule();
+    group.removeRule(rule.id);
     expect(group.rules.value).toEqual([]);
     // destroy 幂等
     expect(() => rule.destroy()).not.toThrow();
@@ -84,7 +85,7 @@ describe('AtomicRuleGroupScheduler - addRule/removeRule', () => {
   it('removeRule on non-existent id is a no-op', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    group.addRule('rule-1');
+    group.addRule();
     expect(() => group.removeRule('rule-999')).not.toThrow();
     expect(group.rules.value).toHaveLength(1);
   });
@@ -92,7 +93,7 @@ describe('AtomicRuleGroupScheduler - addRule/removeRule', () => {
   it('factors updates reactively when rule name changes', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule('rule-1');
+    const rule = group.addRule();
     // 设置 rule.name 后 factors 应该 disable 该因子
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
@@ -101,11 +102,26 @@ describe('AtomicRuleGroupScheduler - addRule/removeRule', () => {
   it('factors restores when rule is removed', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule('rule-1');
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
-    group.removeRule('rule-1');
+    group.removeRule(rule.id);
     expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBeFalsy();
+  });
+});
+
+describe('AtomicRuleGroupScheduler - pickRule', () => {
+  it('pickRule returns the rule scheduler with matching id', () => {
+    const inferrer = makeInferrer();
+    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    const rule = group.addRule();
+    expect(group.pickRule(rule.id)).toBe(rule);
+  });
+
+  it('pickRule returns undefined for non-existent id', () => {
+    const inferrer = makeInferrer();
+    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    expect(group.pickRule('non-existent')).toBeUndefined();
   });
 });
 
@@ -119,7 +135,7 @@ describe('AtomicRuleGroupScheduler - validate & build', () => {
   it('validate returns false when any rule is incomplete', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule('rule-1');
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     rule.onFieldChange({ field: 'operator', value: 'is' });
     // threshold 未设置
@@ -129,7 +145,7 @@ describe('AtomicRuleGroupScheduler - validate & build', () => {
   it('validate returns true when all rules are complete', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule('rule-1');
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     rule.onFieldChange({ field: 'operator', value: 'is' });
     rule.onFieldChange({ field: 'threshold', value: true });
@@ -142,17 +158,19 @@ describe('AtomicRuleGroupScheduler - validate & build', () => {
     expect(() => group.build()).toThrow(/incomplete/);
   });
 
-  it('build returns AtomicRuleGroup when complete', () => {
+  it('build returns AtomicRuleGroup with id when complete', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule('rule-1');
+    const rule = group.addRule();
     rule.onFieldChange({ field: 'name', value: 'is_active' });
     rule.onFieldChange({ field: 'operator', value: 'is' });
     rule.onFieldChange({ field: 'threshold', value: true });
     const result = group.build();
-    expect(result.rules).toEqual([
-      { id: 'rule-1', name: 'is_active', operator: 'is', threshold: true },
-    ]);
+    expect(result.id).toBe('group-1');
+    expect(result.rules).toHaveLength(1);
+    expect(result.rules[0].name).toBe('is_active');
+    expect(result.rules[0].operator).toBe('is');
+    expect(result.rules[0].threshold).toBe(true);
   });
 });
 
@@ -166,7 +184,7 @@ describe('AtomicRuleGroupScheduler - canAddRule', () => {
   it('canAddRule remains true while rules < factors', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    group.addRule('rule-1');
+    group.addRule();
     // ALL_FACTORS.length = 10, rules.length = 1 → still true
     expect(group.canAddRule.value).toBe(true);
   });
@@ -177,7 +195,7 @@ describe('AtomicRuleGroupScheduler - canAddRule', () => {
     const group = new AtomicRuleGroupScheduler('group-1', factorsSignal, inferrer);
     // 添加与 ALL_FACTORS 相同数量的 rule
     for (let i = 0; i < ALL_FACTORS.length; i++) {
-      group.addRule(`rule-${i}`);
+      group.addRule();
     }
     expect(group.canAddRule.value).toBe(false);
   });
@@ -186,11 +204,12 @@ describe('AtomicRuleGroupScheduler - canAddRule', () => {
     const inferrer = makeInferrer();
     const factorsSignal = makeFactorsSignal();
     const group = new AtomicRuleGroupScheduler('group-1', factorsSignal, inferrer);
+    const rules: AtomicRuleScheduler[] = [];
     for (let i = 0; i < ALL_FACTORS.length; i++) {
-      group.addRule(`rule-${i}`);
+      rules.push(group.addRule());
     }
     expect(group.canAddRule.value).toBe(false);
-    group.removeRule('rule-0');
+    group.removeRule(rules[0].id);
     expect(group.canAddRule.value).toBe(true);
   });
 });
@@ -199,8 +218,8 @@ describe('AtomicRuleGroupScheduler - destroy', () => {
   it('destroy releases all child rules', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const r1 = group.addRule('rule-1');
-    const r2 = group.addRule('rule-2');
+    const r1 = group.addRule();
+    const r2 = group.addRule();
     group.destroy();
     expect(group.rules.value).toEqual([]);
     expect(() => r1.destroy()).not.toThrow();
@@ -218,7 +237,38 @@ describe('AtomicRuleGroupScheduler - destroy', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
     group.destroy();
-    expect(() => group.addRule('rule-1')).toThrow(/destroyed/);
+    expect(() => group.addRule()).toThrow(/destroyed/);
+  });
+});
+
+describe('AtomicRuleGroupScheduler - hydrateRule', () => {
+  it('hydrateRule restores rule from AtomicRule data', () => {
+    const inferrer = makeInferrer();
+    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    group.hydrateRule({ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true });
+    expect(group.rules.value).toHaveLength(1);
+    expect(group.rules.value[0]).toBeInstanceOf(AtomicRuleScheduler);
+    expect(group.rules.value[0].id).toBe('rule-1');
+  });
+
+  it('hydrateRule preserves original id, name, operator, threshold', () => {
+    const inferrer = makeInferrer();
+    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    group.hydrateRule({ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true });
+    const rule = group.rules.value[0];
+    expect(rule.name.value).toBe('is_active');
+    expect(rule.operator.value).toBe('is');
+    expect(rule.threshold.value).toBe(true);
+    expect(group.validate()).toBe(true);
+  });
+
+  it('hydrateRule throws after destroy', () => {
+    const inferrer = makeInferrer();
+    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    group.destroy();
+    expect(() =>
+      group.hydrateRule({ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true })
+    ).toThrow(/destroyed/);
   });
 });
 

@@ -20,6 +20,8 @@ export interface AtomicRule<T = unknown> {
  * 多个原子规则通过 AND 连接形成规则组
  */
 export interface AtomicRuleGroup {
+  /** 唯一标识 */
+  readonly id: string;
   /** 规则组内的原子规则列表 */
   readonly rules: readonly AtomicRule[];
 }

@@ -1,4 +1,5 @@
 import { computed, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
+import { nanoid } from 'nanoid';
 import type { AtomicRule, AtomicRuleGroup } from '../dsl/AtomicRule';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
 import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
@@ -41,10 +42,10 @@ export class AtomicRuleGroupScheduler {
     this.thresholderInferrer = thresholderInferrer;
 
     // 编辑场景：从 snapshot 构造初始 rule scheduler
-    const initialRules: AtomicRuleScheduler[] = (snapshot?.rules ?? []).map(
-      (rule) => new AtomicRuleScheduler(rule.id, factors, thresholderInferrer, rule)
-    );
-    this.rules = signal<readonly AtomicRuleScheduler[]>(initialRules);
+    this.rules = signal<readonly AtomicRuleScheduler[]>([]);
+    for (const rule of snapshot?.rules ?? []) {
+      this.hydrateRule(rule);
+    }
 
     // usedFactors 派生自当前 rules 中已选择的因子名称
     this.usedFactors = computed<string[]>(() => {
@@ -69,15 +70,40 @@ export class AtomicRuleGroupScheduler {
   }
 
   /**
-   * 新增原子规则
+   * 恢复原子规则设置器（编辑场景）
+   *
+   * 从已有的 AtomicRule 数据创建 scheduler，保留原始 id / name / operator / threshold
    */
-  addRule(ruleId: string): AtomicRuleScheduler {
+  hydrateRule(rule: AtomicRule): void {
     if (this.destroyed) {
       throw new Error(`[sisyphus] AtomicRuleGroupScheduler "${this.id}" is destroyed.`);
     }
-    const scheduler = new AtomicRuleScheduler(ruleId, this.allFactors, this.thresholderInferrer);
+    const scheduler = new AtomicRuleScheduler(
+      rule.id,
+      this.allFactors,
+      this.thresholderInferrer,
+      rule
+    );
+    this.rules.value = [...this.rules.value, scheduler];
+  }
+
+  /**
+   * 新增原子规则（自动生成唯一标识）
+   */
+  addRule(): AtomicRuleScheduler {
+    if (this.destroyed) {
+      throw new Error(`[sisyphus] AtomicRuleGroupScheduler "${this.id}" is destroyed.`);
+    }
+    const scheduler = new AtomicRuleScheduler(nanoid(), this.allFactors, this.thresholderInferrer);
     this.rules.value = [...this.rules.value, scheduler];
     return scheduler;
+  }
+
+  /**
+   * 获取原子规则设置器
+   */
+  pickRule(ruleId: string): AtomicRuleScheduler | undefined {
+    return this.rules.value.find((r) => r.id === ruleId);
   }
 
   /**
@@ -115,6 +141,7 @@ export class AtomicRuleGroupScheduler {
       );
     }
     return {
+      id: this.id,
       rules: this.rules.value.map((r) => r.build()),
     };
   }

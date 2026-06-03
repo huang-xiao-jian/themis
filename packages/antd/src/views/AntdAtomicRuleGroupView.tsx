@@ -16,8 +16,7 @@ export function AntdAtomicRuleGroupView({
   const canAddRule = scheduler.canAddRule.value;
 
   const handleAddRule = useCallback(() => {
-    const ruleId = `rule-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    scheduler.addRule(ruleId);
+    scheduler.addRule();
   }, [scheduler]);
 
   const handleRemoveRule = useCallback(
