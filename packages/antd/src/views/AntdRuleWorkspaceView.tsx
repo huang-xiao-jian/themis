@@ -1,19 +1,16 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useSignals } from '@preact/signals-react/runtime';
+import type { RuleWorkspaceScheduler } from '@sisyphus/core';
 import type { RuleWorkspaceViewProperties } from '@sisyphus/react';
-import { Button, Card, Space } from 'antd';
+import { Button, Card, Flex } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 import { AntdAtomicRuleGroupView } from './AntdAtomicRuleGroupView';
 
-/** antd 工作空间编辑器视图 */
-export function AntdRuleWorkspaceView({ scheduler }: RuleWorkspaceViewProperties): ReactElement {
+/** 规则组列表，独立追踪 groups 信号变化 */
+function AntdRuleGroupList({ scheduler }: { scheduler: RuleWorkspaceScheduler }): ReactElement {
   useSignals();
   const groups = scheduler.groups.value;
-
-  const onAddGroup = useCallback(() => {
-    scheduler.addGroup();
-  }, [scheduler]);
 
   const onRemoveGroup = useCallback(
     (groupId: string) => {
@@ -23,7 +20,7 @@ export function AntdRuleWorkspaceView({ scheduler }: RuleWorkspaceViewProperties
   );
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }} size="large">
+    <Flex vertical gap="medium">
       {groups.map((group) => (
         <Card
           key={group.id}
@@ -41,9 +38,29 @@ export function AntdRuleWorkspaceView({ scheduler }: RuleWorkspaceViewProperties
           <AntdAtomicRuleGroupView type="AtomicRuleGroupView" scheduler={group} />
         </Card>
       ))}
-      <Button type="dashed" icon={<PlusOutlined />} block onClick={onAddGroup}>
-        添加规则组
-      </Button>
-    </Space>
+    </Flex>
+  );
+}
+
+/** 添加规则组按钮 */
+function AntdRuleGroupActions({ scheduler }: { scheduler: RuleWorkspaceScheduler }): ReactElement {
+  const onAddGroup = useCallback(() => {
+    scheduler.addGroup();
+  }, [scheduler]);
+
+  return (
+    <Button type="dashed" icon={<PlusOutlined />} block onClick={onAddGroup}>
+      添加规则组
+    </Button>
+  );
+}
+
+/** antd 工作空间编辑器视图 */
+export function AntdRuleWorkspaceView({ scheduler }: RuleWorkspaceViewProperties): ReactElement {
+  return (
+    <Flex vertical gap="medium">
+      <AntdRuleGroupList scheduler={scheduler} />
+      <AntdRuleGroupActions scheduler={scheduler} />
+    </Flex>
   );
 }
