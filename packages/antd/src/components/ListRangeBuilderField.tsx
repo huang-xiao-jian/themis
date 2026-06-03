@@ -1,7 +1,7 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ListRangeBuilderProperties } from '@sisyphus/core';
 import { DataType, Semantic } from '@sisyphus/core';
-import { Button, DatePicker, Input, InputNumber, Slider, Space } from 'antd';
+import { Button, DatePicker, Flex, Input, InputNumber, Slider, Space } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 
@@ -155,9 +155,9 @@ export function ListRangeBuilderField({
   );
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }}>
+    <Flex>
       {listValue.map((itemValue: unknown, index: number) => (
-        <Space key={index} align="center">
+        <Flex key={index} align="center">
           {renderRangeListItem(properties.item, itemValue, (v) => onItemChange(index, v), size)}
           <Button
             type="link"
@@ -165,11 +165,11 @@ export function ListRangeBuilderField({
             disabled={!canRemove}
             onClick={() => onRemove(index)}
           />
-        </Space>
+        </Flex>
       ))}
       <Button type="link" icon={<PlusOutlined />} disabled={!canAdd} onClick={onAdd}>
         添加
       </Button>
-    </Space>
+    </Flex>
   );
 }

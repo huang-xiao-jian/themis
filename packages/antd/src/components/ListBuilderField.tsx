@@ -5,10 +5,10 @@ import {
   Select as AntdSelect,
   Button,
   DatePicker,
+  Flex,
   Input,
   InputNumber,
   Slider,
-  Space,
   TimePicker,
 } from 'antd';
 import type { ReactElement } from 'react';
@@ -164,9 +164,9 @@ export function ListBuilderField({
   );
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }}>
+    <Flex>
       {listValue.map((itemValue: unknown, index: number) => (
-        <Space key={index} align="center">
+        <Flex key={index} align="center">
           {renderListItem(properties.item, itemValue, (v) => onItemChange(index, v), size)}
           <Button
             type="link"
@@ -174,11 +174,11 @@ export function ListBuilderField({
             disabled={!canRemove}
             onClick={() => onRemove(index)}
           />
-        </Space>
+        </Flex>
       ))}
       <Button type="link" icon={<PlusOutlined />} disabled={!canAdd} onClick={onAdd}>
         添加
       </Button>
-    </Space>
+    </Flex>
   );
 }
