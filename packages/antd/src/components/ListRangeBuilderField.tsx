@@ -4,6 +4,7 @@ import { DataType, Semantic } from '@sisyphus/core';
 import { Button, DatePicker, Flex, Input, InputNumber, Slider, Space } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
+import { fromDayjsRange, toDayjsRange } from '../utils/dayjsValue';
 
 const { RangePicker } = DatePicker;
 
@@ -96,8 +97,8 @@ function renderRangeListItem(
       // date / datetime
       return (
         <RangePicker
-          value={itemValue as never}
-          onChange={onItemChange}
+          value={toDayjsRange(itemValue)}
+          onChange={(v) => onItemChange(fromDayjsRange(v))}
           showTime={semantic === Semantic.DATETIME}
           size={size}
         />

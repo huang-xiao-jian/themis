@@ -1,6 +1,7 @@
 import type { RangePickerProperties } from '@sisyphus/core';
 import { Semantic } from '@sisyphus/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
+import { fromDayjsRange, toDayjsRange } from '../utils/dayjsValue';
 
 /** RangePicker 映射结果组件标识 */
 export type RangePickerComponentKind = 'RangePicker' | 'Slider';
@@ -27,8 +28,8 @@ export class RangePickerPropsMapper {
         return {
           componentKind: 'RangePicker',
           props: {
-            value: value as unknown,
-            onChange: (dates: unknown) => onChange(dates),
+            value: toDayjsRange(value),
+            onChange: (dates: unknown) => onChange(fromDayjsRange(dates)),
             placeholder: [
               `${config.placeholderTemplate.select}开始${properties.title}`,
               `${config.placeholderTemplate.select}结束${properties.title}`,
@@ -42,8 +43,8 @@ export class RangePickerPropsMapper {
         return {
           componentKind: 'RangePicker',
           props: {
-            value: value as unknown,
-            onChange: (dates: unknown) => onChange(dates),
+            value: toDayjsRange(value),
+            onChange: (dates: unknown) => onChange(fromDayjsRange(dates)),
             showTime: true,
             placeholder: [
               `${config.placeholderTemplate.select}开始${properties.title}`,
@@ -71,8 +72,8 @@ export class RangePickerPropsMapper {
         return {
           componentKind: 'RangePicker',
           props: {
-            value: value as unknown,
-            onChange: (dates: unknown) => onChange(dates),
+            value: toDayjsRange(value),
+            onChange: (dates: unknown) => onChange(fromDayjsRange(dates)),
             placeholder: [
               `${config.placeholderTemplate.select}开始`,
               `${config.placeholderTemplate.select}结束`,

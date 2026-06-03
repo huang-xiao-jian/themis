@@ -13,6 +13,7 @@ import {
 } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
+import { fromDayjs, toDayjs } from '../utils/dayjsValue';
 
 /** ListBuilderField 属性 */
 interface ListBuilderFieldProps {
@@ -73,14 +74,31 @@ function renderListItem(
     case 'Picker': {
       const semantic = item.semantic;
       if (semantic === Semantic.DATE) {
-        return <DatePicker value={itemValue as never} onChange={onItemChange} size={size} />;
+        return (
+          <DatePicker
+            value={toDayjs(itemValue)}
+            onChange={(v) => onItemChange(fromDayjs(v))}
+            size={size}
+          />
+        );
       }
       if (semantic === Semantic.TIME) {
-        return <TimePicker value={itemValue as never} onChange={onItemChange} size={size} />;
+        return (
+          <TimePicker
+            value={toDayjs(itemValue)}
+            onChange={(v) => onItemChange(fromDayjs(v))}
+            size={size}
+          />
+        );
       }
       if (semantic === Semantic.DATETIME) {
         return (
-          <DatePicker value={itemValue as never} onChange={onItemChange} showTime size={size} />
+          <DatePicker
+            value={toDayjs(itemValue)}
+            onChange={(v) => onItemChange(fromDayjs(v))}
+            showTime
+            size={size}
+          />
         );
       }
       if (semantic === Semantic.PERCENTAGE) {

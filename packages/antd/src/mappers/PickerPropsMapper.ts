@@ -1,6 +1,7 @@
 import type { PickerProperties } from '@sisyphus/core';
 import { Semantic } from '@sisyphus/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
+import { fromDayjs, toDayjs } from '../utils/dayjsValue';
 
 /** Picker 映射结果组件标识 */
 export type PickerComponentKind = 'Select' | 'DatePicker' | 'TimePicker' | 'Slider';
@@ -40,8 +41,8 @@ export class PickerPropsMapper {
         return {
           componentKind: 'DatePicker',
           props: {
-            value: value as unknown,
-            onChange: (date: unknown) => onChange(date),
+            value: toDayjs(value),
+            onChange: (date: unknown) => onChange(fromDayjs(date)),
             format: constraints?.format,
             placeholder: `${config.placeholderTemplate.select}${properties.title}`,
             autoComplete: 'off',
@@ -53,8 +54,8 @@ export class PickerPropsMapper {
         return {
           componentKind: 'TimePicker',
           props: {
-            value: value as unknown,
-            onChange: (time: unknown) => onChange(time),
+            value: toDayjs(value),
+            onChange: (time: unknown) => onChange(fromDayjs(time)),
             format: constraints?.format,
             placeholder: `${config.placeholderTemplate.select}${properties.title}`,
             autoComplete: 'off',
@@ -66,8 +67,8 @@ export class PickerPropsMapper {
         return {
           componentKind: 'DatePicker',
           props: {
-            value: value as unknown,
-            onChange: (date: unknown) => onChange(date),
+            value: toDayjs(value),
+            onChange: (date: unknown) => onChange(fromDayjs(date)),
             showTime: true,
             format: constraints?.format,
             placeholder: `${config.placeholderTemplate.select}${properties.title}`,
@@ -93,8 +94,8 @@ export class PickerPropsMapper {
         return {
           componentKind: 'DatePicker',
           props: {
-            value: value as unknown,
-            onChange: (date: unknown) => onChange(date),
+            value: toDayjs(value),
+            onChange: (date: unknown) => onChange(fromDayjs(date)),
             placeholder: `${config.placeholderTemplate.select}${properties.title}`,
             autoComplete: 'off',
             size: config.size,
