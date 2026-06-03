@@ -31,7 +31,7 @@ export function AntdAtomicRuleGroupView({
     <Space direction="vertical" style={{ width: '100%' }} size="middle">
       <Space direction="vertical" style={{ width: '100%' }} size="middle">
         {rules.map((rule) => (
-          <Space key={rule.id} align="start" wrap>
+          <div key={rule.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <AntdAtomicRuleView type="AtomicRuleView" scheduler={rule} factors={factors} />
             <Button
               type="text"
@@ -39,7 +39,7 @@ export function AntdAtomicRuleGroupView({
               icon={<DeleteOutlined />}
               onClick={() => handleRemoveRule(rule.id)}
             />
-          </Space>
+          </div>
         ))}
         <Button
           type="dashed"

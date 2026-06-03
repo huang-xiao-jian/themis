@@ -49,6 +49,7 @@ export function ThresholdRenderer({
           size={result.props.size}
           minLength={result.props.minLength}
           maxLength={result.props.maxLength}
+          style={{ width: '100%' }}
         />
       );
 
@@ -64,6 +65,7 @@ export function ThresholdRenderer({
           step={result.props.step}
           precision={result.props.precision}
           size={result.props.size}
+          style={{ width: '100%' }}
         />
       );
 
@@ -78,6 +80,7 @@ export function ThresholdRenderer({
           allowClear={result.props.allowClear}
           maxLength={result.props.maxLength}
           size={result.props.size}
+          style={{ width: '100%' }}
         />
       );
 

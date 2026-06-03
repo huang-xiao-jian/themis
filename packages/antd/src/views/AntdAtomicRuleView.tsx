@@ -1,7 +1,7 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import type { FieldDataSource } from '@sisyphus/core';
 import type { AtomicRuleViewProperties } from '@sisyphus/react';
-import { Select, Space } from 'antd';
+import { Select } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 import { ThresholdRenderer } from '../components/ThresholdRenderer';
@@ -50,7 +50,7 @@ export function AntdAtomicRuleView({
   );
 
   return (
-    <Space align="start" wrap>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
       <Select
         value={nameValue ?? undefined}
         options={[...factors]}
@@ -74,12 +74,14 @@ export function AntdAtomicRuleView({
         style={{ minWidth: 120 }}
       />
       {thresholder && (
-        <ThresholdRenderer
-          properties={thresholder}
-          value={thresholdValue}
-          onChange={handleThresholdChange}
-        />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <ThresholdRenderer
+            properties={thresholder}
+            value={thresholdValue}
+            onChange={handleThresholdChange}
+          />
+        </div>
       )}
-    </Space>
+    </div>
   );
 }
