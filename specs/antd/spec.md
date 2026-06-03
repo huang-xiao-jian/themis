@@ -240,6 +240,19 @@ interface SisyphusAntdConfig {
     checked?: string;
     unChecked?: string;
   };
+  /** AtomicRule 行布局配置 */
+  atomicRuleLayout?: {
+    /** name 列 flex 值，默认 '180px' */
+    name?: string;
+    /** operator 列 flex 值，默认 '140px' */
+    operator?: string;
+    /** threshold 列 flex 值，默认 'auto' */
+    threshold?: string;
+    /** action 列 flex 值，默认 'none' */
+    action?: string;
+    /** 列间距，默认 8 */
+    gutter?: number;
+  };
 }
 
 /** 提供 antd 配置 */
@@ -263,12 +276,29 @@ function App() {
       config={{
         size: 'large',
         switchLabels: { checked: '启用', unChecked: '停用' },
+        atomicRuleLayout: {
+          name: '200px',
+          operator: '160px',
+          threshold: 'auto',
+          gutter: 12,
+        },
       }}
     >
       {children}
     </SisyphusAntdProvider>
   );
 }
+```
+
+`AtomicRuleView` 使用 `Grid` 布局，沿用 antd `Row` + `Col` 实现。各列的 `flex` 值通过 `SisyphusAntdConfig.atomicRuleLayout` 配置，等效代码如下：
+
+```tsx
+<Row gutter={gutter} align="middle" wrap={false}>
+  <Col flex={layout.name}></Col>
+  <Col flex={layout.operator}></Col>
+  <Col flex={layout.threshold}></Col>
+  <Col flex={layout.action}></Col>
+</Row>
 ```
 
 **说明**：日期/时间格式化等 `antd` 原生支持的配置，由业务方通过 `antd ConfigProvider` 自行配置，不纳入 `SisyphusAntdConfig` 管理。

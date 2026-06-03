@@ -1,3 +1,17 @@
+/** AtomicRule 行布局配置 */
+export interface AtomicRuleLayout {
+  /** name 列 flex 值，默认 '180px' */
+  readonly name?: string;
+  /** operator 列 flex 值，默认 '140px' */
+  readonly operator?: string;
+  /** threshold 列 flex 值，默认 'auto' */
+  readonly threshold?: string;
+  /** action 列 flex 值，默认 'none' */
+  readonly action?: string;
+  /** 列间距，默认 8 */
+  readonly gutter?: number;
+}
+
 /**
  * antd 适配器配置
  *
@@ -17,7 +31,18 @@ export interface SisyphusAntdConfig {
     readonly checked?: string;
     readonly unChecked?: string;
   };
+  /** AtomicRule 行布局配置 */
+  readonly atomicRuleLayout?: AtomicRuleLayout;
 }
+
+/** 默认 AtomicRule 行布局 */
+export const DEFAULT_ATOMIC_RULE_LAYOUT = {
+  name: '180px',
+  operator: '140px',
+  threshold: 'auto',
+  action: 'none',
+  gutter: 8,
+} as const satisfies Required<AtomicRuleLayout>;
 
 /** 默认配置 */
 export const DEFAULT_SISYPHUS_ANTD_CONFIG = {
@@ -30,4 +55,5 @@ export const DEFAULT_SISYPHUS_ANTD_CONFIG = {
     checked: '是',
     unChecked: '否',
   },
+  atomicRuleLayout: DEFAULT_ATOMIC_RULE_LAYOUT,
 } satisfies SisyphusAntdConfig;

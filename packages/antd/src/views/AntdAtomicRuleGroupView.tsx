@@ -1,4 +1,4 @@
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { AtomicRuleGroupScheduler } from '@sisyphus/core';
 import type { AtomicRuleGroupViewProperties } from '@sisyphus/react';
@@ -23,15 +23,13 @@ function AntdAtomicRules({ scheduler }: { scheduler: AtomicRuleGroupScheduler })
   return (
     <Flex vertical gap="medium">
       {rules.map((rule) => (
-        <div key={rule.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <AntdAtomicRuleView type="AtomicRuleView" scheduler={rule} factors={factors} />
-          <Button
-            type="text"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => onRemoveRule(rule.id)}
-          />
-        </div>
+        <AntdAtomicRuleView
+          key={rule.id}
+          type="AtomicRuleView"
+          scheduler={rule}
+          factors={factors}
+          onDelete={() => onRemoveRule(rule.id)}
+        />
       ))}
     </Flex>
   );
