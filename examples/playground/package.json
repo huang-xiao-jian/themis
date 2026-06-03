@@ -14,6 +14,7 @@
     "@sisyphus/core": "workspace:*",
     "@sisyphus/react": "workspace:*",
     "antd": "^6.0.0",
+    "dayjs": "^1.11.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

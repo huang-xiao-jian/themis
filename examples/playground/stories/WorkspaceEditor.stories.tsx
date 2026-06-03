@@ -17,6 +17,7 @@ const DEMO_FACTORS: readonly RuleFactorDefinition[] = [
 /** 编辑场景：预填充的规则组快照 */
 const EDIT_RULE_GROUPS: readonly AtomicRuleGroup[] = [
   {
+    id: 'group-1',
     rules: [
       { id: 'rule-1', name: 'is_vip', operator: 'is', threshold: true },
       { id: 'rule-2', name: 'age', operator: '>=', threshold: 18 },
@@ -27,9 +28,11 @@ const EDIT_RULE_GROUPS: readonly AtomicRuleGroup[] = [
 /** 多组编辑场景：多个规则组快照 */
 const MULTI_GROUP_RULE_GROUPS: readonly AtomicRuleGroup[] = [
   {
+    id: 'group-1',
     rules: [{ id: 'rule-1', name: 'is_vip', operator: 'is', threshold: true }],
   },
   {
+    id: 'group-2',
     rules: [
       { id: 'rule-2', name: 'username', operator: 'contains', threshold: 'admin' },
       { id: 'rule-3', name: 'age', operator: '<=', threshold: 60 },
