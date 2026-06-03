@@ -31,15 +31,24 @@ function renderListItem(
 ): ReactElement {
   switch (item.type) {
     case 'Input': {
-      const isNumber = item.dataType === DataType.NUMBER;
+      if (item.dataType === DataType.NUMBER) {
+        return (
+          <InputNumber
+            value={itemValue as number | undefined}
+            onChange={(v) => onItemChange(v === null ? undefined : v)}
+            min={typeof item.constraints?.min === 'number' ? item.constraints.min : undefined}
+            max={typeof item.constraints?.max === 'number' ? item.constraints.max : undefined}
+            step={item.constraints?.step}
+            precision={item.constraints?.precision}
+            size={size}
+            style={{ width: 160 }}
+          />
+        );
+      }
       return (
         <Input
-          type={isNumber ? 'number' : 'text'}
-          value={(itemValue as string | number | undefined) ?? ''}
-          onChange={(e) => {
-            const raw = e.target.value;
-            onItemChange(isNumber ? (raw === '' ? undefined : Number(raw)) : raw);
-          }}
+          value={(itemValue as string | undefined) ?? ''}
+          onChange={(e) => onItemChange(e.target.value)}
           autoComplete="off"
           size={size}
           style={{ width: 160 }}

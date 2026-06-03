@@ -17,17 +17,17 @@
 
 ### 表单组件到 antd 组件的映射
 
-| 表单组件         | antd 实现                      | 说明             |
-| :--------------- | :----------------------------- | :--------------- |
-| `Input`          | `Input`                        | 单行文本输入     |
-| `InputNumber`    | `InputNumber`                  | 数值输入         |
-| `TextArea`       | `Input.TextArea`               | 多行输入         |
-| `Switch`         | `Switch`                       | 开关             |
-| `Select`         | `Select`                       | 单选             |
-| `MultipleSelect` | `Select` (mode="multiple")     | 多选             |
-| `Picker`         | `DatePicker` / `TimePicker` 等 | 按 semantic 映射 |
-| `RangePicker`    | `DatePicker.RangePicker`       | 区间选择         |
-| `RangeInput`     | `Input` (双框)                 | 区间输入         |
+| 表单组件         | antd 实现                             | 说明                                               |
+| :--------------- | :------------------------------------ | :------------------------------------------------- |
+| `Input`          | `Input`                               | 单行文本输入                                       |
+| `InputNumber`    | `InputNumber`                         | 数值输入                                           |
+| `TextArea`       | `Input.TextArea`                      | 多行输入                                           |
+| `Switch`         | `Switch`                              | 开关                                               |
+| `Select`         | `Select`                              | 单选                                               |
+| `MultipleSelect` | `Select` (mode="multiple")            | 多选                                               |
+| `Picker`         | `DatePicker` / `TimePicker` 等        | 按 semantic 映射                                   |
+| `RangePicker`    | `DatePicker.RangePicker`              | 区间选择                                           |
+| `RangeInput`     | `Input` (双框) / `InputNumber` (双框) | 区间输入，`dataType='number'` 时使用 `InputNumber` |
 
 ### Picker 组件映射（按 semantic）
 
@@ -90,15 +90,18 @@ graph TD
 
 **隐式继承**：`rows: 4`, `placeholder`, `allowClear`
 
-#### RangeInput → Input
+#### RangeInput → Input / InputNumber
 
 | 表单组件属性 | antd 组件属性 |
 | :----------- | :------------ |
 | `name`       | `name`        |
 | `title`      | `label`       |
-| `dataType`   | `type`        |
+| `dataType`   | 组件选择依据  |
 
-**推断规则**：渲染为双框 Input 组件
+**推断规则**：
+
+- `dataType='string'` 时渲染为双框 `Input` 组件
+- `dataType='number'` 时渲染为双框 `InputNumber` 组件，约束映射：`min→min`, `max→max`, `step→step`, `precision→precision`
 
 **隐式继承**：`placeholder: ['最小值', '最大值']`, `allowClear`
 
@@ -196,11 +199,11 @@ graph TD
 
 **列表项组件映射**：
 
-| item.type       | antd 组件                            | 说明         |
-| :-------------- | :----------------------------------- | :----------- |
-| `'Input'`       | `Input`                              | 单行文本输入 |
-| `'InputNumber'` | `InputNumber`                        | 数值输入     |
-| `'Picker'`      | 按 `item.semantic` 映射（见 Picker） | 选择器       |
+| item.type       | antd 组件                            | 说明                                     |
+| :-------------- | :----------------------------------- | :--------------------------------------- |
+| `'Input'`       | `Input` / `InputNumber`              | `dataType='number'` 时使用 `InputNumber` |
+| `'InputNumber'` | `InputNumber`                        | 数值输入                                 |
+| `'Picker'`      | 按 `item.semantic` 映射（见 Picker） | 选择器                                   |
 
 **数量约束映射**：
 
@@ -213,10 +216,10 @@ graph TD
 
 映射规则与 `ListBuilder` 相同。
 
-| item.type       | antd 组件                | 说明       |
-| :-------------- | :----------------------- | :--------- |
-| `'RangeInput'`  | `Input` (双框)           | 区间输入   |
-| `'RangePicker'` | `DatePicker.RangePicker` | 区间选择器 |
+| item.type       | antd 组件                             | 说明                                     |
+| :-------------- | :------------------------------------ | :--------------------------------------- |
+| `'RangeInput'`  | `Input` (双框) / `InputNumber` (双框) | `dataType='number'` 时使用 `InputNumber` |
+| `'RangePicker'` | `DatePicker.RangePicker`              | 区间选择器                               |
 
 ### 抽象配置对象
 

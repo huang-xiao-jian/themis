@@ -1,7 +1,7 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ListRangeBuilderProperties } from '@sisyphus/core';
 import { DataType, Semantic } from '@sisyphus/core';
-import { Button, DatePicker, Input, Slider, Space } from 'antd';
+import { Button, DatePicker, Input, InputNumber, Slider, Space } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 
@@ -26,15 +26,40 @@ function renderRangeListItem(
     case 'RangeInput': {
       const isNumber = item.dataType === DataType.NUMBER;
       const rangeValue = Array.isArray(itemValue) ? itemValue : [undefined, undefined];
+      if (isNumber) {
+        return (
+          <Space>
+            <InputNumber
+              value={rangeValue[0] as number | undefined}
+              onChange={(v) => onItemChange([v ?? undefined, rangeValue[1]])}
+              placeholder="最小值"
+              min={typeof item.constraints?.min === 'number' ? item.constraints.min : undefined}
+              max={typeof item.constraints?.max === 'number' ? item.constraints.max : undefined}
+              step={item.constraints?.step}
+              precision={item.constraints?.precision}
+              size={size}
+              style={{ width: 100 }}
+            />
+            <span>~</span>
+            <InputNumber
+              value={rangeValue[1] as number | undefined}
+              onChange={(v) => onItemChange([rangeValue[0], v ?? undefined])}
+              placeholder="最大值"
+              min={typeof item.constraints?.min === 'number' ? item.constraints.min : undefined}
+              max={typeof item.constraints?.max === 'number' ? item.constraints.max : undefined}
+              step={item.constraints?.step}
+              precision={item.constraints?.precision}
+              size={size}
+              style={{ width: 100 }}
+            />
+          </Space>
+        );
+      }
       return (
         <Space>
           <Input
-            type={isNumber ? 'number' : 'text'}
-            value={(rangeValue[0] as string | number | undefined) ?? ''}
-            onChange={(e) => {
-              const raw = e.target.value;
-              onItemChange([isNumber ? Number(raw) : raw, rangeValue[1]]);
-            }}
+            value={(rangeValue[0] as string | undefined) ?? ''}
+            onChange={(e) => onItemChange([e.target.value, rangeValue[1]])}
             placeholder="最小值"
             autoComplete="off"
             size={size}
@@ -42,12 +67,8 @@ function renderRangeListItem(
           />
           <span>~</span>
           <Input
-            type={isNumber ? 'number' : 'text'}
-            value={(rangeValue[1] as string | number | undefined) ?? ''}
-            onChange={(e) => {
-              const raw = e.target.value;
-              onItemChange([rangeValue[0], isNumber ? Number(raw) : raw]);
-            }}
+            value={(rangeValue[1] as string | undefined) ?? ''}
+            onChange={(e) => onItemChange([rangeValue[0], e.target.value])}
             placeholder="最大值"
             autoComplete="off"
             size={size}
