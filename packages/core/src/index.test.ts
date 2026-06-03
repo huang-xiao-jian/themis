@@ -99,13 +99,12 @@ describe('End-to-end: create scenario', () => {
     expect(() => workspace.destroy()).not.toThrow();
   });
 
-  it('factorOptions excludes the name of an active rule', () => {
+  it('factorOptions disables the name of an active rule', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
     const group = workspace.addGroup('group-1');
     const rule = group.addRule('rule-1');
     rule.onFieldChange({ field: 'name', value: 'is_active' });
-    const values = group.factorOptions.value.map((o) => o.value);
-    expect(values).not.toContain('is_active');
+    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
   });
 
   it('switches factor correctly with full reset', () => {
@@ -150,7 +149,7 @@ describe('End-to-end: edit scenario', () => {
     expect(group.rules.value[0].threshold.value).toBe(true);
   });
 
-  it('factorOptions excludes names from snapshot rules', () => {
+  it('factorOptions disables names from snapshot rules', () => {
     const workspace = new RuleWorkspaceBuilder()
       .withFactors(factors)
       .withFetchers(fetchers)
@@ -158,9 +157,8 @@ describe('End-to-end: edit scenario', () => {
       .build();
 
     const group = workspace.groups.value[0];
-    const values = group.factorOptions.value.map((o) => o.value);
-    expect(values).not.toContain('is_active');
-    expect(values).not.toContain('order_amount');
+    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
+    expect(group.factorOptions.value.find((o) => o.value === 'order_amount')?.disabled).toBe(true);
   });
 
   it('build returns restored data', () => {

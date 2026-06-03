@@ -12,8 +12,10 @@ export class FactorOptionsInferrer {
     allFactors: readonly RuleFactorDefinition[],
     usedFactorNames: ReadonlySet<string>
   ): readonly FieldDataSource[] {
-    return allFactors
-      .filter((f) => !usedFactorNames.has(f.name))
-      .map((f) => ({ label: f.title, value: f.name }));
+    return allFactors.map((f) => ({
+      label: f.title,
+      value: f.name,
+      ...(usedFactorNames.has(f.name) ? { disabled: true } : {}),
+    }));
   }
 }

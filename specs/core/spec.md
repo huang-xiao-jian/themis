@@ -476,7 +476,7 @@ interface AtomicRuleGroupScheduler {
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
   /** 可用的规则因子列表 */
   readonly factors: Signal<readonly RuleFactorDefinition[]>;
-  /** 适配选择器的规则因子选项集合，需要排除 Group 内部已使用的规则因子 */
+  /** 适配选择器的规则因子选项集合，需要 disable group 内部已使用的规则因子 */
   readonly factorOptions: Signal<readonly FieldDataSource[]>;
 
   /** 创建原子规则设置器（新建场景） */

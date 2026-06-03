@@ -46,7 +46,7 @@ describe('AtomicRuleGroupScheduler - create & lifecycle', () => {
     expect(group.rules.value[0].id).toBe('rule-1');
   });
 
-  it('factorOptions excludes names from current rules', () => {
+  it('factorOptions disables names from current rules', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler(
       'group-1',
@@ -55,9 +55,9 @@ describe('AtomicRuleGroupScheduler - create & lifecycle', () => {
       SAMPLE_GROUP
     );
     // SAMPLE_GROUP 的两个 rule 分别用了 employee 和 deliver_city
-    const usedNames = group.factorOptions.value.map((o) => o.value);
-    expect(usedNames).not.toContain('employee');
-    expect(usedNames).not.toContain('deliver_city');
+    expect(group.factorOptions.value).toHaveLength(ALL_FACTORS.length);
+    expect(group.factorOptions.value.find((o) => o.value === 'employee')?.disabled).toBe(true);
+    expect(group.factorOptions.value.find((o) => o.value === 'deliver_city')?.disabled).toBe(true);
   });
 });
 
@@ -93,10 +93,9 @@ describe('AtomicRuleGroupScheduler - addRule/removeRule', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
     const rule = group.addRule('rule-1');
-    // 设置 rule.name 后 factorOptions 应该排除该因子
+    // 设置 rule.name 后 factorOptions 应该 disable 该因子
     rule.onFieldChange({ field: 'name', value: 'is_active' });
-    const usedNames = group.factorOptions.value.map((o) => o.value);
-    expect(usedNames).not.toContain('is_active');
+    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
   });
 
   it('factorOptions restores when rule is removed', () => {
@@ -104,9 +103,9 @@ describe('AtomicRuleGroupScheduler - addRule/removeRule', () => {
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
     const rule = group.addRule('rule-1');
     rule.onFieldChange({ field: 'name', value: 'is_active' });
-    expect(group.factorOptions.value.find((o) => o.value === 'is_active')).toBeUndefined();
+    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
     group.removeRule('rule-1');
-    expect(group.factorOptions.value.find((o) => o.value === 'is_active')).toBeDefined();
+    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBeFalsy();
   });
 });
 
