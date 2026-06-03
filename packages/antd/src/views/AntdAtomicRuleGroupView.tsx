@@ -1,7 +1,7 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { AtomicRuleGroupViewProperties } from '@sisyphus/react';
-import { Button, Card, Space } from 'antd';
+import { Button, Space } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 import { AntdAtomicRuleView } from './AntdAtomicRuleView';
@@ -27,15 +27,7 @@ export function AntdAtomicRuleGroupView({
   );
 
   return (
-    <Card
-      size="small"
-      title="规则组"
-      extra={
-        <Button type="link" icon={<PlusOutlined />} onClick={handleAddRule}>
-          添加规则
-        </Button>
-      }
-    >
+    <Space direction="vertical" style={{ width: '100%' }} size="middle">
       <Space direction="vertical" style={{ width: '100%' }} size="middle">
         {rules.map((rule) => (
           <Space key={rule.id} align="start" wrap>
@@ -52,12 +44,10 @@ export function AntdAtomicRuleGroupView({
             />
           </Space>
         ))}
-        {rules.length === 0 && (
-          <Button type="dashed" icon={<PlusOutlined />} block onClick={handleAddRule}>
-            添加规则
-          </Button>
-        )}
+        <Button type="dashed" icon={<PlusOutlined />} block onClick={handleAddRule}>
+          添加规则
+        </Button>
       </Space>
-    </Card>
+    </Space>
   );
 }

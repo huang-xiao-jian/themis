@@ -29,6 +29,7 @@ export function AntdRuleWorkspaceView({ scheduler }: RuleWorkspaceViewProperties
         <Card
           key={group.id}
           size="small"
+          title="规则组"
           extra={
             <Button
               type="text"
