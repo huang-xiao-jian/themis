@@ -10,7 +10,7 @@ import { useSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 /** AntdAtomicRuleView 扩展属性（包含由父组件传入的 factors） */
 interface AntdAtomicRuleViewProps extends AtomicRuleViewProperties {
   /** 可用的规则因子选项（由 AtomicRuleGroupView 传入） */
-  readonly factors?: readonly FieldDataSource[];
+  readonly factors?: FieldDataSource[];
 }
 
 /** antd 原子规则编辑器视图 */
@@ -53,7 +53,7 @@ export function AntdAtomicRuleView({
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0 }}>
       <Select
         value={nameValue ?? undefined}
-        options={[...factors]}
+        options={factors}
         onChange={onNameChange}
         placeholder={`${config.placeholderTemplate.select}规则因子`}
         allowClear

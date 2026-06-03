@@ -1,23 +1,17 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useSignals } from '@preact/signals-react/runtime';
+import type { AtomicRuleGroupScheduler } from '@sisyphus/core';
 import type { AtomicRuleGroupViewProperties } from '@sisyphus/react';
-import { Button, Space } from 'antd';
+import { Button, Flex } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 import { AntdAtomicRuleView } from './AntdAtomicRuleView';
 
-/** antd 规则组编辑器视图 */
-export function AntdAtomicRuleGroupView({
-  scheduler,
-}: AtomicRuleGroupViewProperties): ReactElement {
+/** 规则列表，独立追踪 rules 和 factors 信号变化 */
+function AntdAtomicRules({ scheduler }: { scheduler: AtomicRuleGroupScheduler }): ReactElement {
   useSignals();
   const rules = scheduler.rules.value;
   const factors = scheduler.factors.value;
-  const canAddRule = scheduler.canAddRule.value;
-
-  const onAddRule = useCallback(() => {
-    scheduler.addRule();
-  }, [scheduler]);
 
   const onRemoveRule = useCallback(
     (ruleId: string) => {
@@ -27,29 +21,50 @@ export function AntdAtomicRuleGroupView({
   );
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }} size="middle">
-      <Space direction="vertical" style={{ width: '100%' }} size="middle">
-        {rules.map((rule) => (
-          <div key={rule.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <AntdAtomicRuleView type="AtomicRuleView" scheduler={rule} factors={factors} />
-            <Button
-              type="text"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => onRemoveRule(rule.id)}
-            />
-          </div>
-        ))}
-        <Button
-          type="dashed"
-          icon={<PlusOutlined />}
-          block
-          disabled={!canAddRule}
-          onClick={onAddRule}
-        >
-          添加规则
-        </Button>
-      </Space>
-    </Space>
+    <Flex vertical gap="medium">
+      {rules.map((rule) => (
+        <div key={rule.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <AntdAtomicRuleView type="AtomicRuleView" scheduler={rule} factors={factors} />
+          <Button
+            type="text"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => onRemoveRule(rule.id)}
+          />
+        </div>
+      ))}
+    </Flex>
+  );
+}
+
+/** 添加规则按钮，独立追踪 canAddRule 信号 */
+function AntdAtomicRuleActions({
+  scheduler,
+}: {
+  scheduler: AtomicRuleGroupScheduler;
+}): ReactElement {
+  useSignals();
+  const canAddRule = scheduler.canAddRule.value;
+
+  const onAddRule = useCallback(() => {
+    scheduler.addRule();
+  }, [scheduler]);
+
+  return (
+    <Button type="dashed" icon={<PlusOutlined />} block disabled={!canAddRule} onClick={onAddRule}>
+      添加规则
+    </Button>
+  );
+}
+
+/** antd 规则组编辑器视图 */
+export function AntdAtomicRuleGroupView({
+  scheduler,
+}: AtomicRuleGroupViewProperties): ReactElement {
+  return (
+    <Flex vertical gap="medium">
+      <AntdAtomicRules scheduler={scheduler} />
+      <AntdAtomicRuleActions scheduler={scheduler} />
+    </Flex>
   );
 }
