@@ -463,6 +463,8 @@ class FactorOptionsInferrer {
 
 /** 规则组初始化数据（编辑场景） */
 interface AtomicRuleGroup {
+  /** 唯一标识 */
+  readonly id: string;
   /** 已有的原子规则列表 */
   readonly rules: readonly AtomicRule[];
 }
@@ -491,7 +493,9 @@ interface AtomicRuleGroupScheduler {
   readonly canAddRule: Signal<boolean>;
 
   /** 创建原子规则设置器（新建场景） */
-  addRule(ruleId: string): AtomicRuleScheduler;
+  addRule(): AtomicRuleScheduler;
+  /** 获取原子规则设置器（精细操作场景） */
+  pickRule(ruleId: string): AtomicRuleScheduler | undefined;
   /** 移除原子规则 */
   removeRule(ruleId: string): void;
   /** 验证所有原子规则 */
@@ -519,10 +523,11 @@ interface RuleWorkspaceScheduler {
 
   // 创建与删除
   /** 创建规则组设置器（新建场景） */
-  addGroup(groupId: string): AtomicRuleGroupScheduler;
+  addGroup(): AtomicRuleGroupScheduler;
+  /** 获取规则组设置器（精细操作场景） */
+  pickGroup(groupId: string): AtomicRuleGroupScheduler | undefined;
   /** 移除规则组 */
   removeGroup(groupId: string): void;
-
   // 验证与构建
   /** 验证所有规则组 */
   validate(): boolean;
@@ -672,10 +677,12 @@ workspace.destroy();
 ### 编辑场景
 
 ```ts
-// 已有规则组数据（从后端加载）
-// AtomicRuleGroup 参见 [规则及规则因子描述](../spec.md#规则配置业务概念)
+// 已有规则组数据（从外部加载）
+import { AtomicRuleGroup } from '../spec.md';
+
 const groups: AtomicRuleGroup[] = [
   {
+    id: 'group-1',
     rules: [
       { id: 'rule-1', name: 'employee', operator: 'eq', threshold: 100 },
       { id: 'rule-2', name: 'deliver_city', operator: 'in', threshold: ['北京', '上海'] },
