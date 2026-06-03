@@ -59,10 +59,10 @@ export function AntdAtomicRuleView({
         allowClear
         size={config.size}
         style={{ minWidth: 140 }}
-        showSearch
-        filterOption={(input, option) =>
-          (option?.label as string)?.toLowerCase().includes(input.toLowerCase()) ?? false
-        }
+        showSearch={{
+          filterOption: (input, option) =>
+            (option?.label as string)?.toLowerCase().includes(input.toLowerCase()) ?? false,
+        }}
       />
       <Select
         value={operatorValue ?? undefined}
