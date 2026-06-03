@@ -7,6 +7,12 @@
 - [规则及规则因子描述](../spec.md)
 - [规则因子解释器](../interpreter.md)
 
+## 技术选型
+
+使用依赖库 `API` 前，务必使用 `context7` 获取使用指导
+
+- [nanoid](https://www.npmjs.com/package/nanoid) 客户端生成唯一标识
+
 ## 设计目标
 
 - **框架无关**：内核实现与框架/组件库解耦，便于多框架、多终端适配
