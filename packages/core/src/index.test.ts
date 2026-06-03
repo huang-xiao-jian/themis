@@ -99,12 +99,12 @@ describe('End-to-end: create scenario', () => {
     expect(() => workspace.destroy()).not.toThrow();
   });
 
-  it('factorOptions disables the name of an active rule', () => {
+  it('factors disables the name of an active rule', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
     const group = workspace.addGroup('group-1');
     const rule = group.addRule('rule-1');
     rule.onFieldChange({ field: 'name', value: 'is_active' });
-    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
+    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
   });
 
   it('switches factor correctly with full reset', () => {
@@ -120,6 +120,17 @@ describe('End-to-end: create scenario', () => {
     rule.onFieldChange({ field: 'name', value: 'order_amount' });
     expect(rule.operator.value).toBeNull();
     expect(rule.threshold.value).toBeUndefined();
+  });
+
+  it('canAddRule becomes false when all factors are used', () => {
+    const workspace = createRuleWorkspace({ factors, fetchers });
+    const group = workspace.addGroup('group-1');
+    expect(group.canAddRule.value).toBe(true);
+    // 添加与 factors 相同数量的 rule
+    for (let i = 0; i < factors.length; i++) {
+      group.addRule(`rule-${i}`);
+    }
+    expect(group.canAddRule.value).toBe(false);
   });
 });
 
@@ -149,7 +160,7 @@ describe('End-to-end: edit scenario', () => {
     expect(group.rules.value[0].threshold.value).toBe(true);
   });
 
-  it('factorOptions disables names from snapshot rules', () => {
+  it('factors disables names from snapshot rules', () => {
     const workspace = new RuleWorkspaceBuilder()
       .withFactors(factors)
       .withFetchers(fetchers)
@@ -157,8 +168,8 @@ describe('End-to-end: edit scenario', () => {
       .build();
 
     const group = workspace.groups.value[0];
-    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
-    expect(group.factorOptions.value.find((o) => o.value === 'order_amount')?.disabled).toBe(true);
+    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
+    expect(group.factors.value.find((o) => o.value === 'order_amount')?.disabled).toBe(true);
   });
 
   it('build returns restored data', () => {

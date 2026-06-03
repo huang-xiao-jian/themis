@@ -5,14 +5,14 @@ import { FactorOptionsInferrer } from './FactorOptionsInferrer';
 describe('FactorOptionsInferrer', () => {
   const inferrer = new FactorOptionsInferrer();
 
-  it('returns all factors when used set is empty', () => {
-    const result = inferrer.infer(ALL_FACTORS, new Set());
+  it('returns all factors when used list is empty', () => {
+    const result = inferrer.infer(ALL_FACTORS, []);
     expect(result).toHaveLength(ALL_FACTORS.length);
     expect(result[0]).toEqual({ label: ALL_FACTORS[0].title, value: ALL_FACTORS[0].name });
   });
 
-  it('marks factors as disabled when name is in used set', () => {
-    const used = new Set(['is_active', 'employee']);
+  it('marks factors as disabled when name is in used list', () => {
+    const used = ['is_active', 'employee'] as const;
     const result = inferrer.infer(ALL_FACTORS, used);
     expect(result).toHaveLength(ALL_FACTORS.length);
     expect(result.find((o) => o.value === 'is_active')).toEqual({
@@ -28,21 +28,21 @@ describe('FactorOptionsInferrer', () => {
   });
 
   it('all factors disabled when all are used', () => {
-    const used = new Set(ALL_FACTORS.map((f) => f.name));
+    const used = ALL_FACTORS.map((f) => f.name);
     const result = inferrer.infer(ALL_FACTORS, used);
     expect(result).toHaveLength(ALL_FACTORS.length);
     expect(result.every((o) => o.disabled === true)).toBe(true);
   });
 
   it('preserves input order', () => {
-    const result = inferrer.infer(ALL_FACTORS, new Set(['is_active']));
+    const result = inferrer.infer(ALL_FACTORS, ['is_active']);
     const names = result.map((o) => o.value);
     const expectedNames = ALL_FACTORS.map((f) => f.name);
     expect(names).toEqual(expectedNames);
   });
 
   it('label comes from title', () => {
-    const result = inferrer.infer(ALL_FACTORS, new Set());
+    const result = inferrer.infer(ALL_FACTORS, []);
     const employee = result.find((o) => o.value === 'employee');
     expect(employee?.label).toBe('员工');
   });

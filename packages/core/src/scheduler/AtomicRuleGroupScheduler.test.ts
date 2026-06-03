@@ -23,12 +23,12 @@ function makeFactorsSignal() {
 }
 
 describe('AtomicRuleGroupScheduler - create & lifecycle', () => {
-  it('starts with empty rules and full factorOptions', () => {
+  it('starts with empty rules and full factors', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
     expect(group.id).toBe('group-1');
     expect(group.rules.value).toEqual([]);
-    expect(group.factorOptions.value).toHaveLength(ALL_FACTORS.length);
+    expect(group.factors.value).toHaveLength(ALL_FACTORS.length);
     expect(group.snapshots).toEqual([]);
   });
 
@@ -46,7 +46,7 @@ describe('AtomicRuleGroupScheduler - create & lifecycle', () => {
     expect(group.rules.value[0].id).toBe('rule-1');
   });
 
-  it('factorOptions disables names from current rules', () => {
+  it('factors disables names from current rules', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler(
       'group-1',
@@ -55,9 +55,9 @@ describe('AtomicRuleGroupScheduler - create & lifecycle', () => {
       SAMPLE_GROUP
     );
     // SAMPLE_GROUP 的两个 rule 分别用了 employee 和 deliver_city
-    expect(group.factorOptions.value).toHaveLength(ALL_FACTORS.length);
-    expect(group.factorOptions.value.find((o) => o.value === 'employee')?.disabled).toBe(true);
-    expect(group.factorOptions.value.find((o) => o.value === 'deliver_city')?.disabled).toBe(true);
+    expect(group.factors.value).toHaveLength(ALL_FACTORS.length);
+    expect(group.factors.value.find((o) => o.value === 'employee')?.disabled).toBe(true);
+    expect(group.factors.value.find((o) => o.value === 'deliver_city')?.disabled).toBe(true);
   });
 });
 
@@ -89,23 +89,23 @@ describe('AtomicRuleGroupScheduler - addRule/removeRule', () => {
     expect(group.rules.value).toHaveLength(1);
   });
 
-  it('factorOptions updates reactively when rule name changes', () => {
+  it('factors updates reactively when rule name changes', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
     const rule = group.addRule('rule-1');
-    // 设置 rule.name 后 factorOptions 应该 disable 该因子
+    // 设置 rule.name 后 factors 应该 disable 该因子
     rule.onFieldChange({ field: 'name', value: 'is_active' });
-    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
+    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
   });
 
-  it('factorOptions restores when rule is removed', () => {
+  it('factors restores when rule is removed', () => {
     const inferrer = makeInferrer();
     const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
     const rule = group.addRule('rule-1');
     rule.onFieldChange({ field: 'name', value: 'is_active' });
-    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
+    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
     group.removeRule('rule-1');
-    expect(group.factorOptions.value.find((o) => o.value === 'is_active')?.disabled).toBeFalsy();
+    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBeFalsy();
   });
 });
 
@@ -153,6 +153,45 @@ describe('AtomicRuleGroupScheduler - validate & build', () => {
     expect(result.rules).toEqual([
       { id: 'rule-1', name: 'is_active', operator: 'is', threshold: true },
     ]);
+  });
+});
+
+describe('AtomicRuleGroupScheduler - canAddRule', () => {
+  it('canAddRule is true when no rules exist', () => {
+    const inferrer = makeInferrer();
+    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    expect(group.canAddRule.value).toBe(true);
+  });
+
+  it('canAddRule remains true while rules < factors', () => {
+    const inferrer = makeInferrer();
+    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    group.addRule('rule-1');
+    // ALL_FACTORS.length = 10, rules.length = 1 → still true
+    expect(group.canAddRule.value).toBe(true);
+  });
+
+  it('canAddRule becomes false when rules reach factors count', () => {
+    const inferrer = makeInferrer();
+    const factorsSignal = makeFactorsSignal();
+    const group = new AtomicRuleGroupScheduler('group-1', factorsSignal, inferrer);
+    // 添加与 ALL_FACTORS 相同数量的 rule
+    for (let i = 0; i < ALL_FACTORS.length; i++) {
+      group.addRule(`rule-${i}`);
+    }
+    expect(group.canAddRule.value).toBe(false);
+  });
+
+  it('canAddRule restores to true after removing a rule', () => {
+    const inferrer = makeInferrer();
+    const factorsSignal = makeFactorsSignal();
+    const group = new AtomicRuleGroupScheduler('group-1', factorsSignal, inferrer);
+    for (let i = 0; i < ALL_FACTORS.length; i++) {
+      group.addRule(`rule-${i}`);
+    }
+    expect(group.canAddRule.value).toBe(false);
+    group.removeRule('rule-0');
+    expect(group.canAddRule.value).toBe(true);
   });
 });
 

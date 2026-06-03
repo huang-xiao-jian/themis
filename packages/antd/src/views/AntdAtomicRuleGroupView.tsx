@@ -12,7 +12,8 @@ export function AntdAtomicRuleGroupView({
 }: AtomicRuleGroupViewProperties): ReactElement {
   useSignals();
   const rules = scheduler.rules.value;
-  const factorOptions = scheduler.factorOptions.value;
+  const factors = scheduler.factors.value;
+  const canAddRule = scheduler.canAddRule.value;
 
   const handleAddRule = useCallback(() => {
     const ruleId = `rule-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -31,11 +32,7 @@ export function AntdAtomicRuleGroupView({
       <Space direction="vertical" style={{ width: '100%' }} size="middle">
         {rules.map((rule) => (
           <Space key={rule.id} align="start" wrap>
-            <AntdAtomicRuleView
-              type="AtomicRuleView"
-              scheduler={rule}
-              factorOptions={factorOptions}
-            />
+            <AntdAtomicRuleView type="AtomicRuleView" scheduler={rule} factors={factors} />
             <Button
               type="text"
               danger
@@ -44,7 +41,13 @@ export function AntdAtomicRuleGroupView({
             />
           </Space>
         ))}
-        <Button type="dashed" icon={<PlusOutlined />} block onClick={handleAddRule}>
+        <Button
+          type="dashed"
+          icon={<PlusOutlined />}
+          block
+          disabled={!canAddRule}
+          onClick={handleAddRule}
+        >
           添加规则
         </Button>
       </Space>

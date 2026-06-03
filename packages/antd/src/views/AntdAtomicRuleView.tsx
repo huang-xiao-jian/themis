@@ -7,16 +7,16 @@ import { useCallback } from 'react';
 import { ThresholdRenderer } from '../components/ThresholdRenderer';
 import { useSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 
-/** AntdAtomicRuleView 扩展属性（包含由父组件传入的 factorOptions） */
+/** AntdAtomicRuleView 扩展属性（包含由父组件传入的 factors） */
 interface AntdAtomicRuleViewProps extends AtomicRuleViewProperties {
   /** 可用的规则因子选项（由 AtomicRuleGroupView 传入） */
-  readonly factorOptions?: readonly FieldDataSource[];
+  readonly factors?: readonly FieldDataSource[];
 }
 
 /** antd 原子规则编辑器视图 */
 export function AntdAtomicRuleView({
   scheduler,
-  factorOptions = [],
+  factors = [],
 }: AntdAtomicRuleViewProps): ReactElement {
   useSignals();
   const config = useSisyphusAntdConfig();
@@ -53,7 +53,7 @@ export function AntdAtomicRuleView({
     <Space align="start" wrap>
       <Select
         value={nameValue ?? undefined}
-        options={[...factorOptions]}
+        options={[...factors]}
         onChange={handleNameChange}
         placeholder={`${config.placeholderTemplate.select}规则因子`}
         allowClear

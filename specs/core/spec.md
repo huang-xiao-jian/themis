@@ -449,15 +449,15 @@ sequenceDiagram
 /**
  * 规则因子选项推断器
  *
- * 1. 数据源：factors.signal（RuleWorkspace 共享的规则因子定义列表）
- * 2. 排除规则：已存在于 rules.signal 中的原子规则的 name
- * 3. 输出格式：转换为 FieldDataSource[] 供 Select 组件使用
+ * 1. 数据源：allFactors.signal（RuleWorkspace 共享的规则因子定义列表）
+ * 2. 排除规则：已存在于 rules.signal 中的原子规则的 name（通过 usedFactors 获取）
+ * 3. 输出格式：转换为 FieldDataSource[] 供 Select 组件使用，已使用的因子标记 disabled
  * 4. 作用域：AtomicRuleGroup 级别，每个规则组独立计算
  */
 class FactorOptionsInferrer {
   infer(
     allFactors: readonly RuleFactorDefinition[],
-    usedFactorNames: ReadonlySet<string>
+    usedFactorNames: readonly string[]
   ): readonly FieldDataSource[];
 }
 
@@ -467,6 +467,13 @@ interface AtomicRuleGroup {
   readonly rules: readonly AtomicRule[];
 }
 
+/**
+ * 规则组设置器
+ *
+ * 管理原子规则集合，并实现规则配置约束：
+ * - 特定规则因子仅允许配置一次（通过 usedFactors + factors.disabled 实现）
+ * - 原子规则最大数量等同于规则因子的数量（通过 canAddRule 暴露）
+ */
 interface AtomicRuleGroupScheduler {
   /** 规则组唯一标识 */
   readonly id: string;
@@ -475,9 +482,13 @@ interface AtomicRuleGroupScheduler {
   /** 已创建的规则实例列表 */
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
   /** 可用的规则因子列表 */
-  readonly factors: Signal<readonly RuleFactorDefinition[]>;
-  /** 适配选择器的规则因子选项集合，需要 disable group 内部已使用的规则因子 */
-  readonly factorOptions: Signal<readonly FieldDataSource[]>;
+  readonly allFactors: Signal<readonly RuleFactorDefinition[]>;
+  /** Group 内部已使用的规则因子名称集合 */
+  readonly usedFactors: Signal<string[]>;
+  /** 适配选择器的规则因子选项集合，已使用的规则因子标记 disabled */
+  readonly factors: Signal<readonly FieldDataSource[]>;
+  /** 是否可继续添加原子规则（rules.length < maxRuleCount 且存在未使用的规则因子） */
+  readonly canAddRule: Signal<boolean>;
 
   /** 创建原子规则设置器（新建场景） */
   addRule(ruleId: string): AtomicRuleScheduler;
@@ -490,7 +501,10 @@ interface AtomicRuleGroupScheduler {
 }
 ```
 
-**特别说明**：`FactorOptionsInferrer` 属于 `AtomicRuleGroup` 级别，每个规则组独立维护自己的 `factorOptions`，不同规则组之间 **不共享**。
+**特别说明**：
+
+- `FactorOptionsInferrer` 属于 `AtomicRuleGroup` 级别，每个规则组独立维护自己的 `factors`，不同规则组之间 **不共享**
+- `canAddRule` 负责数量约束（`rules.length < allFactors.length`），供视图层控制「添加规则」按钮的可操作状态
 
 #### RuleWorkspaceScheduler
 

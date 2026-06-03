@@ -9,14 +9,21 @@ import { AtomicRuleScheduler } from './AtomicRuleScheduler';
 /**
  * 规则组设置器
  *
- * 负责管理一组 AtomicRuleScheduler，并提供 factorOptions 推断
+ * 管理原子规则集合，并实现规则配置约束：
+ * - 特定规则因子仅允许配置一次（通过 usedFactors + factors.disabled 实现）
+ * - 原子规则最大数量等同于规则因子的数量（通过 canAddRule 暴露）
  */
 export class AtomicRuleGroupScheduler {
   readonly id: string;
   readonly snapshots: readonly AtomicRule[];
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
-  readonly factors: ReadonlySignal<readonly RuleFactorDefinition[]>;
-  readonly factorOptions: ReadonlySignal<readonly FieldDataSource[]>;
+  readonly allFactors: ReadonlySignal<readonly RuleFactorDefinition[]>;
+  /** Group 内部已使用的规则因子 */
+  readonly usedFactors: ReadonlySignal<string[]>;
+  /** 适配选择器的规则因子选项集合，需要 disable group 内部已使用的规则因子 */
+  readonly factors: ReadonlySignal<readonly FieldDataSource[]>;
+  /** 是否可继续添加原子规则（rules.length < allFactors.length） */
+  readonly canAddRule: ReadonlySignal<boolean>;
 
   private readonly factorOptionsInferrer = new FactorOptionsInferrer();
   private readonly thresholderInferrer: ThresholderInferrer;
@@ -30,7 +37,7 @@ export class AtomicRuleGroupScheduler {
   ) {
     this.id = id;
     this.snapshots = snapshot?.rules ?? [];
-    this.factors = factors;
+    this.allFactors = factors;
     this.thresholderInferrer = thresholderInferrer;
 
     // 编辑场景：从 snapshot 构造初始 rule scheduler
@@ -39,16 +46,26 @@ export class AtomicRuleGroupScheduler {
     );
     this.rules = signal<readonly AtomicRuleScheduler[]>(initialRules);
 
-    // factorOptions 派生自当前 rules（不是 snapshots）
-    this.factorOptions = computed<readonly FieldDataSource[]>(() => {
-      const usedNames = new Set<string>();
+    // usedFactors 派生自当前 rules 中已选择的因子名称
+    this.usedFactors = computed<string[]>(() => {
+      const names: string[] = [];
       for (const rule of this.rules.value) {
         if (rule.name.value != null) {
-          usedNames.add(rule.name.value);
+          names.push(rule.name.value);
         }
       }
-      return this.factorOptionsInferrer.infer(this.factors.value, usedNames);
+      return names;
     });
+
+    // factors 派生自当前 rules（不是 snapshots）
+    this.factors = computed<readonly FieldDataSource[]>(() => {
+      return this.factorOptionsInferrer.infer(this.allFactors.value, this.usedFactors.value);
+    });
+
+    // canAddRule：规则数量尚未达到因子总数上限
+    this.canAddRule = computed<boolean>(
+      () => this.rules.value.length < this.allFactors.value.length
+    );
   }
 
   /**
@@ -58,7 +75,7 @@ export class AtomicRuleGroupScheduler {
     if (this.destroyed) {
       throw new Error(`[sisyphus] AtomicRuleGroupScheduler "${this.id}" is destroyed.`);
     }
-    const scheduler = new AtomicRuleScheduler(ruleId, this.factors, this.thresholderInferrer);
+    const scheduler = new AtomicRuleScheduler(ruleId, this.allFactors, this.thresholderInferrer);
     this.rules.value = [...this.rules.value, scheduler];
     return scheduler;
   }

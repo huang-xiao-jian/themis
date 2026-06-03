@@ -10,12 +10,13 @@ import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
 export class FactorOptionsInferrer {
   infer(
     allFactors: readonly RuleFactorDefinition[],
-    usedFactorNames: ReadonlySet<string>
+    usedFactorNames: readonly string[]
   ): readonly FieldDataSource[] {
+    const usedSet = new Set<string>(usedFactorNames);
     return allFactors.map((f) => ({
       label: f.title,
       value: f.name,
-      ...(usedFactorNames.has(f.name) ? { disabled: true } : {}),
+      ...(usedSet.has(f.name) ? { disabled: true } : {}),
     }));
   }
 }
