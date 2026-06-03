@@ -44,6 +44,7 @@ export class PickerPropsMapper {
             onChange: (date: unknown) => onChange(date),
             format: constraints?.format,
             placeholder: `${config.placeholderTemplate.select}${properties.title}`,
+            autoComplete: 'off',
             size: config.size,
           },
         };
@@ -56,6 +57,7 @@ export class PickerPropsMapper {
             onChange: (time: unknown) => onChange(time),
             format: constraints?.format,
             placeholder: `${config.placeholderTemplate.select}${properties.title}`,
+            autoComplete: 'off',
             size: config.size,
           },
         };
@@ -69,6 +71,7 @@ export class PickerPropsMapper {
             showTime: true,
             format: constraints?.format,
             placeholder: `${config.placeholderTemplate.select}${properties.title}`,
+            autoComplete: 'off',
             size: config.size,
           },
         };
@@ -93,6 +96,7 @@ export class PickerPropsMapper {
             value: value as unknown,
             onChange: (date: unknown) => onChange(date),
             placeholder: `${config.placeholderTemplate.select}${properties.title}`,
+            autoComplete: 'off',
             size: config.size,
           },
         };

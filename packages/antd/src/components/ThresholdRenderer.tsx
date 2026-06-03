@@ -46,6 +46,7 @@ export function ThresholdRenderer({
           type={result.props.type}
           placeholder={result.props.placeholder}
           allowClear={result.props.allowClear}
+          autoComplete="off"
           size={result.props.size}
           minLength={result.props.minLength}
           maxLength={result.props.maxLength}
@@ -60,6 +61,7 @@ export function ThresholdRenderer({
           onChange={result.props.onChange}
           name={result.props.name}
           placeholder={result.props.placeholder}
+          autoComplete="off"
           min={result.props.min}
           max={result.props.max}
           step={result.props.step}
@@ -78,6 +80,7 @@ export function ThresholdRenderer({
           rows={result.props.rows}
           placeholder={result.props.placeholder}
           allowClear={result.props.allowClear}
+          autoComplete="off"
           maxLength={result.props.maxLength}
           size={result.props.size}
           style={{ width: '100%' }}

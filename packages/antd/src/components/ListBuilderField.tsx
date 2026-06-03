@@ -40,6 +40,7 @@ function renderListItem(
             const raw = e.target.value;
             onItemChange(isNumber ? (raw === '' ? undefined : Number(raw)) : raw);
           }}
+          autoComplete="off"
           size={size}
           style={{ width: 160 }}
         />
@@ -54,6 +55,7 @@ function renderListItem(
           max={typeof item.constraints?.max === 'number' ? item.constraints.max : undefined}
           step={item.constraints?.step}
           precision={item.constraints?.precision}
+          autoComplete="off"
           size={size}
           style={{ width: 160 }}
         />
@@ -100,6 +102,7 @@ function renderListItem(
         <Input
           value={(itemValue as string | undefined) ?? ''}
           onChange={(e) => onItemChange(e.target.value)}
+          autoComplete="off"
           size={size}
           style={{ width: 160 }}
         />
@@ -110,6 +113,7 @@ function renderListItem(
         <Input
           value={String(itemValue ?? '')}
           onChange={(e) => onItemChange(e.target.value)}
+          autoComplete="off"
           size={size}
         />
       );

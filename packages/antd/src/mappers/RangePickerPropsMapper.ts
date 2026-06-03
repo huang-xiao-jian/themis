@@ -33,6 +33,7 @@ export class RangePickerPropsMapper {
               `${config.placeholderTemplate.select}开始${properties.title}`,
               `${config.placeholderTemplate.select}结束${properties.title}`,
             ],
+            autoComplete: ['off', 'off'],
             size: config.size,
           },
         };
@@ -48,6 +49,7 @@ export class RangePickerPropsMapper {
               `${config.placeholderTemplate.select}开始${properties.title}`,
               `${config.placeholderTemplate.select}结束${properties.title}`,
             ],
+            autoComplete: ['off', 'off'],
             size: config.size,
           },
         };
@@ -75,6 +77,7 @@ export class RangePickerPropsMapper {
               `${config.placeholderTemplate.select}开始`,
               `${config.placeholderTemplate.select}结束`,
             ],
+            autoComplete: ['off', 'off'],
             size: config.size,
           },
         };

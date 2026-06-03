@@ -36,6 +36,7 @@ function renderRangeListItem(
               onItemChange([isNumber ? Number(raw) : raw, rangeValue[1]]);
             }}
             placeholder="最小值"
+            autoComplete="off"
             size={size}
             style={{ width: 100 }}
           />
@@ -48,6 +49,7 @@ function renderRangeListItem(
               onItemChange([rangeValue[0], isNumber ? Number(raw) : raw]);
             }}
             placeholder="最大值"
+            autoComplete="off"
             size={size}
             style={{ width: 100 }}
           />
@@ -85,6 +87,7 @@ function renderRangeListItem(
         <Input
           value={String(itemValue ?? '')}
           onChange={(e) => onItemChange(e.target.value)}
+          autoComplete="off"
           size={size}
         />
       );

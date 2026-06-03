@@ -20,6 +20,7 @@ export function RangeInputField({ mapping }: RangeInputFieldProps): ReactElement
         }}
         placeholder={mapping.minPlaceholder}
         allowClear={mapping.allowClear}
+        autoComplete="off"
         size={mapping.size}
         style={{ width: 120 }}
       />
@@ -33,6 +34,7 @@ export function RangeInputField({ mapping }: RangeInputFieldProps): ReactElement
         }}
         placeholder={mapping.maxPlaceholder}
         allowClear={mapping.allowClear}
+        autoComplete="off"
         size={mapping.size}
         style={{ width: 120 }}
       />
