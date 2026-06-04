@@ -16,7 +16,7 @@ import { useMemo } from 'react';
 // ─── Factor Definitions ────────────────────────────────────────────────
 
 // ─── 1. BOOLEAN → Switch ──────────────────────────────────────────────
-const BOOLEAN: RuleFactorDefinition = {
+const BOOLEAN_SWITCH: RuleFactorDefinition = {
   name: 'is_active',
   title: '是否激活 (Switch)',
   dataType: DataType.BOOLEAN,
@@ -195,7 +195,7 @@ const MOCK_FETCHERS = [
 
 /** 全量因子定义，覆盖 ThresholderInferrer 所有分支 */
 const ALL_FACTORS: readonly RuleFactorDefinition[] = [
-  BOOLEAN,
+  BOOLEAN_SWITCH,
   STRING_INPUT,
   STRING_TEXTAREA,
   NUMBER_INPUT,
@@ -274,7 +274,7 @@ export const AllFactors: Story = {};
 
 /** 1. BOOLEAN → Switch | 阈值: true */
 export const EditBooleanSwitch: Story = {
-  render: createEditStory(BOOLEAN, {
+  render: createEditStory(BOOLEAN_SWITCH, {
     id: 'r-1',
     name: 'is_active',
     operator: 'is',
@@ -283,7 +283,7 @@ export const EditBooleanSwitch: Story = {
 };
 
 /** 2. STRING + POINT + SINGLE → Input | 阈值: 'admin' */
-export const EditStringInput: Story = {
+export const EditStringTextInput: Story = {
   render: createEditStory(STRING_INPUT, {
     id: 'r-2',
     name: 'username',
@@ -303,7 +303,7 @@ export const EditStringTextArea: Story = {
 };
 
 /** 4. NUMBER + POINT + SINGLE → InputNumber | 阈值: 18 */
-export const EditNumberInputNumber: Story = {
+export const EditNumberInput: Story = {
   render: createEditStory(NUMBER_INPUT, {
     id: 'r-4',
     name: 'age',

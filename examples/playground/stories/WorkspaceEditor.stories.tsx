@@ -14,17 +14,6 @@ const DEMO_FACTORS: readonly RuleFactorDefinition[] = [
   { name: 'age', title: '年龄', dataType: DataType.NUMBER },
 ];
 
-/** 编辑场景：预填充的规则组快照 */
-const EDIT_RULE_GROUPS: readonly AtomicRuleGroup[] = [
-  {
-    id: 'group-1',
-    rules: [
-      { id: 'rule-1', name: 'is_vip', operator: 'is', threshold: true },
-      { id: 'rule-2', name: 'age', operator: '>=', threshold: 18 },
-    ],
-  },
-];
-
 /** 多组编辑场景：多个规则组快照 */
 const MULTI_GROUP_RULE_GROUPS: readonly AtomicRuleGroup[] = [
   {
@@ -41,7 +30,7 @@ const MULTI_GROUP_RULE_GROUPS: readonly AtomicRuleGroup[] = [
 ];
 
 /** Story 装饰器：空工作空间 */
-function EmptyWrapper(): ReactElement {
+function EmptyWorkspace(): ReactElement {
   const scope = useMemo(() => createSisyphusScope({ plugins: [createAntdPlugin()] }), []);
   const workspace = useMemo(() => createRuleWorkspace({ factors: DEMO_FACTORS }), []);
 
@@ -59,30 +48,8 @@ function EmptyWrapper(): ReactElement {
   );
 }
 
-/** Story 装饰器：编辑已有规则 */
-function EditWrapper(): ReactElement {
-  const scope = useMemo(() => createSisyphusScope({ plugins: [createAntdPlugin()] }), []);
-  const workspace = useMemo(
-    () => createRuleWorkspace({ factors: DEMO_FACTORS, ruleGroups: EDIT_RULE_GROUPS }),
-    []
-  );
-
-  return (
-    <SisyphusScopeProvider scope={scope}>
-      <Row gutter={16}>
-        <Col lg={12} md={16}>
-          <WorkspaceEditor workspace={workspace} />
-        </Col>
-        <Col lg={12} md={16}>
-          <WorkspaceEditor workspace={workspace} />
-        </Col>
-      </Row>
-    </SisyphusScopeProvider>
-  );
-}
-
 /** Story 装饰器：多规则组编辑 */
-function MultiGroupEditWrapper(): ReactElement {
+function MultiGroupWorkspace(): ReactElement {
   const scope = useMemo(() => createSisyphusScope({ plugins: [createAntdPlugin()] }), []);
   const workspace = useMemo(
     () => createRuleWorkspace({ factors: DEMO_FACTORS, ruleGroups: MULTI_GROUP_RULE_GROUPS }),
@@ -103,26 +70,21 @@ function MultiGroupEditWrapper(): ReactElement {
   );
 }
 
-const meta: Meta<typeof EmptyWrapper> = {
+const meta: Meta<typeof EmptyWorkspace> = {
   title: 'WorkspaceEditor',
-  component: EmptyWrapper,
+  component: EmptyWorkspace,
 };
 
 export default meta;
 
-type Story = StoryObj<typeof EmptyWrapper>;
+type Story = StoryObj<typeof EmptyWorkspace>;
 
-/** 默认空工作空间 */
-export const Default: Story = {
-  render: () => <EmptyWrapper />,
+/** 空工作空间 */
+export const Empty: Story = {
+  render: () => <EmptyWorkspace />,
 };
 
-/** 编辑场景：预填充单组规则 */
-export const EditSingleGroup: Story = {
-  render: () => <EditWrapper />,
-};
-
-/** 编辑场景：预填充多组规则 */
-export const EditMultiGroups: Story = {
-  render: () => <MultiGroupEditWrapper />,
+/** 多规则组编辑 */
+export const MultiGroups: Story = {
+  render: () => <MultiGroupWorkspace />,
 };
