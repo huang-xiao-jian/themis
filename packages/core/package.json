@@ -19,9 +19,9 @@
   },
   "dependencies": {
     "@preact/signals-core": "^1.14.2",
-    "nanoid": "^5.0.7"
+    "nanoid": "^5.1.11"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0"
+    "@types/node": "^25.9.1"
   }
 }
