@@ -27,7 +27,7 @@
 - `vitest` 测试用例描述必须使用全英语
 
 ```ts
-import { describe, expect, it, rstest } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 
 it('should return single point', () => {
   // Arrange, Act, Assert pattern

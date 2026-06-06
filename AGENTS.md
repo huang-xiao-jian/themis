@@ -12,7 +12,7 @@
 
 - Runtime: `Node.js 22.16.0`
 - Language: `TypeScript 6.0.3`
-- Package Manager: `pnpm 10.28.2`
+- Package Manager: `pnpm 11.5.1`
 
 ## 核心依赖
 
