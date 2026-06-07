@@ -242,7 +242,7 @@ function SisyphusScopeProvider(props: SisyphusScopeProviderProps): React.ReactEl
 `WorkspaceEditor` 是业务方直接使用的顶层组件，封装了内部编辑器组件的实现细节：
 
 ```ts
-import { RuleWorkspaceScheduler } from '../core/spec.md';
+import { RuleWorkspaceScheduler } from '../core/application.md';
 
 interface WorkspaceEditorProps {
   /** 工作空间实例 */
