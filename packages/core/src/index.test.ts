@@ -62,7 +62,7 @@ describe('End-to-end: create scenario', () => {
 
     // Interact via Formily form
     rule.form.setValues({ name: 'order_amount' });
-    expect(rule.factor.value?.name).toBe('order_amount');
+    expect(rule.form.values.name).toBe('order_amount');
     // number + range + multiple inference — results stay in form fields
     const $operator = rule.form.getFieldState('operator');
     assert($operator.dataSource);

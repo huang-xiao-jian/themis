@@ -6,6 +6,7 @@ import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
 import { DefaultStaticResourceFactory } from '../factory/StaticResourceFactory';
+import { FactorInferrer } from '../inferrer/FactorInferrer';
 import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { AtomicRuleGroupScheduler } from './AtomicRuleGroupScheduler';
@@ -17,6 +18,7 @@ function makeInferrers() {
     new DefaultDynamicResourceFactory(new FetcherRegistry())
   );
   return {
+    factor: new FactorInferrer(ALL_FACTORS),
     operator: new OperatorInferrer(),
     thresholder: new ThresholderInferrer(factory),
   };

@@ -11,7 +11,7 @@ import { AntdAtomicRuleView } from './AntdAtomicRuleView';
 function AntdAtomicRules({ scheduler }: { scheduler: AtomicRuleGroupScheduler }): ReactElement {
   useSignals();
   const rules = scheduler.rules.value;
-  const factors = scheduler.factors.value;
+  const factors = scheduler.coordination.factors.value;
 
   const onRemoveRule = useCallback(
     (ruleId: string) => {

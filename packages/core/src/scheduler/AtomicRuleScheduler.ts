@@ -1,6 +1,5 @@
 import { computed, effect, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
 import type { AtomicRule } from '../dsl/AtomicRule';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
 import { SchedulerState } from '../dsl/SchedulerState';
 import { TransitionEventType } from '../dsl/TransitionEventType';
 import { createAtomicRuleForm, type AtomicRuleForm, type Inferrers } from './AtomicRuleForm';
@@ -23,30 +22,25 @@ export class AtomicRuleScheduler {
   readonly editable: ReadonlySignal<boolean>;
   /** 上次用户确认且数据无误时更新的原子规则配置 */
   readonly rule: Signal<AtomicRule | null>;
-
-  /** 已激活的规则因子定义 */
-  readonly factor: ReadonlySignal<RuleFactorDefinition | null>;
+  /** 上次用户确认且数据无误时更新的原子规则因子名 */
+  readonly factorName: Signal<string | null>;
 
   private readonly coordination: GroupCoordination;
-  private readonly factors: ReadonlySignal<readonly RuleFactorDefinition[]>;
   private readonly unsubscribers: (() => void)[] = [];
   private destroyed = false;
 
   constructor(
     id: string,
     coordination: GroupCoordination,
-    factors: ReadonlySignal<RuleFactorDefinition[]>,
     inferrers: Inferrers,
     snapshot?: AtomicRule
   ) {
     this.id = id;
     this.coordination = coordination;
-    this.factors = factors;
 
     // 创建 Formily 表单（effects 驱动重置联动，推断由视图层处理）
     this.form = createAtomicRuleForm({
       initialValues: snapshot,
-      factors: factors.value,
       inferrers,
     });
 
@@ -58,13 +52,7 @@ export class AtomicRuleScheduler {
 
     // 已确认数据：与 build() 返回值一致
     this.rule = signal<AtomicRule | null>(snapshot ?? null);
-
-    // factor 从 form name 字段值 + factors 派生
-    this.factor = computed<RuleFactorDefinition | null>(() => {
-      const nameValue = this.form.values.name as string | null;
-      if (!nameValue) return null;
-      return this.factors.value.find((f) => f.name === nameValue) ?? null;
-    });
+    this.factorName = signal<string | null>(snapshot?.name ?? null);
 
     // pattern 同步：state → form.pattern
     const unsubEffect = effect(() => {

@@ -2,7 +2,6 @@ import { computed, signal, type ReadonlySignal, type Signal } from '@preact/sign
 import { nanoid } from 'nanoid';
 import type { AtomicRule, AtomicRuleGroup } from '../dsl/AtomicRule';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
 import { SchedulerState } from '../dsl/SchedulerState';
 import { TransitionEventType } from '../dsl/TransitionEventType';
 import { FactorOptionsInferrer } from '../inferrer/FactorOptionsInferrer';
@@ -21,18 +20,13 @@ import { createGroupCoordination } from './Coordination';
  * - 组内不支持并行编辑，最多 1 个 Rule 处于编辑态；存在编辑中的 Rule 时禁用 addRule
  */
 export class AtomicRuleGroupScheduler {
-  readonly id: string;
   /** 初始化时传入的规则快照数据（编辑场景），不可变 */
-  readonly snapshots: readonly AtomicRule[];
+  private readonly snapshots: readonly AtomicRule[];
+  /** Group 内部已使用的规则因子名称集合 */
+  private readonly usedFactors: ReadonlySignal<string[]>;
+  readonly id: string;
   /** 已创建的规则实例列表 */
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
-  /** 可用的规则因子列表（源自 Workspace 级 WorkspaceCoordination.allFactors） */
-  readonly allFactors: ReadonlySignal<readonly RuleFactorDefinition[]>;
-  /** Group 内部已使用的规则因子名称集合 */
-  readonly usedFactors: ReadonlySignal<string[]>;
-  /** 适配选择器的规则因子选项集合，已使用的规则因子标记 disabled */
-  readonly factors: ReadonlySignal<readonly FieldDataSource[]>;
-
   /** 当前状态（编辑态 / 锁定态），通过 computed 从 WorkspaceCoordination.editingGroupId 派生 */
   readonly state: ReadonlySignal<SchedulerState>;
   /** 是否处于编辑态（派生信号） */
@@ -43,6 +37,7 @@ export class AtomicRuleGroupScheduler {
    *
    * 封装供子级 Rule 派生状态的共享信号：
    * - coordination.editingRuleId：当前处于编辑态的 Rule ID（null 表示无编辑中的 Rule）
+   * - coordination.factors：可用规则因子集合（组内已用因子标记 disabled）
    * - coordination.bus：Rule 上行事件总线（OK | EDIT | CANCEL）
    */
   readonly coordination: GroupCoordination;
@@ -64,12 +59,8 @@ export class AtomicRuleGroupScheduler {
   ) {
     this.id = id;
     this.snapshots = snapshot?.rules ?? [];
-    this.allFactors = workspaceCoordination.allFactors;
     this.inferrers = inferrers;
     this.workspaceCoordination = workspaceCoordination;
-
-    // 创建 Group 级协调实体（供 Rule 消费）
-    this.coordination = createGroupCoordination();
 
     // 状态：从 WorkspaceCoordination 的 editingGroupId computed 派生
     this.state = computed<SchedulerState>(() =>
@@ -79,33 +70,42 @@ export class AtomicRuleGroupScheduler {
     );
     this.editable = computed<boolean>(() => this.state.value === SchedulerState.EDITING);
 
-    // 从 snapshot 构造初始 rule scheduler
+    // 初始化 rules 信号（空集合）
     this.rules = signal<readonly AtomicRuleScheduler[]>([]);
+
+    // usedFactors 派生自当前 rules 中已确认的因子名称（从 rule 信号取值，而非编辑态表单）
+    this.usedFactors = computed<string[]>(() => {
+      const names: string[] = [];
+
+      for (const rule of this.rules.value) {
+        if (rule.factorName.value !== null) {
+          names.push(rule.factorName.value);
+        }
+      }
+
+      return names;
+    });
+
+    // 创建 Group 级协调实体（供 Rule 消费），factors 通过 Signal 共享
+    this.coordination = createGroupCoordination(
+      // factors 派生自 allFactors 和 usedFactors
+      computed<readonly FieldDataSource[]>(() =>
+        this.factorOptionsInferrer.infer(
+          workspaceCoordination.allFactors.value,
+          this.usedFactors.value
+        )
+      )
+    );
+
+    // 从 snapshot 构造初始 rule scheduler
     for (const rule of snapshot?.rules ?? []) {
       this.hydrateRule(rule);
     }
 
-    // usedFactors 派生自当前 rules 中已选择的因子名称
-    this.usedFactors = computed<string[]>(() => {
-      const names: string[] = [];
-      for (const rule of this.rules.value) {
-        const nameValue = rule.form.values.name as string | null;
-        if (nameValue != null) {
-          names.push(nameValue);
-        }
-      }
-      return names;
-    });
-
-    // factors 派生自 allFactors 和 usedFactors
-    this.factors = computed<readonly FieldDataSource[]>(() => {
-      return this.factorOptionsInferrer.infer(this.allFactors.value, this.usedFactors.value);
-    });
-
     // canAddRule：数量约束 + 编辑互斥约束
     this.canAddRule = computed<boolean>(
       () =>
-        this.rules.value.length < this.allFactors.value.length &&
+        this.rules.value.length < workspaceCoordination.allFactors.value.length &&
         this.coordination.editingRuleId.value === null
     );
   }
@@ -123,12 +123,7 @@ export class AtomicRuleGroupScheduler {
       return undefined;
     }
     const newId = nanoid();
-    const scheduler = new AtomicRuleScheduler(
-      newId,
-      this.coordination,
-      this.allFactors,
-      this.inferrers
-    );
+    const scheduler = new AtomicRuleScheduler(newId, this.coordination, this.inferrers);
     // 新建的 Rule 自动进入编辑态（互斥：前一个编辑中的 Rule 自动锁定）
     this.coordination.editingRuleId.value = newId;
     this.subscribeRuleEvents(scheduler);
@@ -175,13 +170,7 @@ export class AtomicRuleGroupScheduler {
     if (this.destroyed) {
       throw new Error(`[sisyphus] AtomicRuleGroupScheduler "${this.id}" is destroyed.`);
     }
-    const scheduler = new AtomicRuleScheduler(
-      rule.id,
-      this.coordination,
-      this.allFactors,
-      this.inferrers,
-      rule
-    );
+    const scheduler = new AtomicRuleScheduler(rule.id, this.coordination, this.inferrers, rule);
     this.subscribeRuleEvents(scheduler);
     this.rules.value = [...this.rules.value, scheduler];
   }

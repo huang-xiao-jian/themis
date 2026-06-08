@@ -1,5 +1,6 @@
-import { signal, type Signal } from '@preact/signals-core';
+import { signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
 import { createNanoEvents, type Emitter, type EventsMap } from 'nanoevents';
+import type { FieldDataSource } from '../dsl/FieldDataSource';
 import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
 import type { TransitionEvent } from '../dsl/TransitionEvent';
 import { TransitionEventType } from '../dsl/TransitionEventType';
@@ -50,15 +51,17 @@ export interface WorkspaceCoordination {
  * 事件总线（上行）：Rule → Group，有效事件类型 OK | EDIT | CANCEL
  * 信号通道（下行）：Group → Rule
  * - 子级 AtomicRuleScheduler 通过 computed 从 editingRuleId 派生 state
+ * - 子级通过 factors 获取可用规则因子（组内已用因子标记 disabled，确保因子仅配置一次）
  */
 export interface GroupCoordination {
   // ── 事件总线（上行：Rule → Group）────────────
   /** 事件总线，有效事件类型：OK | EDIT | CANCEL */
   readonly bus: EventBus<GroupTransitionEvents>;
-
   // ── 信号通道（下行：Group → Rule）────────────
   /** 当前处于编辑态的 Rule ID（null 表示无编辑中的 Rule） */
   readonly editingRuleId: Signal<string | null>;
+  /** 可用规则因子集合（源自 WorkspaceCoordination.allFactors，组内已使用的因子标记 disabled） */
+  readonly factors: ReadonlySignal<readonly FieldDataSource[]>;
 }
 
 /**
@@ -72,7 +75,7 @@ export function createWorkspaceCoordination(
   return {
     bus: createNanoEvents<WorkspaceTransitionEvents>(),
     editingGroupId: signal<string | null>(null),
-    allFactors: signal<readonly RuleFactorDefinition[]>([...factors]),
+    allFactors: signal<readonly RuleFactorDefinition[]>(factors),
   };
 }
 
@@ -81,9 +84,12 @@ export function createWorkspaceCoordination(
  *
  * 由 AtomicRuleGroupScheduler 持有，供 AtomicRuleScheduler 消费
  */
-export function createGroupCoordination(): GroupCoordination {
+export function createGroupCoordination(
+  factors: ReadonlySignal<readonly FieldDataSource[]>
+): GroupCoordination {
   return {
     bus: createNanoEvents<GroupTransitionEvents>(),
     editingRuleId: signal<string | null>(null),
+    factors,
   };
 }

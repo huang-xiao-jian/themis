@@ -4,6 +4,7 @@ import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
 import { DefaultStaticResourceFactory } from '../factory/StaticResourceFactory';
+import { FactorInferrer } from '../inferrer/FactorInferrer';
 import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { createAtomicRuleForm } from './AtomicRuleForm';
@@ -14,6 +15,7 @@ function makeInferrers() {
     new DefaultDynamicResourceFactory(new FetcherRegistry())
   );
   return {
+    factor: new FactorInferrer(ALL_FACTORS),
     operator: new OperatorInferrer(),
     thresholder: new ThresholderInferrer(factory),
   };
@@ -22,7 +24,6 @@ function makeInferrers() {
 describe('AtomicRuleForm - creation', () => {
   it('creates form with name, operator, threshold fields', () => {
     const form = createAtomicRuleForm({
-      factors: ALL_FACTORS,
       inferrers: makeInferrers(),
       initialValues: { name: 'is_active', operator: 'is', threshold: true },
     });
@@ -34,7 +35,6 @@ describe('AtomicRuleForm - creation', () => {
 
   it('default pattern is editable', () => {
     const form = createAtomicRuleForm({
-      factors: ALL_FACTORS,
       inferrers: makeInferrers(),
     });
 
@@ -45,7 +45,6 @@ describe('AtomicRuleForm - creation', () => {
 describe('AtomicRuleForm - inference linkage', () => {
   it('changing name updates operator field dataSource internally', () => {
     const form = createAtomicRuleForm({
-      factors: ALL_FACTORS,
       inferrers: makeInferrers(),
     });
 
@@ -58,7 +57,6 @@ describe('AtomicRuleForm - inference linkage', () => {
 
   it('changing name resets operator and threshold values', () => {
     const form = createAtomicRuleForm({
-      factors: ALL_FACTORS,
       inferrers: makeInferrers(),
     });
 
@@ -80,7 +78,6 @@ describe('AtomicRuleForm - inference linkage', () => {
 
   it('threshold componentProps is updated from inference', () => {
     const form = createAtomicRuleForm({
-      factors: ALL_FACTORS,
       inferrers: makeInferrers(),
     });
 
@@ -103,7 +100,6 @@ describe('AtomicRuleForm - inference linkage', () => {
 describe('AtomicRuleForm - snapshot restoration', () => {
   it('restores initial values without resetting operator/threshold', () => {
     const form = createAtomicRuleForm({
-      factors: ALL_FACTORS,
       inferrers: makeInferrers(),
       initialValues: { name: 'is_active', operator: 'is', threshold: true },
     });

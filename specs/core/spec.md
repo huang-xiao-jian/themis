@@ -90,6 +90,7 @@ classDiagram
     <<interface>>
     +bus: EventBus
     +editingRuleId: Signal
+    +factors: Signal
   }
 
   class AtomicRule {

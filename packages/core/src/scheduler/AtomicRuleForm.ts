@@ -1,6 +1,6 @@
 import { createForm, onFieldValueChange, onFormReact, type Form } from '@formily/core';
 import { AtomicRule } from '../dsl';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import { FactorInferrer } from '../inferrer';
 import type { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import type { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 
@@ -11,7 +11,7 @@ import type { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
  * 编辑态数据与外部隔离，推断结果留在 Form 字段内部，不进行数据传输。
  *
  * 创建阶段通过有限接口与外部通讯：
- * - 输入：`factors`（纯数据）、`inferrers`（推断器）、`initialValues`
+ * - 输入：`inferrers`（推断器组合）、`initialValues`
  * - 输出：无（Form 完全自治）
  *
  * **状态约束**：表单 pattern 由所属 AtomicRuleScheduler 控制
@@ -27,14 +27,13 @@ export type AtomicRuleForm = Form;
 
 /** 推断器组合 */
 export interface Inferrers {
+  readonly factor: FactorInferrer;
   readonly operator: OperatorInferrer;
   readonly thresholder: ThresholderInferrer;
 }
 
 /** createAtomicRuleForm 的配置选项 */
 export interface CreateAtomicRuleFormOptions {
-  /** 可用规则因子定义列表（纯数据） */
-  readonly factors: RuleFactorDefinition[];
   /** 推断器（operator + thresholder） */
   readonly inferrers: Inferrers;
   /** 编辑场景初始值（直接传入 createForm，字段创建时自动消费） */
@@ -49,7 +48,7 @@ export interface CreateAtomicRuleFormOptions {
  * - name 变化时推断 operators / thresholder
  */
 export function createAtomicRuleForm(options: CreateAtomicRuleFormOptions): AtomicRuleForm {
-  const { factors, inferrers, initialValues } = options;
+  const { inferrers, initialValues } = options;
 
   const form = createForm<AtomicRule>({
     initialValues,
@@ -57,7 +56,7 @@ export function createAtomicRuleForm(options: CreateAtomicRuleFormOptions): Atom
       // name 变化时推断 operators / thresholder
       onFormReact((form: Form<AtomicRule>) => {
         const name = form.values.name;
-        const factor = name ? (factors.find((f) => f.name === name) ?? null) : null;
+        const factor = inferrers.factor.infer(name);
 
         if (factor) {
           form.setFieldState('operator', {

@@ -1,13 +1,15 @@
-import { signal } from '@preact/signals-core';
+import { signal, type Signal } from '@preact/signals-core';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS, BOOLEAN_FACTOR } from '../__fixtures__/factors';
 import { SAMPLE_RULE_1 } from '../__fixtures__/rules';
+import type { FieldDataSource } from '../dsl/FieldDataSource';
 import { SchedulerState } from '../dsl/SchedulerState';
 import { TransitionEventType } from '../dsl/TransitionEventType';
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory';
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
 import { DefaultStaticResourceFactory } from '../factory/StaticResourceFactory';
+import { FactorInferrer } from '../inferrer/FactorInferrer';
 import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { AtomicRuleScheduler } from './AtomicRuleScheduler';
@@ -19,17 +21,20 @@ function makeInferrers() {
     new DefaultDynamicResourceFactory(new FetcherRegistry())
   );
   return {
+    factor: new FactorInferrer(ALL_FACTORS),
     operator: new OperatorInferrer(),
     thresholder: new ThresholderInferrer(factory),
   };
 }
 
-function makeFactorsSignal() {
-  return signal(ALL_FACTORS);
+function makeFieldDataSourceSignal(): Signal<readonly FieldDataSource[]> {
+  return signal<readonly FieldDataSource[]>(
+    ALL_FACTORS.map((f) => ({ label: f.title, value: f.name }))
+  );
 }
 
 function makeCoordination(editingRuleId?: string | null): GroupCoordination {
-  const c = createGroupCoordination();
+  const c = createGroupCoordination(makeFieldDataSourceSignal());
   c.editingRuleId.value = editingRuleId ?? null;
   return c;
 }
@@ -38,36 +43,28 @@ function makeScheduler(coordination?: GroupCoordination, snapshot?: typeof SAMPL
   return new AtomicRuleScheduler(
     'rule-1',
     coordination ?? makeCoordination(),
-    makeFactorsSignal(),
     makeInferrers(),
     snapshot
   );
 }
 
 describe('AtomicRuleScheduler - creation', () => {
-  it('starts with null factor and null rule when no snapshot', () => {
+  it('starts with null rule when no snapshot', () => {
     const scheduler = makeScheduler();
     expect(scheduler.id).toBe('rule-1');
-    expect(scheduler.factor.value).toBeNull();
     expect(scheduler.rule.value).toBeNull();
   });
 
   it('restores from snapshot and sets rule signal', () => {
     const scheduler = makeScheduler(makeCoordination(), SAMPLE_RULE_1);
     expect(scheduler.rule.value).toEqual(SAMPLE_RULE_1);
-    expect(scheduler.factor.value?.name).toBe('employee');
   });
 });
 
 describe('AtomicRuleScheduler - state derivation', () => {
   it('state is EDITING when editingRuleId matches this.id', () => {
     const coordination = makeCoordination('rule-1');
-    const scheduler = new AtomicRuleScheduler(
-      'rule-1',
-      coordination,
-      makeFactorsSignal(),
-      makeInferrers()
-    );
+    const scheduler = new AtomicRuleScheduler('rule-1', coordination, makeInferrers());
     expect(scheduler.state.value).toBe(SchedulerState.EDITING);
     expect(scheduler.editable.value).toBe(true);
   });
@@ -81,12 +78,7 @@ describe('AtomicRuleScheduler - state derivation', () => {
 
   it('state responds to editingRuleId changes', () => {
     const coordination = makeCoordination();
-    const scheduler = new AtomicRuleScheduler(
-      'rule-1',
-      coordination,
-      makeFactorsSignal(),
-      makeInferrers()
-    );
+    const scheduler = new AtomicRuleScheduler('rule-1', coordination, makeInferrers());
     expect(scheduler.state.value).toBe(SchedulerState.LOCKED);
     coordination.editingRuleId.value = 'rule-1';
     expect(scheduler.state.value).toBe(SchedulerState.EDITING);
@@ -94,12 +86,7 @@ describe('AtomicRuleScheduler - state derivation', () => {
 
   it('form pattern reflects state', () => {
     const coordination = makeCoordination('rule-1');
-    const scheduler = new AtomicRuleScheduler(
-      'rule-1',
-      coordination,
-      makeFactorsSignal(),
-      makeInferrers()
-    );
+    const scheduler = new AtomicRuleScheduler('rule-1', coordination, makeInferrers());
     expect(scheduler.form.pattern).toBe('editable');
     coordination.editingRuleId.value = null;
     expect(scheduler.form.pattern).toBe('disabled');
@@ -112,7 +99,6 @@ describe('AtomicRuleScheduler - form inference', () => {
     const scheduler = makeScheduler(coordination);
 
     scheduler.form.setValues({ name: 'is_active' });
-    expect(scheduler.factor.value?.name).toBe('is_active');
     const $operator = scheduler.form.getFieldState('operator');
     assert($operator.dataSource);
     expect($operator.dataSource.map((o) => o.value)).toEqual(['is']);

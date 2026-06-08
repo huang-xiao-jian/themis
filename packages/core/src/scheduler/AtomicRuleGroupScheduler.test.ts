@@ -7,6 +7,7 @@ import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
 import { DefaultStaticResourceFactory } from '../factory/StaticResourceFactory';
+import { FactorInferrer } from '../inferrer/FactorInferrer';
 import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { AtomicRuleGroupScheduler } from './AtomicRuleGroupScheduler';
@@ -19,6 +20,7 @@ function makeInferrers() {
     new DefaultDynamicResourceFactory(new FetcherRegistry())
   );
   return {
+    factor: new FactorInferrer(ALL_FACTORS),
     operator: new OperatorInferrer(),
     thresholder: new ThresholderInferrer(factory),
   };
@@ -42,13 +44,11 @@ describe('AtomicRuleGroupScheduler - creation', () => {
     const group = makeGroup();
     expect(group.id).toBe('group-1');
     expect(group.rules.value).toEqual([]);
-    expect(group.factors.value).toHaveLength(ALL_FACTORS.length);
-    expect(group.snapshots).toEqual([]);
+    expect(group.coordination.factors.value).toHaveLength(ALL_FACTORS.length);
   });
 
   it('restores rules from snapshot', () => {
     const group = makeGroup(null, SAMPLE_GROUP);
-    expect(group.snapshots).toHaveLength(2);
     expect(group.rules.value).toHaveLength(2);
     expect(group.rules.value[0]).toBeInstanceOf(AtomicRuleScheduler);
     expect(group.rules.value[0].id).toBe('rule-1');

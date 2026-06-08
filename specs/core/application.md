@@ -115,6 +115,7 @@ type WorkspaceTransitionEvent = TransitionEvent & {
  * 事件总线（上行）：Rule → Group，有效事件类型 OK | EDIT | CANCEL
  * 信号通道（下行）：Group → Rule
  * - 子级 AtomicRuleScheduler 通过 computed 从 editingRuleId 派生 state
+ * - 子级通过 factors 获取可用规则因子（组内已用因子标记 disabled，确保因子仅配置一次）
  */
 interface GroupCoordination {
   // ── 事件总线（上行：Rule → Group）────────────
@@ -124,6 +125,8 @@ interface GroupCoordination {
   // ── 信号通道（下行：Group → Rule）────────────
   /** 当前处于编辑态的 Rule ID（null 表示无编辑中的 Rule） */
   readonly editingRuleId: Signal<string | null>;
+  /** 可用规则因子集合（源自 WorkspaceCoordination.allFactors，组内已使用的因子标记 disabled） */
+  readonly factors: Signal<FieldDataSource[]>;
 }
 
 /** Group 级有效事件类型（Rule → Group） */
@@ -137,7 +140,7 @@ type GroupTransitionEvent = TransitionEvent & {
 | 协议层级          | 协调实体                | 事件总线（上行）                               | 信号通道（下行）                |
 | ----------------- | ----------------------- | ---------------------------------------------- | ------------------------------- |
 | Workspace → Group | `WorkspaceCoordination` | `WorkspaceTransitionEvent`（OK \| EDIT）       | `editingGroupId` + `allFactors` |
-| Group → Rule      | `GroupCoordination`     | `GroupTransitionEvent`（OK \| EDIT \| CANCEL） | `editingRuleId`                 |
+| Group → Rule      | `GroupCoordination`     | `GroupTransitionEvent`（OK \| EDIT \| CANCEL） | `editingRuleId` + `factors`     |
 
 **状态流转路径**：
 
@@ -218,7 +221,7 @@ stateDiagram-v2
 
 原子规则调度器。自身状态通过 `computed` 从所属 `AtomicRuleGroupScheduler` 的 `GroupCoordination` 派生，暴露只读状态信号、Formily 表单委托，以及用户行为接收入口。内部将调度器状态同步到 Formily Form 的 `pattern` 属性。
 
-> **协议角色**：事件总线（发射 `GroupTransitionEvent` 给 Group）+ 信号通道（从 Group 的 `GroupCoordination.editingRuleId` 派生 `state`）。
+> **协议角色**：事件总线（发射 `GroupTransitionEvent` 给 Group）+ 信号通道（从 Group 的 `GroupCoordination.editingRuleId` 派生 `state`，通过 `GroupCoordination.factors` 获取可用规则因子）。
 
 ```ts
 interface AtomicRuleScheduler {
@@ -245,8 +248,6 @@ interface AtomicRuleScheduler {
   readonly form: AtomicRuleForm;
 
   // ─── 推断数据（由 form effects 更新，供视图层消费）────────────
-  /** 已激活的规则因子定义 */
-  readonly factor: Signal<RuleFactorDefinition | null>;
   /** 可用的匹配操作符列表（同步注入 form 中 operator 字段的 dataSource） */
   readonly operators: Signal<readonly FieldDataSource[]>;
   /** threshold 渲染组件属性（同步注入 form 中 threshold 字段的 component） */
@@ -416,16 +417,8 @@ interface AtomicRuleGroupScheduler {
   readonly state: Signal<SchedulerState>;
   /** 是否处于编辑态（派生信号，便于视图层绑定） */
   readonly editable: Signal<boolean>;
-  /** 初始化时传入的规则快照数据（编辑场景），不可变 */
-  readonly snapshots: readonly AtomicRule[];
   /** 已创建的规则实例列表 */
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
-  /** 可用的规则因子列表（源自 Workspace 级 WorkspaceCoordination.allFactors） */
-  readonly allFactors: Signal<readonly RuleFactorDefinition[]>;
-  /** Group 内部已使用的规则因子名称集合 */
-  readonly usedFactors: Signal<string[]>;
-  /** 适配选择器的规则因子选项集合，已使用的规则因子标记 disabled */
-  readonly factors: Signal<readonly FieldDataSource[]>;
   /** 是否可继续添加原子规则（rules.length < maxRuleCount 且存在未使用的规则因子，且当前无编辑中的 Rule） */
   readonly canAddRule: Signal<boolean>;
 
@@ -434,6 +427,7 @@ interface AtomicRuleGroupScheduler {
    * Group 级协调实体，封装供子级 Rule 派生状态的共享信号
    *
    * `GroupCoordination.editingRuleId`：当前处于编辑态的 Rule ID（`null` 表示无编辑中的 Rule）
+   * `GroupCoordination.factors`：可用规则因子集合（组内已用因子标记 disabled）
    * `AtomicRuleScheduler.state` 通过 `computed` 从 `GroupCoordination.editingRuleId` 派生
    */
   readonly coordination: GroupCoordination;
@@ -503,7 +497,7 @@ interface AtomicRuleGroupScheduler {
 **特别说明**：
 
 - `FactorOptionsInferrer` 属于 `AtomicRuleGroup` 级别，每个规则组独立维护自己的 `factors`，不同规则组之间 **不共享**
-- `canAddRule` 综合数量约束（`rules.length < allFactors.length`）与 **编辑互斥约束**
+- `canAddRule` 综合数量约束（`rules.length < WorkspaceCoordination.allFactors.length`）与 **编辑互斥约束**
 - `addRule` 仅在 `Group` 处于编辑态时允许调用，锁定态调用静默忽略
 - `removeRule` 不受状态约束，锁定态下仍可删除规则
 

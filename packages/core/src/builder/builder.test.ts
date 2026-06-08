@@ -30,7 +30,10 @@ describe('RuleWorkspaceBuilder', () => {
     const group = workspace.addGroup()!;
     const rule = group.addRule()!;
     rule.form.setValues({ name: 'is_active' });
-    expect(rule.factor.value?.name).toBe('is_active');
+    // 通过 form 内部推断结果验证 factors 已生效
+    const $operator = rule.form.getFieldState('operator');
+    assert($operator.dataSource);
+    expect($operator.dataSource.map((o) => o.value)).toEqual(['is']);
   });
 
   it('withFetchers registers providers in the internal registry', () => {
