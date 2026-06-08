@@ -1,4 +1,4 @@
-import { computed, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
+import { computed, effect, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
 import { nanoid } from 'nanoid';
 import type { AtomicRule, AtomicRuleGroup } from '../dsl/AtomicRule';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
@@ -9,6 +9,8 @@ import type { Inferrers } from './AtomicRuleForm';
 import { AtomicRuleScheduler } from './AtomicRuleScheduler';
 import type { GroupCoordination, WorkspaceCoordination } from './Coordination';
 import { createGroupCoordination } from './Coordination';
+
+type DisposeFn = () => void;
 
 /**
  * 规则组调度器
@@ -24,6 +26,9 @@ export class AtomicRuleGroupScheduler {
   private readonly snapshots: readonly AtomicRule[];
   /** Group 内部已使用的规则因子名称集合 */
   private readonly usedFactors: ReadonlySignal<string[]>;
+  /** 规则组调度器销毁回调集合 */
+  private disposers: DisposeFn[] = [];
+  /** 规则组唯一标识 */
   readonly id: string;
   /** 已创建的规则实例列表 */
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
@@ -107,6 +112,14 @@ export class AtomicRuleGroupScheduler {
       () =>
         this.rules.value.length < workspaceCoordination.allFactors.value.length &&
         this.coordination.editingRuleId.value === null
+    );
+
+    this.disposers.push(
+      effect(() => {
+        if (this.state.value === SchedulerState.LOCKED) {
+          this.rules.value.forEach((r) => r.lockdown());
+        }
+      })
     );
   }
 
@@ -250,7 +263,17 @@ export class AtomicRuleGroupScheduler {
       this.unsubscribeRuleEvents(r.id);
       r.destroy();
     }
+
+    for (const dispose of this.disposers) {
+      dispose();
+    }
+
     this.rules.value = [];
+    this.disposers = [];
+  }
+
+  isEmpty(): boolean {
+    return this.rules.value.length === 0;
   }
 
   /** 订阅 Rule 事件（通过 GroupCoordination.bus，需 sourceId 过滤） */

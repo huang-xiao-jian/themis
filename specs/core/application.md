@@ -558,7 +558,7 @@ interface RuleWorkspaceScheduler {
    * 切换指定规则组的状态（内部更新 WorkspaceCoordination.editingGroupId Signal）
    *
    * - 目标为 EDITING：应用互斥约束，更新 `WorkspaceCoordination.editingGroupId.value = groupId`
-   * - 目标为 LOCKED：更新 `WorkspaceCoordination.editingGroupId.value = null`，级联锁定组内所有编辑中的 Rule
+   * - 目标为 LOCKED：更新 `WorkspaceCoordination.editingGroupId.value = null`
    * - 子级 `AtomicRuleGroupScheduler.state` 通过 `computed` 自动响应
    */
   transitionState(groupId: string, state: SchedulerState): boolean;

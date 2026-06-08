@@ -80,6 +80,13 @@ export class AtomicRuleScheduler {
   }
 
   /**
+   * 锁定规则配置，Group 级别调度
+   */
+  lockdown() {
+    this.form.setPattern('disabled');
+  }
+
+  /**
    * 确认规则配置（用户行为驱动）
    *
    * 内部判断表单配置是否满足规则约束，更新内部数据，然后发射 OK 事件

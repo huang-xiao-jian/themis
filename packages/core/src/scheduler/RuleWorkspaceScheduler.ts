@@ -54,7 +54,7 @@ export class RuleWorkspaceScheduler {
     this.canAddGroup = computed<boolean>(() => {
       if (this.coordination.editingGroupId.value !== null) return false;
       // 存在配置规则为空的 Group 时禁用新增
-      return !this.groups.value.some((g) => g.rules.value.length === 0);
+      return !this.groups.value.some((g) => g.isEmpty());
     });
 
     // 编辑场景：从 snapshots 构造初始 group scheduler
@@ -143,22 +143,14 @@ export class RuleWorkspaceScheduler {
 
   /**
    * 切换指定规则组的状态（内部更新 WorkspaceCoordination.editingGroupId Signal）
-   *
-   * LOCKED 时级联锁定组内所有编辑中的 Rule
    */
-  transitionState(groupId: string, state: SchedulerState): boolean {
-    if (this.destroyed) return false;
+  transitionState(groupId: string, state: SchedulerState): void {
+    if (this.destroyed) return;
     if (state === SchedulerState.EDITING) {
       this.coordination.editingGroupId.value = groupId;
-      return true;
     } else {
-      // LOCKED：清空 editingGroupId + 级联锁定组内 Rule
+      // LOCKED：清空 editingGroupId
       this.coordination.editingGroupId.value = null;
-      const group = this.pickGroup(groupId);
-      if (group) {
-        group.transitionState('', SchedulerState.LOCKED); // 清空 editingRuleId
-      }
-      return true;
     }
   }
 
@@ -201,9 +193,8 @@ export class RuleWorkspaceScheduler {
     unsubs.push(
       this.coordination.bus.on(TransitionEventType.OK, (e) => {
         if (e.sourceId !== scheduler.id) return;
-        // Group 确认 → 锁定 + 级联锁定组内 Rule
+        // Group 确认 → 锁定
         this.coordination.editingGroupId.value = null;
-        scheduler.transitionState('', SchedulerState.LOCKED);
       })
     );
 
