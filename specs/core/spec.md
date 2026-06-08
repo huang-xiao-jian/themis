@@ -64,6 +64,25 @@ classDiagram
     LOCKED
   }
 
+  class TransitionEventType {
+    <<enum>>
+    OK
+    EDIT
+    CANCEL
+  }
+
+  class TransitionEvent {
+    <<interface>>
+    +type: TransitionEventType
+    +sourceId: string
+  }
+
+  class TransitionEventEmitter {
+    <<interface>>
+    +on(event, handler)
+    +off(event, handler)
+  }
+
   class AtomicRule {
     <<interface>>
   }
@@ -74,10 +93,13 @@ classDiagram
 
   class AtomicRuleGroupScheduler {
     <<class>>
+    +editingRuleId: Signal
+    +state: computed
   }
 
   class AtomicRuleScheduler {
     <<class>>
+    +state: computed
   }
 
   class AtomicRuleForm {
@@ -98,23 +120,31 @@ classDiagram
 
   class RuleWorkspaceScheduler {
     <<class>>
+    +editingGroupId: Signal
   }
 
+  %% 状态依赖
   AtomicRuleScheduler ..> SchedulerState : State
   AtomicRuleGroupScheduler ..> SchedulerState : State
   AtomicRuleScheduler ..> AtomicRuleForm : Dependency
 
-  AtomicRuleGroup ..> AtomicRule : Dependency
+  %% 事件通道（上行）
+  AtomicRuleScheduler ..> TransitionEventEmitter : emit
+  AtomicRuleGroupScheduler ..> TransitionEventEmitter : emit
+  TransitionEventEmitter ..> TransitionEvent : emits
+  TransitionEvent ..> TransitionEventType : type
 
+  %% 信号通道（下行）
+  RuleWorkspaceScheduler ..> AtomicRuleGroupScheduler : editingGroupId Signal
+  AtomicRuleGroupScheduler ..> AtomicRuleScheduler : editingRuleId Signal
+
+  %% 数据依赖
+  AtomicRuleGroup ..> AtomicRule : Dependency
   AtomicRuleScheduler ..> AtomicRule : Dependency
   AtomicRuleForm ..> OperatorInferrer : Dependency
   AtomicRuleForm ..> ThresholderInferrer : Dependency
-
   AtomicRuleGroupScheduler ..> AtomicRuleGroup : Dependency
-  AtomicRuleGroupScheduler ..> AtomicRuleScheduler : Controls state
   AtomicRuleGroupScheduler ..> FactorOptionsInferrer : Dependency
-
-  RuleWorkspaceScheduler ..> AtomicRuleGroupScheduler : Controls state
 ```
 
 ## 业务方使用示例

@@ -16,6 +16,14 @@
 - Interface name: `PascalCase` without `I` prefix
 - Enum name: `PascalCase`
 - Enum key: `SCREAMING_SNAKE_CASE` (`MAX_RETRY_COUNT`)
+- Class Method: 使用 `on` 前缀的方法，用于事件回调绑定，必须使用**箭头函数**方式声明
+
+```tsx
+// ❌ 默认方法声明，直接传递方法引用，点击时会报错 this 为 undefined
+const TriggerView = observer(() => {
+  return <button onClick={counterStore.onIncrement}>点击增加</button>;
+});
+```
 
 字符串风格的 `Enum` 声明：
 
