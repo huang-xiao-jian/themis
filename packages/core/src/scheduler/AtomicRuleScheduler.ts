@@ -5,6 +5,8 @@ import { TransitionEventType } from '../dsl/TransitionEventType';
 import { createAtomicRuleForm, type AtomicRuleForm, type Inferrers } from './AtomicRuleForm';
 import type { GroupCoordination } from './Coordination';
 
+type DisposeFn = () => void;
+
 /**
  * 原子规则调度器
  *
@@ -25,6 +27,8 @@ export class AtomicRuleScheduler {
   /** 上次用户确认且数据无误时更新的原子规则因子名 */
   readonly factorName: Signal<string | null>;
 
+  /** 规则组调度器销毁回调集合 */
+  private disposers: DisposeFn[] = [];
   private readonly coordination: GroupCoordination;
   private readonly unsubscribers: (() => void)[] = [];
   private destroyed = false;
@@ -59,6 +63,12 @@ export class AtomicRuleScheduler {
       this.form.pattern = this.state.value === SchedulerState.EDITING ? 'editable' : 'disabled';
     });
     this.unsubscribers.push(unsubEffect);
+
+    this.disposers.push(
+      effect(() => {
+        this.form.pattern = this.state.value === SchedulerState.EDITING ? 'editable' : 'disabled';
+      })
+    );
   }
 
   /** 验证配置是否完整可用 */
@@ -77,13 +87,6 @@ export class AtomicRuleScheduler {
       );
     }
     return this.rule.value;
-  }
-
-  /**
-   * 锁定规则配置，Group 级别调度
-   */
-  lockdown() {
-    this.form.setPattern('disabled');
   }
 
   /**
@@ -139,6 +142,8 @@ export class AtomicRuleScheduler {
     for (const fn of this.unsubscribers) {
       fn();
     }
+    this.disposers.forEach((fn) => fn());
     this.unsubscribers.length = 0;
+    this.disposers.length = 0;
   }
 }

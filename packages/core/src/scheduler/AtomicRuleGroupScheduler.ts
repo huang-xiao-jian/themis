@@ -117,7 +117,8 @@ export class AtomicRuleGroupScheduler {
     this.disposers.push(
       effect(() => {
         if (this.state.value === SchedulerState.LOCKED) {
-          this.rules.value.forEach((r) => r.lockdown());
+          // 级联关闭规则编辑态
+          this.coordination.editingRuleId.value = null;
         }
       })
     );
