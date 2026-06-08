@@ -35,7 +35,7 @@ export class AtomicRuleScheduler {
   constructor(
     id: string,
     coordination: GroupCoordination,
-    factors: ReadonlySignal<readonly RuleFactorDefinition[]>,
+    factors: ReadonlySignal<RuleFactorDefinition[]>,
     inferrers: Inferrers,
     snapshot?: AtomicRule
   ) {
@@ -46,7 +46,7 @@ export class AtomicRuleScheduler {
     // 创建 Formily 表单（effects 驱动重置联动，推断由视图层处理）
     this.form = createAtomicRuleForm({
       initialValues: snapshot,
-      factors: Array.from(factors.value),
+      factors: factors.value,
       inferrers,
     });
 

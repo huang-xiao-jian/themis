@@ -108,7 +108,7 @@ export const STRING_SHORT_TEXT_FACTOR: RuleFactorDefinition = {
   constraints: { max: 50 },
 };
 
-export const ALL_FACTORS: readonly RuleFactorDefinition[] = [
+export const ALL_FACTORS: RuleFactorDefinition[] = [
   BOOLEAN_FACTOR,
   STRING_POINT_SINGLE_FACTOR,
   STRING_POINT_MULTIPLE_FACTOR,

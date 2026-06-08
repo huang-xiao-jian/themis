@@ -34,7 +34,7 @@ export interface Inferrers {
 /** createAtomicRuleForm 的配置选项 */
 export interface CreateAtomicRuleFormOptions {
   /** 可用规则因子定义列表（纯数据） */
-  readonly factors: readonly RuleFactorDefinition[];
+  readonly factors: RuleFactorDefinition[];
   /** 推断器（operator + thresholder） */
   readonly inferrers: Inferrers;
   /** 编辑场景初始值（直接传入 createForm，字段创建时自动消费） */
