@@ -16,4 +16,4 @@ import { FieldDataSource } from './spec.md';
 ### Class Diagram
 
 - 默认使用简易类图，不声明 `properties` + `methods`
-- 类关联关系必须使用规范定义的关系，不得自行生造
+- 类关联关系必须使用规范定义的关系（e.g. `Dependency`），不得自行生造
