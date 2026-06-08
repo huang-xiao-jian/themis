@@ -12,6 +12,8 @@
 使用依赖库 `API` 前，务必使用 `context7` 获取使用指导
 
 - [nanoid](https://www.npmjs.com/package/nanoid) 客户端生成唯一标识
+- [nanoevents](https://github.com/ai/nanoevents) 轻量级事件监听
+- [formily](https://github.com/alibaba/formily) 表单解决方案（`@formily/core`）
 
 ## 设计目标
 
@@ -103,7 +105,8 @@ classDiagram
   }
 
   class AtomicRuleForm {
-    <<interface>>
+    <<type alias>>
+    Form
   }
 
   class OperatorInferrer {
@@ -126,7 +129,9 @@ classDiagram
   %% 状态依赖
   AtomicRuleScheduler ..> SchedulerState : State
   AtomicRuleGroupScheduler ..> SchedulerState : State
-  AtomicRuleScheduler ..> AtomicRuleForm : Dependency
+  AtomicRuleScheduler ..> AtomicRuleForm : form
+  AtomicRuleScheduler ..> OperatorInferrer : effects
+  AtomicRuleScheduler ..> ThresholderInferrer : effects
 
   %% 事件通道（上行）
   AtomicRuleScheduler ..> TransitionEventEmitter : emit
@@ -141,8 +146,6 @@ classDiagram
   %% 数据依赖
   AtomicRuleGroup ..> AtomicRule : Dependency
   AtomicRuleScheduler ..> AtomicRule : Dependency
-  AtomicRuleForm ..> OperatorInferrer : Dependency
-  AtomicRuleForm ..> ThresholderInferrer : Dependency
   AtomicRuleGroupScheduler ..> AtomicRuleGroup : Dependency
   AtomicRuleGroupScheduler ..> FactorOptionsInferrer : Dependency
 ```
@@ -214,11 +217,11 @@ const group = workspace.addGroup();
 const rule = group.addRule();
 // rule.state.value === SchedulerState.EDITING
 
-// 6. 通过 Form 驱动表单交互（编辑态下生效，锁定态静默忽略）
+// 6. 通过 Formily Form 驱动表单交互（Formily effects 自动处理推断联动）
 // rule.form.name.value = 'employee'
 // rule.form.operator.value = 'eq'
 // rule.form.threshold.value = 100
-// Form 自动完成 factor 切换 → operators / thresholder 推断
+// Formily effects 自动完成 factor 切换 → operators / thresholder 推断
 
 // 7. 确认规则配置，进入锁定态（Rule 接收确认指令，内部校验通过后由 Group 写入状态）
 rule.confirm();
@@ -238,7 +241,7 @@ if (workspace.validate()) {
 // 10. 编辑已有配置（需显式切换到编辑态，由父级控制状态）
 workspace.transitionState(group.id, SchedulerState.EDITING);
 group.transitionState(rule.id, SchedulerState.EDITING);
-// 通过 rule.form 驱动表单修改...
+// 通过 rule.form（Formily Form）驱动表单修改
 rule.confirm();
 group.confirm();
 
@@ -282,7 +285,7 @@ const rule1 = group.pickRule('rule-1');
 // 用户需显式切换到编辑态后才能修改（由父级控制状态）
 workspace.transitionState('group-1', SchedulerState.EDITING);
 group.transitionState('rule-1', SchedulerState.EDITING);
-// 通过 rule1.form 驱动表单修改...
+// 通过 rule1.form（Formily Form）驱动表单修改
 rule1.confirm();
 group.confirm();
 

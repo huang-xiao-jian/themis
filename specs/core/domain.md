@@ -12,6 +12,8 @@
 - `AtomicRule` 级别根据 `RuleFactorDefinition` 推断可用 `operators` 和 `thresholder`，参考 [规则因子解释器](../interpreter.md) 中的推断机制
 - `AtomicRuleGroup` 级别的规则因子选项推断，参考 [规则及规则因子描述](../spec.md) 中的规则配置约束章节
 
+> 推断器由 `AtomicRuleScheduler` 在创建 Formily Form 的 `effects` 中调用，详见 [应用层 - AtomicRuleForm](./application.md#atomicruleform)
+
 ## 推断器类声明
 
 ```ts

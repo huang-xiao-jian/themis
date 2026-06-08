@@ -172,7 +172,7 @@ stateDiagram-v2
 
 ## AtomicRuleScheduler
 
-原子规则调度器。自身状态通过 `computed` 从所属 `AtomicRuleGroupScheduler` 的共享 Signal 派生，暴露只读状态信号、表单委托，以及用户行为接收入口。
+原子规则调度器。自身状态通过 `computed` 从所属 `AtomicRuleGroupScheduler` 的共享 Signal 派生，暴露只读状态信号、Formily 表单委托，以及用户行为接收入口。内部将调度器状态同步到 Formily Form 的 `pattern` 属性。
 
 > **协议角色**：事件上行（发射 `TransitionEvent` 给 Group）+ 信号下行（从 Group 的 `editingRuleId` 派生 `state`）。
 
@@ -193,12 +193,20 @@ interface AtomicRuleScheduler {
   /**
    * 上次用户确认且数据无误时更新的原子规则配置
    *
-   * 与 Form 的不稳定态隔离：Form 字段的实时变化不影响 rule，仅在 onOk() 且内部校验通过后更新。
+   * 与 Formily Form 的不稳定态隔离：Form 字段的实时变化不影响 rule，仅在 onOk() 且内部校验通过后更新。
    * `build()` 返回值与 `rule.value` 始终一致
    */
   readonly rule: Signal<AtomicRule>;
-  /** 关联的表单实例（管理表单数据与推断联动） */
+  /** 关联的表单实例（等效 Formily `Form`，由 createForm 创建，effects 驱动推断联动） */
   readonly form: AtomicRuleForm;
+
+  // ─── 推断数据（由 form effects 更新，供视图层消费）────────────
+  /** 已激活的规则因子定义 */
+  readonly factor: Signal<RuleFactorDefinition | null>;
+  /** 可用的匹配操作符列表（同步注入 form 中 operator 字段的 dataSource） */
+  readonly operators: Signal<readonly FieldDataSource[]>;
+  /** threshold 渲染组件属性（同步注入 form 中 threshold 字段的 component） */
+  readonly thresholder: Signal<ThresholdComponentProperties>;
 
   /** 验证配置是否完整可用 */
   validate(): boolean;
@@ -223,7 +231,7 @@ interface AtomicRuleScheduler {
   /**
    * 激活规则配置编辑（用户行为驱动）
    *
-   * 实例化编辑 Form 实例，然后发射 `TransitionEventType.EDIT` 事件
+   * 创建 Formily Form 实例（AtomicRuleForm），同步 pattern 为 editable，然后发射 `TransitionEventType.EDIT` 事件
    */
   onEdit(): void;
 }
@@ -231,56 +239,44 @@ interface AtomicRuleScheduler {
 
 ## AtomicRuleForm
 
-表单模型独立于调度器，负责管理表单字段状态、用户交互与推断联动。
-
-> **占位声明**：后续进一步细化表单模型的完整协议
+`AtomicRuleForm` 等效于 Formily `Form` 实例，不引入额外包装层。
 
 ```ts
-/**
- * 原子规则表单模型
- *
- * 职责：
- * - 管理表单字段状态（name / operator / threshold）
- * - 驱动推断联动：用户选择规则因子 → 推断 operators / thresholder → 重置 operator / threshold
- * - 消费推断结果，供视图层渲染
- *
- * **状态约束**：仅编辑态（state=EDITING）时接受用户输入，锁定态静默忽略
- */
-interface AtomicRuleForm {
-  // 表单字段
-  /** 选中的规则因子名称 */
-  readonly name: Signal<string | null>;
-  /** 选中的操作符 */
-  readonly operator: Signal<string | null>;
-  /** 阈值 */
-  readonly threshold: Signal<unknown>;
+import type { Form } from '@formily/core';
 
-  // 推断数据（由内核自动计算，供视图层消费）
-  /** 已激活的规则因子定义 */
-  readonly factor: Signal<RuleFactorDefinition | null>;
-  /** 可用的匹配操作符列表 */
-  readonly operators: Signal<readonly FieldDataSource[]>;
-  /** threshold 渲染组件属性 */
-  readonly thresholder: Signal<readonly ThresholdComponentProperties>;
-}
+/**
+ * 原子规则表单 = Formily Form
+ *
+ * 创建时通过 effects 注册推断联动：name 变化 → 推断 operators / thresholder → 重置 operator / threshold
+ *
+ * **状态约束**：表单 pattern 由所属 AtomicRuleScheduler 控制
+ * - EDITING → `pattern = 'editable'`
+ * - LOCKED → `pattern = 'disabled'`
+ *
+ * 三个核心字段（由 createField 创建）：
+ * - name：规则因子（Select，dataSource 来源于 Group 级 factors）
+ * - operator：操作符（Select，dataSource 来源于推断结果）
+ * - threshold：阈值（动态组件，组件类型来源于推断结果）
+ */
+type AtomicRuleForm = Form;
 ```
 
-规则因子选择联动流程（编辑态下，由 `Form` 内部驱动）：
+规则因子选择联动流程（编辑态下，由 Formily `effects` 驱动）：
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant FM as AtomicRuleForm
+  participant FM as Form（AtomicRuleForm）
   participant OI as OperatorInferrer
   participant TI as ThresholderInferrer
 
-  U->>FM: 选择规则因子（更新 name）
+  U->>FM: field(name).value = 'employee'
   activate FM
   FM->>OI: infer(factor)
   OI-->>FM: operators
   FM->>TI: infer(factor)
   TI-->>FM: thresholder
-  FM->>FM: 重置 operator / threshold
+  FM->>FM: field(operator/threshold) 重置
   deactivate FM
 ```
 
