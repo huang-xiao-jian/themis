@@ -63,14 +63,13 @@ export function createAtomicRuleForm(options: CreateAtomicRuleFormOptions): Atom
           form.setFieldState('operator', {
             dataSource: Array.from(inferrers.operator.infer(factor)),
           });
-          // componentProps 必须直接赋值，setFieldState 无法正确设置
-          const thresholdField = form.fields['threshold'] as
-            | { componentProps: Record<string, unknown> }
-            | undefined;
-          if (thresholdField) {
-            thresholdField.componentProps = {
+
+          const $threshold = form.query('threshold').take();
+
+          if ($threshold) {
+            $threshold.setComponentProps({
               properties: inferrers.thresholder.infer(factor),
-            };
+            });
           }
         }
       });
@@ -82,6 +81,11 @@ export function createAtomicRuleForm(options: CreateAtomicRuleFormOptions): Atom
       });
     },
   });
+
+  // explicitly create fields to activate reactions
+  form.createField({ name: 'name' });
+  form.createField({ name: 'operator' });
+  form.createField({ name: 'threshold' });
 
   return form;
 }

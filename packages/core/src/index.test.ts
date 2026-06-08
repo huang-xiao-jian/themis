@@ -61,9 +61,6 @@ describe('End-to-end: create scenario', () => {
     expect(rule.state.value).toBe(SchedulerState.EDITING);
 
     // Interact via Formily form
-    rule.form.createField({ name: 'name' });
-    rule.form.createField({ name: 'operator' });
-    rule.form.createField({ name: 'threshold' });
     rule.form.setValues({ name: 'order_amount' });
     expect(rule.factor.value?.name).toBe('order_amount');
     // number + range + multiple inference — results stay in form fields
@@ -162,9 +159,6 @@ describe('End-to-end: edit scenario', () => {
     expect(rule.form.pattern).toBe('editable');
 
     // Modify via form
-    rule.form.createField({ name: 'name' });
-    rule.form.createField({ name: 'operator' });
-    rule.form.createField({ name: 'threshold' });
     rule.form.setValues({ name: 'order_amount' });
     rule.form.setFieldState('operator', (s) => {
       s.value = 'between any';

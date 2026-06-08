@@ -49,11 +49,6 @@ describe('AtomicRuleForm - inference linkage', () => {
       inferrers: makeInferrers(),
     });
 
-    // Must create fields to activate reactions
-    form.createField({ name: 'name' });
-    form.createField({ name: 'operator' });
-    form.createField({ name: 'threshold' });
-
     form.setValues({ name: 'is_active' });
 
     const $operator = form.getFieldState('operator');
@@ -66,11 +61,6 @@ describe('AtomicRuleForm - inference linkage', () => {
       factors: ALL_FACTORS,
       inferrers: makeInferrers(),
     });
-
-    // Must create fields to activate reactions
-    form.createField({ name: 'name' });
-    form.createField({ name: 'operator' });
-    form.createField({ name: 'threshold' });
 
     // Set initial values
     form.setValues({ name: 'is_active' });
@@ -93,11 +83,6 @@ describe('AtomicRuleForm - inference linkage', () => {
       factors: ALL_FACTORS,
       inferrers: makeInferrers(),
     });
-
-    // Must create fields to activate reactions
-    form.createField({ name: 'name' });
-    form.createField({ name: 'operator' });
-    form.createField({ name: 'threshold' });
 
     form.setValues({ name: 'is_active' });
 
@@ -126,11 +111,6 @@ describe('AtomicRuleForm - snapshot restoration', () => {
     expect(form.values.name).toBe('is_active');
     expect(form.values.operator).toBe('is');
     expect(form.values.threshold).toBe(true);
-
-    // Must create fields to active reactions
-    form.createField({ name: 'name' });
-    form.createField({ name: 'operator' });
-    form.createField({ name: 'threshold' });
 
     // Inference should have been triggered (operator dataSource populated)
     const $operator = form.getFieldState('operator');

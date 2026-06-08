@@ -111,11 +111,6 @@ describe('AtomicRuleScheduler - form inference', () => {
     const coordination = makeCoordination('rule-1');
     const scheduler = makeScheduler(coordination);
 
-    // Must create fields to activate reactions
-    scheduler.form.createField({ name: 'name' });
-    scheduler.form.createField({ name: 'operator' });
-    scheduler.form.createField({ name: 'threshold' });
-
     scheduler.form.setValues({ name: 'is_active' });
     expect(scheduler.factor.value?.name).toBe('is_active');
     const $operator = scheduler.form.getFieldState('operator');
@@ -130,11 +125,6 @@ describe('AtomicRuleScheduler - onOk', () => {
     const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
     coordination.bus.on(TransitionEventType.OK, handler);
-
-    // Must create fields to activate reactions
-    scheduler.form.createField({ name: 'name' });
-    scheduler.form.createField({ name: 'operator' });
-    scheduler.form.createField({ name: 'threshold' });
 
     scheduler.form.setValues({ name: 'is_active' });
     scheduler.form.setFieldState('operator', (s) => {
@@ -208,11 +198,6 @@ describe('AtomicRuleScheduler - build', () => {
     const coordination = makeCoordination('rule-1');
     const scheduler = makeScheduler(coordination);
 
-    // Must create fields to activate reactions
-    scheduler.form.createField({ name: 'name' });
-    scheduler.form.createField({ name: 'operator' });
-    scheduler.form.createField({ name: 'threshold' });
-
     scheduler.form.setValues({ name: 'is_active' });
     scheduler.form.setFieldState('operator', (s) => {
       s.value = 'is';
@@ -248,11 +233,6 @@ describe('AtomicRuleScheduler - validate', () => {
   it('validate returns true when all fields are set', () => {
     const coordination = makeCoordination('rule-1');
     const scheduler = makeScheduler(coordination);
-
-    // Must create fields to activate reactions
-    scheduler.form.createField({ name: 'name' });
-    scheduler.form.createField({ name: 'operator' });
-    scheduler.form.createField({ name: 'threshold' });
 
     scheduler.form.setValues({ name: 'is_active' });
     scheduler.form.setFieldState('operator', (s) => {

@@ -158,10 +158,6 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
   it('Rule onOk locks the editing rule', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
-    // Must create fields to activate reactions
-    rule.form.createField({ name: 'name' });
-    rule.form.createField({ name: 'operator' });
-    rule.form.createField({ name: 'threshold' });
     // Set up valid rule data
     rule.form.setValues({ name: 'is_active' });
     rule.form.setFieldState('operator', (s) => {
@@ -190,10 +186,6 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
     workspaceCoordination.bus.on(TransitionEventType.OK, handler);
     // Add and confirm a rule
     const rule = group.addRule()!;
-    // Must create fields to activate reactions
-    rule.form.createField({ name: 'name' });
-    rule.form.createField({ name: 'operator' });
-    rule.form.createField({ name: 'threshold' });
     rule.form.setValues({ name: 'is_active' });
     rule.form.setFieldState('operator', (s) => {
       s.value = 'is';

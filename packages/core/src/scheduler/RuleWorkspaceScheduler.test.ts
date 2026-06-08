@@ -126,10 +126,6 @@ describe('RuleWorkspaceScheduler - event handling', () => {
     const workspace = makeWorkspace();
     const group = workspace.addGroup()!;
     const rule = group.addRule()!;
-    // Must create fields to activate reactions
-    rule.form.createField({ name: 'name' });
-    rule.form.createField({ name: 'operator' });
-    rule.form.createField({ name: 'threshold' });
     // Confirm the rule
     rule.form.setValues({ name: 'is_active' });
     rule.form.setFieldState('operator', (s) => {

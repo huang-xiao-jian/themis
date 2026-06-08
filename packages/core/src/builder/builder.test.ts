@@ -29,10 +29,6 @@ describe('RuleWorkspaceBuilder', () => {
     // 通过 addGroup + addRule + 设置 name 验证 factors 已生效
     const group = workspace.addGroup()!;
     const rule = group.addRule()!;
-    // Must create fields to activate reactions
-    rule.form.createField({ name: 'name' });
-    rule.form.createField({ name: 'operator' });
-    rule.form.createField({ name: 'threshold' });
     rule.form.setValues({ name: 'is_active' });
     expect(rule.factor.value?.name).toBe('is_active');
   });
@@ -57,11 +53,6 @@ describe('RuleWorkspaceBuilder', () => {
       .build();
     const group = workspace.addGroup()!;
     const rule = group.addRule()!;
-
-    // Must create fields to activate reactions
-    rule.form.createField({ name: 'name' });
-    rule.form.createField({ name: 'operator' });
-    rule.form.createField({ name: 'threshold' });
 
     rule.form.setValues({ name: 'employee_dyn' });
     // 不抛错即表示 fetcher 已成功注册
