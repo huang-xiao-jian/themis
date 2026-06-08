@@ -116,6 +116,10 @@ classDiagram
     <<interface>>
   }
 
+  class FactorInferrer {
+    <<class>>
+  }
+
   class OperatorInferrer {
     <<class>>
   }
@@ -139,6 +143,7 @@ classDiagram
 
   %% Composition (lifecycle-bound)
   AtomicRuleScheduler *-- AtomicRuleForm
+  AtomicRuleScheduler *-- FactorInferrer
   AtomicRuleScheduler *-- OperatorInferrer
   AtomicRuleScheduler *-- ThresholderInferrer
 

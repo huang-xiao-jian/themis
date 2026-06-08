@@ -18,9 +18,19 @@
 
 ```ts
 /**
+ * 规则因子推断器
+ *
+ * 根据因子名称查找对应的规则因子定义
+ */
+class FactorInferrer {
+  constructor(factors: readonly RuleFactorDefinition[]);
+  infer(name: string | null | undefined): RuleFactorDefinition | undefined;
+}
+
+/**
  * 操作符推断器
  *
- * 根据 dataType + semantic 确定"数据域"，再结合 mode（点/区间）和 quantity（单/多）确定"操作域"
+ * 根据 dataType + semantic 确定“数据域”，再结合 mode（点/区间）和 quantity（单/多）确定“操作域”
  */
 class OperatorInferrer {
   infer(factor: RuleFactorDefinition): readonly FieldDataSource[];

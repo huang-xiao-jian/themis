@@ -126,7 +126,7 @@ interface GroupCoordination {
   /** 当前处于编辑态的 Rule ID（null 表示无编辑中的 Rule） */
   readonly editingRuleId: Signal<string | null>;
   /** 可用规则因子集合（源自 WorkspaceCoordination.allFactors，组内已使用的因子标记 disabled） */
-  readonly factors: Signal<FieldDataSource[]>;
+  readonly factors: ReadonlySignal<readonly FieldDataSource[]>;
 }
 
 /** Group 级有效事件类型（Rule → Group） */
@@ -243,15 +243,11 @@ interface AtomicRuleScheduler {
    * 与 Formily Form 的不稳定态隔离：Form 字段的实时变化不影响 rule，仅在 onOk() 且内部校验通过后更新。
    * `build()` 返回值与 `rule.value` 始终一致
    */
-  readonly rule: Signal<AtomicRule>;
+  readonly rule: Signal<AtomicRule | null>;
+  /** 已确认的原子规则因子名（从 rule 信号 computed 派生） */
+  readonly factorName: ReadonlySignal<string | null>;
   /** 关联的表单实例（等效 Formily `Form`，由 createForm 创建，effects 驱动推断联动） */
   readonly form: AtomicRuleForm;
-
-  // ─── 推断数据（由 form effects 更新，供视图层消费）────────────
-  /** 可用的匹配操作符列表（同步注入 form 中 operator 字段的 dataSource） */
-  readonly operators: Signal<readonly FieldDataSource[]>;
-  /** threshold 渲染组件属性（同步注入 form 中 threshold 字段的 component） */
-  readonly thresholder: Signal<ThresholdComponentProperties>;
 
   /** 验证配置是否完整可用 */
   validate(): boolean;
@@ -276,7 +272,7 @@ interface AtomicRuleScheduler {
   /**
    * 激活规则配置编辑（用户行为驱动）
    *
-   * 创建 Formily Form 实例（AtomicRuleForm），同步 pattern 为 editable，然后发射 `TransitionEventType.EDIT` 事件
+   * 发射 `TransitionEventType.EDIT` 事件，父级通过 GroupCoordination.editingRuleId 控制状态
    */
   onEdit(): void;
 }
@@ -360,9 +356,10 @@ sequenceDiagram
     U->>G: onOk()
     G->>G: 内部校验 + 更新数据
     G->>WS: emit(OK, groupId)（nanoevents）
-    WS->>WC: editingGroupId.value = null（级联：editingRuleId 也置 null）
+    WS->>WC: editingGroupId.value = null
     WC-->>G: state = LOCKED（computed 自动响应）
-    GC-->>R: state = LOCKED（级联响应）
+    G->>GC: editingRuleId.value = null（effect 级联响应）
+    GC-->>R: state = LOCKED（computed 自动响应）
   end
 ```
 
@@ -438,10 +435,10 @@ interface AtomicRuleGroupScheduler {
    *
    * **状态约束**：仅 Group 处于编辑态时允许调用
    * **互斥行为**：新建的 Rule 默认进入编辑态（`GroupCoordination.editingRuleId` 更新为新 Rule ID），当前编辑中的 Rule（如有）自动锁定
-   * **前置约束**：canAddRule=false 时调用静默忽略
+   * **前置约束**：canAddRule=false 时调用静默返回 undefined
    * **事件订阅**：创建后自动订阅 Rule 的 TransitionEvent（由 nanoevents 处理）
    */
-  addRule(): AtomicRuleScheduler;
+  addRule(): AtomicRuleScheduler | undefined;
   /**
    * 获取原子规则设置器（精细操作场景）
    */
@@ -462,11 +459,14 @@ interface AtomicRuleGroupScheduler {
   /**
    * 切换指定规则的状态（内部更新 GroupCoordination.editingRuleId Signal）
    *
-   * - 目标为 EDITING：应用互斥约束，更新 `GroupCoordination.editingRuleId.value = ruleId`，返回是否成功
-   * - 目标为 LOCKED：更新 `GroupCoordination.editingRuleId.value = null`，始终返回 true
+   * - 目标为 EDITING：应用互斥约束，更新 `GroupCoordination.editingRuleId.value = ruleId`
+   * - 目标为 LOCKED：更新 `GroupCoordination.editingRuleId.value = null`
    * - 子级 `AtomicRuleScheduler.state` 通过 `computed` 自动响应
    */
-  transitionState(ruleId: string, state: SchedulerState): boolean;
+  transitionState(ruleId: string, state: SchedulerState): void;
+
+  /** 是否无规则（rules 集合为空） */
+  isEmpty(): boolean;
 
   /** 验证所有原子规则 */
   validate(): boolean;
@@ -498,7 +498,7 @@ interface AtomicRuleGroupScheduler {
 
 - `FactorOptionsInferrer` 属于 `AtomicRuleGroup` 级别，每个规则组独立维护自己的 `factors`，不同规则组之间 **不共享**
 - `canAddRule` 综合数量约束（`rules.length < WorkspaceCoordination.allFactors.length`）与 **编辑互斥约束**
-- `addRule` 仅在 `Group` 处于编辑态时允许调用，锁定态调用静默忽略
+- `addRule` 仅在 `Group` 处于编辑态时允许调用，锁定态调用静默返回 `undefined`
 - `removeRule` 不受状态约束，锁定态下仍可删除规则
 
 ## RuleWorkspaceScheduler
@@ -532,10 +532,10 @@ interface RuleWorkspaceScheduler {
    *
    * **状态约束**：仅 Workspace 处于可编辑状态时允许调用
    * **互斥行为**：新建的 Group 默认进入编辑态（`WorkspaceCoordination.editingGroupId` 更新为新 Group ID），当前编辑中的 Group（如有）自动锁定
-   * **前置约束**：canAddGroup=false 时调用静默忽略
+   * **前置约束**：canAddGroup=false 时调用静默返回 undefined
    * **事件订阅**：创建后自动订阅 Group 的 TransitionEvent（由 nanoevents 处理）
    */
-  addGroup(): AtomicRuleGroupScheduler;
+  addGroup(): AtomicRuleGroupScheduler | undefined;
   /**
    * 获取规则组设置器（精细操作场景）
    */
@@ -561,7 +561,7 @@ interface RuleWorkspaceScheduler {
    * - 目标为 LOCKED：更新 `WorkspaceCoordination.editingGroupId.value = null`
    * - 子级 `AtomicRuleGroupScheduler.state` 通过 `computed` 自动响应
    */
-  transitionState(groupId: string, state: SchedulerState): boolean;
+  transitionState(groupId: string, state: SchedulerState): void;
 
   // 验证与构建
   /** 验证所有规则组 */

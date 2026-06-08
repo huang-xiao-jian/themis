@@ -72,11 +72,11 @@ const rule = group.addRule();
 // Formily effects 自动完成 factor 切换 → operators / thresholder 推断
 
 // 7. 确认规则配置，进入锁定态（Rule 接收确认指令，内部校验通过后由 Group 写入状态）
-rule.confirm();
+rule.onOk();
 // rule.state.value === SchedulerState.LOCKED
 
 // 8. 确认规则组配置，进入锁定态（Group 接收确认指令，内部校验通过后由 Workspace 写入状态）
-group.confirm();
+group.onOk();
 // group.state.value === SchedulerState.LOCKED
 
 // 9. 验证并构建（build 阶段执行业务校验）
@@ -90,8 +90,8 @@ if (workspace.validate()) {
 workspace.transitionState(group.id, SchedulerState.EDITING);
 group.transitionState(rule.id, SchedulerState.EDITING);
 // 通过 rule.form（Formily Form）驱动表单修改
-rule.confirm();
-group.confirm();
+rule.onOk();
+group.onOk();
 
 // 11. 锁定态下仍可删除规则
 group.removeRule(rule.id); // 删除不受锁定态限制
@@ -134,8 +134,8 @@ const rule1 = group.pickRule('rule-1');
 workspace.transitionState('group-1', SchedulerState.EDITING);
 group.transitionState('rule-1', SchedulerState.EDITING);
 // 通过 rule1.form（Formily Form）驱动表单修改
-rule1.confirm();
-group.confirm();
+rule1.onOk();
+group.onOk();
 
 // 编辑态下的并行编辑互斥（Group 级别约束，与 Workspace 级别独立）
 group.transitionState('rule-1', SchedulerState.EDITING); // rule1 进入编辑态
