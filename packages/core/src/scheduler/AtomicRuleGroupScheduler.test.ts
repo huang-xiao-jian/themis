@@ -234,6 +234,42 @@ describe('AtomicRuleGroupScheduler - hydrateRule', () => {
   });
 });
 
+describe('AtomicRuleGroupScheduler - factor uniqueness', () => {
+  it('confirmed rule factor is marked disabled in coordination.factors', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
+
+    // 确认规则前，所有因子均可用
+    const before = group.coordination.factors.value;
+    expect(before.every((f) => !f.disabled)).toBe(true);
+
+    // 配置并确认规则
+    rule.form.setValues({ name: 'is_active' });
+    rule.form.setFieldState('operator', (s) => {
+      s.value = 'is';
+    });
+    rule.form.setFieldState('threshold', (s) => {
+      s.value = true;
+    });
+    rule.onOk();
+
+    // 确认后可用因子中 is_active 应被标记 disabled
+    const after = group.coordination.factors.value;
+    const disabledItem = after.find((f) => f.value === 'is_active');
+    expect(disabledItem?.disabled).toBe(true);
+  });
+
+  it('snapshot-restored rule factor is marked disabled', () => {
+    const group = makeGroup(null, SAMPLE_GROUP);
+    const factors = group.coordination.factors.value;
+    // SAMPLE_GROUP 中包含 employee 和 deliver_city 两条规则
+    const employee = factors.find((f) => f.value === 'employee');
+    const deliverCity = factors.find((f) => f.value === 'deliver_city');
+    expect(employee?.disabled).toBe(true);
+    expect(deliverCity?.disabled).toBe(true);
+  });
+});
+
 describe('AtomicRuleGroupScheduler - validate & build', () => {
   it('validate returns false when no rules', () => {
     const group = makeGroup('group-1');

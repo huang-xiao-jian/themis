@@ -24,13 +24,12 @@ export class AtomicRuleScheduler {
   readonly editable: ReadonlySignal<boolean>;
   /** 上次用户确认且数据无误时更新的原子规则配置 */
   readonly rule: Signal<AtomicRule | null>;
-  /** 上次用户确认且数据无误时更新的原子规则因子名 */
-  readonly factorName: Signal<string | null>;
+  /** 已确认的原子规则因子名（从 rule 信号 computed 派生） */
+  readonly factorName: ReadonlySignal<string | null>;
 
-  /** 规则组调度器销毁回调集合 */
+  /** 规则调度器销毁回调集合 */
   private disposers: DisposeFn[] = [];
   private readonly coordination: GroupCoordination;
-  private readonly unsubscribers: (() => void)[] = [];
   private destroyed = false;
 
   constructor(
@@ -56,14 +55,9 @@ export class AtomicRuleScheduler {
 
     // 已确认数据：与 build() 返回值一致
     this.rule = signal<AtomicRule | null>(snapshot ?? null);
-    this.factorName = signal<string | null>(snapshot?.name ?? null);
+    this.factorName = computed<string | null>(() => this.rule.value?.name ?? null);
 
     // pattern 同步：state → form.pattern
-    const unsubEffect = effect(() => {
-      this.form.pattern = this.state.value === SchedulerState.EDITING ? 'editable' : 'disabled';
-    });
-    this.unsubscribers.push(unsubEffect);
-
     this.disposers.push(
       effect(() => {
         this.form.pattern = this.state.value === SchedulerState.EDITING ? 'editable' : 'disabled';
@@ -139,11 +133,7 @@ export class AtomicRuleScheduler {
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
-    for (const fn of this.unsubscribers) {
-      fn();
-    }
     this.disposers.forEach((fn) => fn());
-    this.unsubscribers.length = 0;
-    this.disposers.length = 0;
+    this.disposers = [];
   }
 }

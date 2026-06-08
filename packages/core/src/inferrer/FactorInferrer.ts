@@ -12,7 +12,8 @@ export class FactorInferrer {
     this.factorMap = new Map(factors.map((f) => [f.name, f]));
   }
 
-  infer(name: string): RuleFactorDefinition | undefined {
+  infer(name: string | null | undefined): RuleFactorDefinition | undefined {
+    if (name == null) return undefined;
     return this.factorMap.get(name);
   }
 }

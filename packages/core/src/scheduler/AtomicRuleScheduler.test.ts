@@ -134,6 +134,23 @@ describe('AtomicRuleScheduler - onOk', () => {
     });
   });
 
+  it('onOk updates factorName computed', () => {
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
+    expect(scheduler.factorName.value).toBeNull();
+
+    scheduler.form.setValues({ name: 'is_active' });
+    scheduler.form.setFieldState('operator', (s) => {
+      s.value = 'is';
+    });
+    scheduler.form.setFieldState('threshold', (s) => {
+      s.value = true;
+    });
+    scheduler.onOk();
+
+    expect(scheduler.factorName.value).toBe('is_active');
+  });
+
   it('onOk does nothing when form is invalid', () => {
     const coordination = makeCoordination('rule-1');
     const scheduler = makeScheduler(coordination);

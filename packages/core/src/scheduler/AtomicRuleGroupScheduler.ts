@@ -192,16 +192,14 @@ export class AtomicRuleGroupScheduler {
   /**
    * 切换指定规则的状态（内部更新 GroupCoordination.editingRuleId Signal）
    */
-  transitionState(ruleId: string, state: SchedulerState): boolean {
-    if (this.destroyed) return false;
+  transitionState(ruleId: string, state: SchedulerState): void {
+    if (this.destroyed) return;
     if (state === SchedulerState.EDITING) {
       // 互斥：更新 editingRuleId，前一个编辑中的 Rule 通过 computed 自动锁定
       this.coordination.editingRuleId.value = ruleId;
-      return true;
     } else {
       // LOCKED
       this.coordination.editingRuleId.value = null;
-      return true;
     }
   }
 

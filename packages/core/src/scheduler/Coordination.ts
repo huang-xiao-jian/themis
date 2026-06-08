@@ -75,7 +75,7 @@ export function createWorkspaceCoordination(
   return {
     bus: createNanoEvents<WorkspaceTransitionEvents>(),
     editingGroupId: signal<string | null>(null),
-    allFactors: signal<readonly RuleFactorDefinition[]>(factors),
+    allFactors: signal<readonly RuleFactorDefinition[]>([...factors]),
   };
 }
 
