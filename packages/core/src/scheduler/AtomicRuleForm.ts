@@ -63,11 +63,15 @@ export function createAtomicRuleForm(options: CreateAtomicRuleFormOptions): Atom
           form.setFieldState('operator', {
             dataSource: Array.from(inferrers.operator.infer(factor)),
           });
-          form.setFieldState('threshold', {
-            componentProps: {
+          // componentProps 必须直接赋值，setFieldState 无法正确设置
+          const thresholdField = form.fields['threshold'] as
+            | { componentProps: Record<string, unknown> }
+            | undefined;
+          if (thresholdField) {
+            thresholdField.componentProps = {
               properties: inferrers.thresholder.infer(factor),
-            },
-          });
+            };
+          }
         }
       });
 

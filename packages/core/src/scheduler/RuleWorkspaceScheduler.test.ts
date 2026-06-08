@@ -17,8 +17,8 @@ function makeInferrers() {
     new DefaultDynamicResourceFactory(new FetcherRegistry())
   );
   return {
-    operatorInferrer: new OperatorInferrer(),
-    thresholderInferrer: new ThresholderInferrer(factory),
+    operator: new OperatorInferrer(),
+    thresholder: new ThresholderInferrer(factory),
   };
 }
 
@@ -40,9 +40,9 @@ describe('RuleWorkspaceScheduler - creation', () => {
     expect(workspace.groups.value[0]).toBeInstanceOf(AtomicRuleGroupScheduler);
   });
 
-  it('editingGroupId is null by default', () => {
+  it('coordination.editingGroupId is null by default', () => {
     const workspace = makeWorkspace();
-    expect(workspace.editingGroupId.value).toBeNull();
+    expect(workspace.coordination.editingGroupId.value).toBeNull();
   });
 });
 
@@ -52,7 +52,7 @@ describe('RuleWorkspaceScheduler - addGroup', () => {
     const group = workspace.addGroup();
     expect(group).toBeInstanceOf(AtomicRuleGroupScheduler);
     expect(workspace.groups.value).toHaveLength(1);
-    expect(workspace.editingGroupId.value).toBe(group!.id);
+    expect(workspace.coordination.editingGroupId.value).toBe(group!.id);
     expect(group!.state.value).toBe(SchedulerState.EDITING);
   });
 
@@ -101,7 +101,7 @@ describe('RuleWorkspaceScheduler - transitionState', () => {
   it('transitionState to EDITING sets editingGroupId', () => {
     const workspace = makeWorkspace([SAMPLE_GROUP]);
     workspace.transitionState('group-1', SchedulerState.EDITING);
-    expect(workspace.editingGroupId.value).toBe('group-1');
+    expect(workspace.coordination.editingGroupId.value).toBe('group-1');
     expect(workspace.groups.value[0].state.value).toBe(SchedulerState.EDITING);
   });
 
@@ -114,9 +114,9 @@ describe('RuleWorkspaceScheduler - transitionState', () => {
     expect(rule.state.value).toBe(SchedulerState.EDITING);
     // Lock the group
     workspace.transitionState(group.id, SchedulerState.LOCKED);
-    expect(workspace.editingGroupId.value).toBeNull();
+    expect(workspace.coordination.editingGroupId.value).toBeNull();
     expect(group.state.value).toBe(SchedulerState.LOCKED);
-    expect(group.editingRuleId.value).toBeNull();
+    expect(group.coordination.editingRuleId.value).toBeNull();
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 });
@@ -126,6 +126,10 @@ describe('RuleWorkspaceScheduler - event handling', () => {
     const workspace = makeWorkspace();
     const group = workspace.addGroup()!;
     const rule = group.addRule()!;
+    // Must create fields to activate reactions
+    rule.form.createField({ name: 'name' });
+    rule.form.createField({ name: 'operator' });
+    rule.form.createField({ name: 'threshold' });
     // Confirm the rule
     rule.form.setValues({ name: 'is_active' });
     rule.form.setFieldState('operator', (s) => {
@@ -137,9 +141,9 @@ describe('RuleWorkspaceScheduler - event handling', () => {
     rule.onOk();
     // Confirm the group
     group.onOk();
-    expect(workspace.editingGroupId.value).toBeNull();
+    expect(workspace.coordination.editingGroupId.value).toBeNull();
     expect(group.state.value).toBe(SchedulerState.LOCKED);
-    expect(group.editingRuleId.value).toBeNull();
+    expect(group.coordination.editingRuleId.value).toBeNull();
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 
@@ -147,7 +151,7 @@ describe('RuleWorkspaceScheduler - event handling', () => {
     const workspace = makeWorkspace([SAMPLE_GROUP]);
     const group = workspace.groups.value[0];
     group.onEdit();
-    expect(workspace.editingGroupId.value).toBe('group-1');
+    expect(workspace.coordination.editingGroupId.value).toBe('group-1');
     expect(group.state.value).toBe(SchedulerState.EDITING);
   });
 });
@@ -163,9 +167,9 @@ describe('RuleWorkspaceScheduler - removeGroup', () => {
   it('removeGroup clears editingGroupId if removed group was editing', () => {
     const workspace = makeWorkspace();
     const group = workspace.addGroup()!;
-    expect(workspace.editingGroupId.value).toBe(group.id);
+    expect(workspace.coordination.editingGroupId.value).toBe(group.id);
     workspace.removeGroup(group.id);
-    expect(workspace.editingGroupId.value).toBeNull();
+    expect(workspace.coordination.editingGroupId.value).toBeNull();
   });
 
   it('removeGroup on non-existent id is a no-op', () => {

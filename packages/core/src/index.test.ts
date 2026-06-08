@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { assert, describe, expect, it, vi } from 'vitest';
 import { RuleWorkspaceBuilder } from './builder/RuleWorkspaceBuilder';
 import type { RuleFactorDefinition } from './dsl';
 import { DataType } from './dsl/DataType';
@@ -61,20 +61,23 @@ describe('End-to-end: create scenario', () => {
     expect(rule.state.value).toBe(SchedulerState.EDITING);
 
     // Interact via Formily form
+    rule.form.createField({ name: 'name' });
+    rule.form.createField({ name: 'operator' });
+    rule.form.createField({ name: 'threshold' });
     rule.form.setValues({ name: 'order_amount' });
     expect(rule.factor.value?.name).toBe('order_amount');
     // number + range + multiple inference — results stay in form fields
-    const operatorField = rule.form.fields['operator'] as { dataSource: { value: string }[] };
-    expect(operatorField.dataSource.map((o) => o.value)).toEqual([
+    const $operator = rule.form.getFieldState('operator');
+    assert($operator.dataSource);
+    expect($operator.dataSource.map((o) => o.value)).toEqual([
       'between any',
       'between all',
       'not between any',
       'not between all',
     ]);
-    const thresholdField = rule.form.fields['threshold'] as unknown as {
-      componentProps: { type: string };
-    };
-    expect(thresholdField.componentProps.type).toBe('ListRangeBuilder');
+    const $threshold = rule.form.getFieldState('threshold');
+    assert(Array.isArray($threshold.component));
+    expect($threshold.component[1]).toMatchObject({ properties: { type: 'ListRangeBuilder' } });
 
     rule.form.setFieldState('operator', (s) => {
       s.value = 'between any';
@@ -159,6 +162,9 @@ describe('End-to-end: edit scenario', () => {
     expect(rule.form.pattern).toBe('editable');
 
     // Modify via form
+    rule.form.createField({ name: 'name' });
+    rule.form.createField({ name: 'operator' });
+    rule.form.createField({ name: 'threshold' });
     rule.form.setValues({ name: 'order_amount' });
     rule.form.setFieldState('operator', (s) => {
       s.value = 'between any';

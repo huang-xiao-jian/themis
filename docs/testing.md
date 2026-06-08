@@ -34,6 +34,39 @@ it('should return single point', () => {
 });
 ```
 
+### Formily 表单测试规范
+
+#### 手动创建 Field 激活 reaction
+
+Formily 的 `effects`（`onFormReact` 等）只有在对应 `Field` 实例存在时才会被激活。测试中必须先手动调用 `form.createField` 创建字段，再调用 `setValues`，否则推断逻辑不会触发：
+
+```ts
+const form = createForm({ effects() { onFormReact(...) } });
+
+// ✅ 必须先创建字段，才能激活 reaction
+form.createField({ name: 'name' });
+form.createField({ name: 'operator' });
+form.createField({ name: 'threshold' });
+
+// setValues 在 createField 之后，reaction 才会被触发
+form.setValues({ name: 'is_active' });
+```
+
+#### componentProps 断言方式
+
+Formily 的 `componentProps` 无法通过 `form.fields[x].componentProps` 可靠读取，必须通过 `getFieldState` 访问，并取 `component[1]`（数组第二项为实际组件属性对象）：
+
+```ts
+// ✅ 正确的断言方式
+const $threshold = form.getFieldState('threshold');
+assert(Array.isArray($threshold.component));
+expect($threshold.component[1]).toMatchObject({
+  properties: { type: 'Switch' },
+});
+
+// ❌ 错误：直接访问 form.fields[x].componentProps 不可靠
+```
+
 ### 测试运行
 
 `vitest` 支持测试用例范围过滤：

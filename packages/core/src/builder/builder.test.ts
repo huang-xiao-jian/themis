@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { assert, describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS } from '../__fixtures__/factors';
 import { SAMPLE_GROUP } from '../__fixtures__/rules';
 import { DataType } from '../dsl/DataType';
@@ -29,6 +29,10 @@ describe('RuleWorkspaceBuilder', () => {
     // 通过 addGroup + addRule + 设置 name 验证 factors 已生效
     const group = workspace.addGroup()!;
     const rule = group.addRule()!;
+    // Must create fields to activate reactions
+    rule.form.createField({ name: 'name' });
+    rule.form.createField({ name: 'operator' });
+    rule.form.createField({ name: 'threshold' });
     rule.form.setValues({ name: 'is_active' });
     expect(rule.factor.value?.name).toBe('is_active');
   });
@@ -53,12 +57,17 @@ describe('RuleWorkspaceBuilder', () => {
       .build();
     const group = workspace.addGroup()!;
     const rule = group.addRule()!;
+
+    // Must create fields to activate reactions
+    rule.form.createField({ name: 'name' });
+    rule.form.createField({ name: 'operator' });
+    rule.form.createField({ name: 'threshold' });
+
     rule.form.setValues({ name: 'employee_dyn' });
     // 不抛错即表示 fetcher 已成功注册
-    const thresholdField = rule.form.fields['threshold'] as unknown as {
-      componentProps: { type: string };
-    };
-    expect(thresholdField.componentProps.type).toBe('Select');
+    const $threshold = rule.form.getFieldState('threshold');
+    assert(Array.isArray($threshold.component));
+    expect($threshold.component[1]).toMatchObject({ properties: { type: 'Select' } });
   });
 
   it('build twice returns different instances', () => {

@@ -4,15 +4,12 @@ import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
 import { SchedulerState } from '../dsl/SchedulerState';
 import { TransitionEventType } from '../dsl/TransitionEventType';
 import { createAtomicRuleForm, type AtomicRuleForm, type Inferrers } from './AtomicRuleForm';
-import {
-  createTransitionEventEmitter,
-  type TransitionEventEmitter,
-} from './TransitionEventEmitter';
+import type { GroupCoordination } from './Coordination';
 
 /**
  * 原子规则调度器
  *
- * 自身状态通过 computed 从所属 AtomicRuleGroupScheduler 的共享 Signal 派生，
+ * 自身状态通过 computed 从所属 AtomicRuleGroupScheduler 的 GroupCoordination 派生，
  * 暴露只读状态信号、Formily 表单委托，以及用户行为接收入口。
  * 内部将调度器状态同步到 Formily Form 的 pattern 属性。
  */
@@ -20,7 +17,7 @@ export class AtomicRuleScheduler {
   readonly id: string;
   readonly form: AtomicRuleForm;
 
-  /** 当前状态（编辑态 / 锁定态），通过 computed 从 Group 的 editingRuleId 派生 */
+  /** 当前状态（编辑态 / 锁定态），通过 computed 从 Group 的 GroupCoordination.editingRuleId 派生 */
   readonly state: ReadonlySignal<SchedulerState>;
   /** 是否处于编辑态（派生信号，便于视图层绑定） */
   readonly editable: ReadonlySignal<boolean>;
@@ -30,33 +27,32 @@ export class AtomicRuleScheduler {
   /** 已激活的规则因子定义 */
   readonly factor: ReadonlySignal<RuleFactorDefinition | null>;
 
-  private readonly emitter: TransitionEventEmitter<string>;
+  private readonly coordination: GroupCoordination;
   private readonly factors: ReadonlySignal<readonly RuleFactorDefinition[]>;
   private readonly unsubscribers: (() => void)[] = [];
   private destroyed = false;
 
   constructor(
     id: string,
-    editingRuleId: Signal<string | null>,
+    coordination: GroupCoordination,
     factors: ReadonlySignal<readonly RuleFactorDefinition[]>,
     inferrers: Inferrers,
     snapshot?: AtomicRule
   ) {
     this.id = id;
+    this.coordination = coordination;
     this.factors = factors;
 
-    // 创建 Formily 表单（effects 驱动推断联动，推断结果留在 form 内部）
+    // 创建 Formily 表单（effects 驱动重置联动，推断由视图层处理）
     this.form = createAtomicRuleForm({
-      factors: factors.value,
+      initialValues: snapshot,
+      factors: Array.from(factors.value),
       inferrers,
-      initialValues: snapshot
-        ? { name: snapshot.name, operator: snapshot.operator, threshold: snapshot.threshold }
-        : undefined,
     });
 
-    // 状态：从 Group 的 editingRuleId computed 派生
+    // 状态：从 GroupCoordination 的 editingRuleId computed 派生
     this.state = computed<SchedulerState>(() =>
-      editingRuleId.value === this.id ? SchedulerState.EDITING : SchedulerState.LOCKED
+      coordination.editingRuleId.value === this.id ? SchedulerState.EDITING : SchedulerState.LOCKED
     );
     this.editable = computed<boolean>(() => this.state.value === SchedulerState.EDITING);
 
@@ -70,19 +66,11 @@ export class AtomicRuleScheduler {
       return this.factors.value.find((f) => f.name === nameValue) ?? null;
     });
 
-    // 事件发射器
-    this.emitter = createTransitionEventEmitter<string>();
-
     // pattern 同步：state → form.pattern
     const unsubEffect = effect(() => {
       this.form.pattern = this.state.value === SchedulerState.EDITING ? 'editable' : 'disabled';
     });
     this.unsubscribers.push(unsubEffect);
-  }
-
-  /** 事件发射器（供父级 Group 订阅） */
-  get transitionEvents(): TransitionEventEmitter<string> {
-    return this.emitter;
   }
 
   /** 验证配置是否完整可用 */
@@ -117,17 +105,23 @@ export class AtomicRuleScheduler {
       operator: this.form.values.operator as string,
       threshold: this.form.values.threshold,
     };
-    this.emitter.emit(TransitionEventType.OK, this.id);
+    this.coordination.bus.emit(TransitionEventType.OK, {
+      type: TransitionEventType.OK,
+      sourceId: this.id,
+    });
   };
 
   /**
    * 激活规则配置编辑（用户行为驱动）
    *
-   * 发射 EDIT 事件，父级通过 editingRuleId 控制状态
+   * 发射 EDIT 事件，父级通过 GroupCoordination.editingRuleId 控制状态
    */
   onEdit = (): void => {
     if (this.destroyed) return;
-    this.emitter.emit(TransitionEventType.EDIT, this.id);
+    this.coordination.bus.emit(TransitionEventType.EDIT, {
+      type: TransitionEventType.EDIT,
+      sourceId: this.id,
+    });
   };
 
   /**
@@ -137,7 +131,10 @@ export class AtomicRuleScheduler {
    */
   onCancel = (): void => {
     if (this.destroyed) return;
-    this.emitter.emit(TransitionEventType.CANCEL, this.id);
+    this.coordination.bus.emit(TransitionEventType.CANCEL, {
+      type: TransitionEventType.CANCEL,
+      sourceId: this.id,
+    });
   };
 
   /** 销毁并释放订阅 */

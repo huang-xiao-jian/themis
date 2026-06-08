@@ -1,5 +1,5 @@
 import { signal } from '@preact/signals-core';
-import { describe, expect, it, vi } from 'vitest';
+import { assert, describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS, BOOLEAN_FACTOR } from '../__fixtures__/factors';
 import { SAMPLE_RULE_1 } from '../__fixtures__/rules';
 import { SchedulerState } from '../dsl/SchedulerState';
@@ -11,6 +11,7 @@ import { DefaultStaticResourceFactory } from '../factory/StaticResourceFactory';
 import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { AtomicRuleScheduler } from './AtomicRuleScheduler';
+import { createGroupCoordination, type GroupCoordination } from './Coordination';
 
 function makeInferrers() {
   const factory = new DefaultResourceFactory(
@@ -18,8 +19,8 @@ function makeInferrers() {
     new DefaultDynamicResourceFactory(new FetcherRegistry())
   );
   return {
-    operatorInferrer: new OperatorInferrer(),
-    thresholderInferrer: new ThresholderInferrer(factory),
+    operator: new OperatorInferrer(),
+    thresholder: new ThresholderInferrer(factory),
   };
 }
 
@@ -27,14 +28,16 @@ function makeFactorsSignal() {
   return signal(ALL_FACTORS);
 }
 
-function makeEditingRuleId(ruleId: string | null = null) {
-  return signal<string | null>(ruleId);
+function makeCoordination(editingRuleId?: string | null): GroupCoordination {
+  const c = createGroupCoordination();
+  c.editingRuleId.value = editingRuleId ?? null;
+  return c;
 }
 
-function makeScheduler(editingRuleId?: string | null, snapshot?: typeof SAMPLE_RULE_1) {
+function makeScheduler(coordination?: GroupCoordination, snapshot?: typeof SAMPLE_RULE_1) {
   return new AtomicRuleScheduler(
     'rule-1',
-    makeEditingRuleId(editingRuleId),
+    coordination ?? makeCoordination(),
     makeFactorsSignal(),
     makeInferrers(),
     snapshot
@@ -43,37 +46,25 @@ function makeScheduler(editingRuleId?: string | null, snapshot?: typeof SAMPLE_R
 
 describe('AtomicRuleScheduler - creation', () => {
   it('starts with null factor and null rule when no snapshot', () => {
-    const scheduler = new AtomicRuleScheduler(
-      'rule-1',
-      makeEditingRuleId(),
-      makeFactorsSignal(),
-      makeInferrers()
-    );
+    const scheduler = makeScheduler();
     expect(scheduler.id).toBe('rule-1');
     expect(scheduler.factor.value).toBeNull();
     expect(scheduler.rule.value).toBeNull();
   });
 
   it('restores from snapshot and sets rule signal', () => {
-    const scheduler = makeScheduler(null, SAMPLE_RULE_1);
+    const scheduler = makeScheduler(makeCoordination(), SAMPLE_RULE_1);
     expect(scheduler.rule.value).toEqual(SAMPLE_RULE_1);
     expect(scheduler.factor.value?.name).toBe('employee');
-  });
-
-  it('form is created with three fields', () => {
-    const scheduler = makeScheduler();
-    expect(scheduler.form.fields['name']).toBeDefined();
-    expect(scheduler.form.fields['operator']).toBeDefined();
-    expect(scheduler.form.fields['threshold']).toBeDefined();
   });
 });
 
 describe('AtomicRuleScheduler - state derivation', () => {
   it('state is EDITING when editingRuleId matches this.id', () => {
-    const editingRuleId = signal<string | null>('rule-1');
+    const coordination = makeCoordination('rule-1');
     const scheduler = new AtomicRuleScheduler(
       'rule-1',
-      editingRuleId,
+      coordination,
       makeFactorsSignal(),
       makeInferrers()
     );
@@ -82,53 +73,68 @@ describe('AtomicRuleScheduler - state derivation', () => {
   });
 
   it('state is LOCKED when editingRuleId does not match', () => {
-    const scheduler = makeScheduler('other-rule');
+    const coordination = makeCoordination('other-rule');
+    const scheduler = makeScheduler(coordination);
     expect(scheduler.state.value).toBe(SchedulerState.LOCKED);
     expect(scheduler.editable.value).toBe(false);
   });
 
   it('state responds to editingRuleId changes', () => {
-    const editingRuleId = signal<string | null>(null);
+    const coordination = makeCoordination();
     const scheduler = new AtomicRuleScheduler(
       'rule-1',
-      editingRuleId,
+      coordination,
       makeFactorsSignal(),
       makeInferrers()
     );
     expect(scheduler.state.value).toBe(SchedulerState.LOCKED);
-    editingRuleId.value = 'rule-1';
+    coordination.editingRuleId.value = 'rule-1';
     expect(scheduler.state.value).toBe(SchedulerState.EDITING);
   });
 
   it('form pattern reflects state', () => {
-    const editingRuleId = signal<string | null>('rule-1');
+    const coordination = makeCoordination('rule-1');
     const scheduler = new AtomicRuleScheduler(
       'rule-1',
-      editingRuleId,
+      coordination,
       makeFactorsSignal(),
       makeInferrers()
     );
     expect(scheduler.form.pattern).toBe('editable');
-    editingRuleId.value = null;
+    coordination.editingRuleId.value = null;
     expect(scheduler.form.pattern).toBe('disabled');
   });
 });
 
 describe('AtomicRuleScheduler - form inference', () => {
   it('setting name via form updates operator dataSource in form', () => {
-    const scheduler = makeScheduler('rule-1');
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
+
+    // Must create fields to activate reactions
+    scheduler.form.createField({ name: 'name' });
+    scheduler.form.createField({ name: 'operator' });
+    scheduler.form.createField({ name: 'threshold' });
+
     scheduler.form.setValues({ name: 'is_active' });
     expect(scheduler.factor.value?.name).toBe('is_active');
-    const operatorField = scheduler.form.fields['operator'] as { dataSource: { value: string }[] };
-    expect(operatorField.dataSource.map((o) => o.value)).toEqual(['is']);
+    const $operator = scheduler.form.getFieldState('operator');
+    assert($operator.dataSource);
+    expect($operator.dataSource.map((o) => o.value)).toEqual(['is']);
   });
 });
 
 describe('AtomicRuleScheduler - onOk', () => {
   it('onOk validates, updates rule signal, and emits OK event', () => {
-    const scheduler = makeScheduler('rule-1');
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    scheduler.transitionEvents.on(TransitionEventType.OK, handler);
+    coordination.bus.on(TransitionEventType.OK, handler);
+
+    // Must create fields to activate reactions
+    scheduler.form.createField({ name: 'name' });
+    scheduler.form.createField({ name: 'operator' });
+    scheduler.form.createField({ name: 'threshold' });
 
     scheduler.form.setValues({ name: 'is_active' });
     scheduler.form.setFieldState('operator', (s) => {
@@ -153,9 +159,10 @@ describe('AtomicRuleScheduler - onOk', () => {
   });
 
   it('onOk does nothing when form is invalid', () => {
-    const scheduler = makeScheduler('rule-1');
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    scheduler.transitionEvents.on(TransitionEventType.OK, handler);
+    coordination.bus.on(TransitionEventType.OK, handler);
 
     scheduler.onOk(); // form is empty
 
@@ -166,9 +173,10 @@ describe('AtomicRuleScheduler - onOk', () => {
 
 describe('AtomicRuleScheduler - onEdit', () => {
   it('emits EDIT event', () => {
-    const scheduler = makeScheduler();
+    const coordination = makeCoordination();
+    const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    scheduler.transitionEvents.on(TransitionEventType.EDIT, handler);
+    coordination.bus.on(TransitionEventType.EDIT, handler);
 
     scheduler.onEdit();
 
@@ -181,9 +189,10 @@ describe('AtomicRuleScheduler - onEdit', () => {
 
 describe('AtomicRuleScheduler - onCancel', () => {
   it('emits CANCEL event', () => {
-    const scheduler = makeScheduler('rule-1');
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    scheduler.transitionEvents.on(TransitionEventType.CANCEL, handler);
+    coordination.bus.on(TransitionEventType.CANCEL, handler);
 
     scheduler.onCancel();
 
@@ -196,7 +205,14 @@ describe('AtomicRuleScheduler - onCancel', () => {
 
 describe('AtomicRuleScheduler - build', () => {
   it('build returns rule.value after onOk', () => {
-    const scheduler = makeScheduler('rule-1');
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
+
+    // Must create fields to activate reactions
+    scheduler.form.createField({ name: 'name' });
+    scheduler.form.createField({ name: 'operator' });
+    scheduler.form.createField({ name: 'threshold' });
+
     scheduler.form.setValues({ name: 'is_active' });
     scheduler.form.setFieldState('operator', (s) => {
       s.value = 'is';
@@ -216,19 +232,28 @@ describe('AtomicRuleScheduler - build', () => {
   });
 
   it('build throws when no confirmed data', () => {
-    const scheduler = makeScheduler('rule-1');
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
     expect(() => scheduler.build()).toThrow(/no confirmed data/);
   });
 });
 
 describe('AtomicRuleScheduler - validate', () => {
   it('validate returns false when form is incomplete', () => {
-    const scheduler = makeScheduler('rule-1');
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
     expect(scheduler.validate()).toBe(false);
   });
 
   it('validate returns true when all fields are set', () => {
-    const scheduler = makeScheduler('rule-1');
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
+
+    // Must create fields to activate reactions
+    scheduler.form.createField({ name: 'name' });
+    scheduler.form.createField({ name: 'operator' });
+    scheduler.form.createField({ name: 'threshold' });
+
     scheduler.form.setValues({ name: 'is_active' });
     scheduler.form.setFieldState('operator', (s) => {
       s.value = 'is';
@@ -248,9 +273,10 @@ describe('AtomicRuleScheduler - destroy', () => {
   });
 
   it('destroy prevents further event emissions', () => {
-    const scheduler = makeScheduler();
+    const coordination = makeCoordination();
+    const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    scheduler.transitionEvents.on(TransitionEventType.OK, handler);
+    coordination.bus.on(TransitionEventType.OK, handler);
     scheduler.destroy();
     scheduler.onOk();
     expect(handler).not.toHaveBeenCalled();

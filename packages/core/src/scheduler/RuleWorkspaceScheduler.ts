@@ -6,12 +6,15 @@ import { SchedulerState } from '../dsl/SchedulerState';
 import { TransitionEventType } from '../dsl/TransitionEventType';
 import type { Inferrers } from './AtomicRuleForm';
 import { AtomicRuleGroupScheduler } from './AtomicRuleGroupScheduler';
+import type { WorkspaceCoordination } from './Coordination';
+import { createWorkspaceCoordination } from './Coordination';
 
 /**
  * 工作空间调度器
  *
  * 顶层入口：管理所有规则组、共享因素定义、生命周期管理
- * 信号下行（维护 editingGroupId + allFactors 共享 Signal）+ 事件上行（订阅 Group 的 TransitionEvent）
+ * 信号通道（通过 WorkspaceCoordination 封装 editingGroupId + allFactors）
+ * + 事件总线（订阅 Group 的 WorkspaceTransitionEvent）
  */
 export class RuleWorkspaceScheduler {
   /** 初始化时传入的规则组快照数据（编辑场景），不可变 */
@@ -20,17 +23,18 @@ export class RuleWorkspaceScheduler {
   readonly groups: Signal<readonly AtomicRuleGroupScheduler[]>;
 
   /**
-   * Workspace 级别共享状态：当前处于编辑态的 Group ID
+   * Workspace 级协调实体（Workspace → Group 协议）
    *
-   * null 表示当前无编辑中的 Group。
-   * AtomicRuleGroupScheduler.state 通过 computed 从此 Signal 派生
+   * 封装供子级 Group 派生状态的共享信号：
+   * - coordination.editingGroupId：当前处于编辑态的 Group ID（null 表示无编辑中的 Group）
+   * - coordination.allFactors：可用规则因子定义列表
+   * - coordination.bus：Group 上行事件总线（OK | EDIT）
    */
-  readonly editingGroupId: Signal<string | null>;
+  readonly coordination: WorkspaceCoordination;
 
   /** 是否可继续添加规则组 */
   readonly canAddGroup: ReadonlySignal<boolean>;
 
-  private readonly factors: Signal<readonly RuleFactorDefinition[]>;
   private readonly inferrers: Inferrers;
   private readonly groupEventUnsubscribers = new Map<string, (() => void)[]>();
   private destroyed = false;
@@ -41,15 +45,14 @@ export class RuleWorkspaceScheduler {
     snapshots?: readonly AtomicRuleGroup[]
   ) {
     this.snapshots = snapshots ?? [];
-    this.factors = signal<readonly RuleFactorDefinition[]>([...factors]);
     this.inferrers = inferrers;
 
-    // Workspace 级共享 Signal
-    this.editingGroupId = signal<string | null>(null);
+    // 创建 Workspace 级协调实体
+    this.coordination = createWorkspaceCoordination(factors);
 
     // canAddGroup：无编辑中 Group 且无空规则 Group
     this.canAddGroup = computed<boolean>(() => {
-      if (this.editingGroupId.value !== null) return false;
+      if (this.coordination.editingGroupId.value !== null) return false;
       // 存在配置规则为空的 Group 时禁用新增
       return !this.groups.value.some((g) => g.rules.value.length === 0);
     });
@@ -65,7 +68,7 @@ export class RuleWorkspaceScheduler {
    * 获取规则因子定义（只读访问）
    */
   getFactors(): ReadonlySignal<readonly RuleFactorDefinition[]> {
-    return this.factors;
+    return this.coordination.allFactors;
   }
 
   /**
@@ -79,8 +82,7 @@ export class RuleWorkspaceScheduler {
     }
     const scheduler = new AtomicRuleGroupScheduler(
       group.id,
-      this.editingGroupId,
-      this.factors,
+      this.coordination,
       this.inferrers,
       group
     );
@@ -91,7 +93,7 @@ export class RuleWorkspaceScheduler {
   /**
    * 创建规则组调度器（新建场景）
    *
-   * 新建的 Group 默认进入编辑态（editingGroupId 更新为新 Group ID）
+   * 新建的 Group 默认进入编辑态（WorkspaceCoordination.editingGroupId 更新为新 Group ID）
    */
   addGroup(): AtomicRuleGroupScheduler | undefined {
     if (this.destroyed) {
@@ -101,14 +103,9 @@ export class RuleWorkspaceScheduler {
       return undefined;
     }
     const newId = nanoid();
-    const scheduler = new AtomicRuleGroupScheduler(
-      newId,
-      this.editingGroupId,
-      this.factors,
-      this.inferrers
-    );
+    const scheduler = new AtomicRuleGroupScheduler(newId, this.coordination, this.inferrers);
     // 新建的 Group 自动进入编辑态
-    this.editingGroupId.value = newId;
+    this.coordination.editingGroupId.value = newId;
     this.subscribeGroupEvents(scheduler);
     this.groups.value = [...this.groups.value, scheduler];
     return scheduler;
@@ -139,24 +136,24 @@ export class RuleWorkspaceScheduler {
     }
     this.groups.value = next;
     // 若删除的是编辑中的 Group，清空 editingGroupId
-    if (this.editingGroupId.value === groupId) {
-      this.editingGroupId.value = null;
+    if (this.coordination.editingGroupId.value === groupId) {
+      this.coordination.editingGroupId.value = null;
     }
   }
 
   /**
-   * 切换指定规则组的状态（内部更新 editingGroupId Signal）
+   * 切换指定规则组的状态（内部更新 WorkspaceCoordination.editingGroupId Signal）
    *
    * LOCKED 时级联锁定组内所有编辑中的 Rule
    */
   transitionState(groupId: string, state: SchedulerState): boolean {
     if (this.destroyed) return false;
     if (state === SchedulerState.EDITING) {
-      this.editingGroupId.value = groupId;
+      this.coordination.editingGroupId.value = groupId;
       return true;
     } else {
       // LOCKED：清空 editingGroupId + 级联锁定组内 Rule
-      this.editingGroupId.value = null;
+      this.coordination.editingGroupId.value = null;
       const group = this.pickGroup(groupId);
       if (group) {
         group.transitionState('', SchedulerState.LOCKED); // 清空 editingRuleId
@@ -197,23 +194,25 @@ export class RuleWorkspaceScheduler {
     this.groups.value = [];
   }
 
-  /** 订阅 Group 事件 */
+  /** 订阅 Group 事件（通过 WorkspaceCoordination.bus，需 sourceId 过滤） */
   private subscribeGroupEvents(scheduler: AtomicRuleGroupScheduler): void {
     const unsubs: (() => void)[] = [];
 
-    const onOk = (): void => {
-      // Group 确认 → 锁定 + 级联锁定组内 Rule
-      this.editingGroupId.value = null;
-      scheduler.transitionState('', SchedulerState.LOCKED);
-    };
-    scheduler.transitionEvents.on(TransitionEventType.OK, onOk);
-    unsubs.push(() => scheduler.transitionEvents.off(TransitionEventType.OK, onOk));
+    unsubs.push(
+      this.coordination.bus.on(TransitionEventType.OK, (e) => {
+        if (e.sourceId !== scheduler.id) return;
+        // Group 确认 → 锁定 + 级联锁定组内 Rule
+        this.coordination.editingGroupId.value = null;
+        scheduler.transitionState('', SchedulerState.LOCKED);
+      })
+    );
 
-    const onEdit = (): void => {
-      this.editingGroupId.value = scheduler.id;
-    };
-    scheduler.transitionEvents.on(TransitionEventType.EDIT, onEdit);
-    unsubs.push(() => scheduler.transitionEvents.off(TransitionEventType.EDIT, onEdit));
+    unsubs.push(
+      this.coordination.bus.on(TransitionEventType.EDIT, (e) => {
+        if (e.sourceId !== scheduler.id) return;
+        this.coordination.editingGroupId.value = scheduler.id;
+      })
+    );
 
     this.groupEventUnsubscribers.set(scheduler.id, unsubs);
   }

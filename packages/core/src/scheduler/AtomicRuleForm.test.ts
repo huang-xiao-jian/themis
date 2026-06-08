@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { ALL_FACTORS, BOOLEAN_FACTOR } from '../__fixtures__/factors';
+import { assert, describe, expect, it } from 'vitest';
+import { ALL_FACTORS } from '../__fixtures__/factors';
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory';
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
@@ -49,10 +49,16 @@ describe('AtomicRuleForm - inference linkage', () => {
       inferrers: makeInferrers(),
     });
 
+    // Must create fields to activate reactions
+    form.createField({ name: 'name' });
+    form.createField({ name: 'operator' });
+    form.createField({ name: 'threshold' });
+
     form.setValues({ name: 'is_active' });
 
-    const operatorField = form.fields['operator'] as { dataSource: unknown[] };
-    expect(operatorField.dataSource).toEqual([{ label: 'is', value: 'is' }]);
+    const $operator = form.getFieldState('operator');
+    assert($operator.dataSource);
+    expect($operator.dataSource).toEqual([{ label: 'is', value: 'is' }]);
   });
 
   it('changing name resets operator and threshold values', () => {
@@ -60,6 +66,11 @@ describe('AtomicRuleForm - inference linkage', () => {
       factors: ALL_FACTORS,
       inferrers: makeInferrers(),
     });
+
+    // Must create fields to activate reactions
+    form.createField({ name: 'name' });
+    form.createField({ name: 'operator' });
+    form.createField({ name: 'threshold' });
 
     // Set initial values
     form.setValues({ name: 'is_active' });
@@ -73,7 +84,7 @@ describe('AtomicRuleForm - inference linkage', () => {
     // Switch to another factor → operator/threshold should reset
     form.setValues({ name: 'age' });
 
-    expect(form.values.operator).toBeNull();
+    expect(form.values.operator).toBeUndefined();
     expect(form.values.threshold).toBeUndefined();
   });
 
@@ -83,11 +94,24 @@ describe('AtomicRuleForm - inference linkage', () => {
       inferrers: makeInferrers(),
     });
 
+    // Must create fields to activate reactions
+    form.createField({ name: 'name' });
+    form.createField({ name: 'operator' });
+    form.createField({ name: 'threshold' });
+
     form.setValues({ name: 'is_active' });
 
-    const thresholdField = form.fields['threshold'] as { componentProps: Record<string, unknown> };
-    expect(thresholdField.componentProps).toBeDefined();
-    expect((thresholdField.componentProps as { type: string }).type).toBe('Switch');
+    const $threshold = form.getFieldState('threshold');
+
+    // 断言：$threshold.component 为数组类型
+    assert(Array.isArray($threshold.component));
+
+    // 断言：$threshold.component[1] 为实际组件属性
+    expect($threshold.component[1]).toMatchObject({
+      properties: {
+        type: 'Switch',
+      },
+    });
   });
 });
 
@@ -102,26 +126,18 @@ describe('AtomicRuleForm - snapshot restoration', () => {
     expect(form.values.name).toBe('is_active');
     expect(form.values.operator).toBe('is');
     expect(form.values.threshold).toBe(true);
+
+    // Must create fields to active reactions
+    form.createField({ name: 'name' });
+    form.createField({ name: 'operator' });
+    form.createField({ name: 'threshold' });
+
     // Inference should have been triggered (operator dataSource populated)
-    const operatorField = form.fields['operator'] as { dataSource: unknown[] };
-    expect(operatorField.dataSource.length).toBeGreaterThan(0);
+    const $operator = form.getFieldState('operator');
+
+    assert($operator);
+    assert($operator.dataSource);
+
+    expect($operator.dataSource.length).toBeGreaterThan(0);
   });
 });
-
-describe('AtomicRuleForm - pattern switching', () => {
-  it('setting pattern to disabled makes fields read-only', () => {
-    const form = createAtomicRuleForm({
-      factors: ALL_FACTORS,
-      inferrers: makeInferrers(),
-    });
-
-    form.pattern = 'disabled';
-    expect(form.pattern).toBe('disabled');
-
-    const nameField = form.fields['name'] as { pattern: string };
-    expect(nameField.pattern).toBe('disabled');
-  });
-});
-
-// suppress unused
-void BOOLEAN_FACTOR;

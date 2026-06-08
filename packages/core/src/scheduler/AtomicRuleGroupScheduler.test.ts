@@ -1,4 +1,3 @@
-import { signal } from '@preact/signals-core';
 import { describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS } from '../__fixtures__/factors';
 import { SAMPLE_GROUP } from '../__fixtures__/rules';
@@ -12,6 +11,7 @@ import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { AtomicRuleGroupScheduler } from './AtomicRuleGroupScheduler';
 import { AtomicRuleScheduler } from './AtomicRuleScheduler';
+import { createWorkspaceCoordination, type WorkspaceCoordination } from './Coordination';
 
 function makeInferrers() {
   const factory = new DefaultResourceFactory(
@@ -19,23 +19,22 @@ function makeInferrers() {
     new DefaultDynamicResourceFactory(new FetcherRegistry())
   );
   return {
-    operatorInferrer: new OperatorInferrer(),
-    thresholderInferrer: new ThresholderInferrer(factory),
+    operator: new OperatorInferrer(),
+    thresholder: new ThresholderInferrer(factory),
   };
 }
 
-function makeFactorsSignal() {
-  return signal(ALL_FACTORS);
+function makeGroup(editingGroupId?: string | null, snapshot?: typeof SAMPLE_GROUP) {
+  const coordination = createWorkspaceCoordination(ALL_FACTORS);
+  coordination.editingGroupId.value = editingGroupId ?? null;
+  return new AtomicRuleGroupScheduler('group-1', coordination, makeInferrers(), snapshot);
 }
 
-function makeGroup(editingGroupId?: string | null, snapshot?: typeof SAMPLE_GROUP) {
-  return new AtomicRuleGroupScheduler(
-    'group-1',
-    signal<string | null>(editingGroupId ?? null),
-    makeFactorsSignal(),
-    makeInferrers(),
-    snapshot
-  );
+function makeGroupWithCoordination(
+  workspaceCoordination: WorkspaceCoordination,
+  snapshot?: typeof SAMPLE_GROUP
+) {
+  return new AtomicRuleGroupScheduler('group-1', workspaceCoordination, makeInferrers(), snapshot);
 }
 
 describe('AtomicRuleGroupScheduler - creation', () => {
@@ -67,9 +66,9 @@ describe('AtomicRuleGroupScheduler - creation', () => {
     expect(group.editable.value).toBe(true);
   });
 
-  it('editingRuleId is null by default', () => {
+  it('coordination.editingRuleId is null by default', () => {
     const group = makeGroup();
-    expect(group.editingRuleId.value).toBeNull();
+    expect(group.coordination.editingRuleId.value).toBeNull();
   });
 });
 
@@ -79,7 +78,7 @@ describe('AtomicRuleGroupScheduler - addRule', () => {
     const rule = group.addRule();
     expect(rule).toBeInstanceOf(AtomicRuleScheduler);
     expect(group.rules.value).toHaveLength(1);
-    expect(group.editingRuleId.value).toBe(rule!.id);
+    expect(group.coordination.editingRuleId.value).toBe(rule!.id);
   });
 
   it('addRule returns undefined when not in EDITING state', () => {
@@ -92,11 +91,11 @@ describe('AtomicRuleGroupScheduler - addRule', () => {
   it('addRule mutex: second addRule auto-locks first rule', () => {
     const group = makeGroup('group-1');
     const rule1 = group.addRule()!;
-    expect(group.editingRuleId.value).toBe(rule1.id);
+    expect(group.coordination.editingRuleId.value).toBe(rule1.id);
     // Lock rule1 via transitionState first to allow second addRule
     group.transitionState(rule1.id, SchedulerState.LOCKED);
     const rule2 = group.addRule()!;
-    expect(group.editingRuleId.value).toBe(rule2.id);
+    expect(group.coordination.editingRuleId.value).toBe(rule2.id);
     expect(rule1.state.value).toBe(SchedulerState.LOCKED);
   });
 });
@@ -127,7 +126,7 @@ describe('AtomicRuleGroupScheduler - transitionState', () => {
     const rule = group.addRule()!;
     group.transitionState(rule.id, SchedulerState.LOCKED);
     group.transitionState(rule.id, SchedulerState.EDITING);
-    expect(group.editingRuleId.value).toBe(rule.id);
+    expect(group.coordination.editingRuleId.value).toBe(rule.id);
     expect(rule.state.value).toBe(SchedulerState.EDITING);
   });
 
@@ -135,7 +134,7 @@ describe('AtomicRuleGroupScheduler - transitionState', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
     group.transitionState(rule.id, SchedulerState.LOCKED);
-    expect(group.editingRuleId.value).toBeNull();
+    expect(group.coordination.editingRuleId.value).toBeNull();
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 
@@ -159,6 +158,10 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
   it('Rule onOk locks the editing rule', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
+    // Must create fields to activate reactions
+    rule.form.createField({ name: 'name' });
+    rule.form.createField({ name: 'operator' });
+    rule.form.createField({ name: 'threshold' });
     // Set up valid rule data
     rule.form.setValues({ name: 'is_active' });
     rule.form.setFieldState('operator', (s) => {
@@ -168,7 +171,7 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
       s.value = true;
     });
     rule.onOk();
-    expect(group.editingRuleId.value).toBeNull();
+    expect(group.coordination.editingRuleId.value).toBeNull();
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 
@@ -176,15 +179,21 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
     rule.onCancel();
-    expect(group.editingRuleId.value).toBeNull();
+    expect(group.coordination.editingRuleId.value).toBeNull();
   });
 
-  it('Group onOk emits OK event to parent', () => {
-    const group = makeGroup('group-1');
+  it('Group onOk emits OK event to parent (workspace coordination bus)', () => {
+    const workspaceCoordination = createWorkspaceCoordination(ALL_FACTORS);
+    workspaceCoordination.editingGroupId.value = 'group-1';
+    const group = makeGroupWithCoordination(workspaceCoordination);
     const handler = vi.fn();
-    group.transitionEvents.on(TransitionEventType.OK, handler);
+    workspaceCoordination.bus.on(TransitionEventType.OK, handler);
     // Add and confirm a rule
     const rule = group.addRule()!;
+    // Must create fields to activate reactions
+    rule.form.createField({ name: 'name' });
+    rule.form.createField({ name: 'operator' });
+    rule.form.createField({ name: 'threshold' });
     rule.form.setValues({ name: 'is_active' });
     rule.form.setFieldState('operator', (s) => {
       s.value = 'is';
@@ -212,9 +221,9 @@ describe('AtomicRuleGroupScheduler - removeRule', () => {
   it('removeRule clears editingRuleId if removed rule was editing', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
-    expect(group.editingRuleId.value).toBe(rule.id);
+    expect(group.coordination.editingRuleId.value).toBe(rule.id);
     group.removeRule(rule.id);
-    expect(group.editingRuleId.value).toBeNull();
+    expect(group.coordination.editingRuleId.value).toBeNull();
   });
 });
 
