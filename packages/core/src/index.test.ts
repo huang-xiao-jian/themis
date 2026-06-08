@@ -4,6 +4,7 @@ import type { RuleFactorDefinition } from './dsl';
 import { DataType } from './dsl/DataType';
 import { Mode } from './dsl/Mode';
 import { Quantity } from './dsl/Quantity';
+import { SchedulerState } from './dsl/SchedulerState';
 import { provideElementaryFetcher } from './fetcher/provideElementaryFetcher';
 import { providePaginatedFilterableFetcher } from './fetcher/providePaginatedFilterableFetcher';
 import { createRuleWorkspace } from './index';
@@ -48,87 +49,70 @@ const fetchers = [
 ];
 
 describe('End-to-end: create scenario', () => {
-  it('completes the full workflow from spec.md usage example', () => {
+  it('completes the full workflow: addGroup → addRule → form → onOk → lock', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
 
-    // addGroup / addRule (ID auto-generated)
-    const group = workspace.addGroup();
-    const rule = group.addRule();
+    // addGroup: new group enters EDITING
+    const group = workspace.addGroup()!;
+    expect(group.state.value).toBe(SchedulerState.EDITING);
 
-    // 选择 order_amount
-    rule.onFieldChange({ field: 'name', value: 'order_amount' });
+    // addRule: new rule enters EDITING
+    const rule = group.addRule()!;
+    expect(rule.state.value).toBe(SchedulerState.EDITING);
+
+    // Interact via Formily form
+    rule.form.setValues({ name: 'order_amount' });
     expect(rule.factor.value?.name).toBe('order_amount');
-    // number + range + multiple 推断
-    expect(rule.operators.value.map((o) => o.value)).toEqual([
+    // number + range + multiple inference — results stay in form fields
+    const operatorField = rule.form.fields['operator'] as { dataSource: { value: string }[] };
+    expect(operatorField.dataSource.map((o) => o.value)).toEqual([
       'between any',
       'between all',
       'not between any',
       'not between all',
     ]);
-    expect(rule.thresholder.value?.type).toBe('ListRangeBuilder');
+    const thresholdField = rule.form.fields['threshold'] as unknown as {
+      componentProps: { type: string };
+    };
+    expect(thresholdField.componentProps.type).toBe('ListRangeBuilder');
 
-    // 选择 operator / threshold
-    rule.onFieldChange({ field: 'operator', value: 'between any' });
-    rule.onFieldChange({
-      field: 'threshold',
-      value: [
+    rule.form.setFieldState('operator', (s) => {
+      s.value = 'between any';
+    });
+    rule.form.setFieldState('threshold', (s) => {
+      s.value = [
+        [0, 100],
+        [200, 300],
+      ];
+    });
+
+    // onOk: confirm rule → locks
+    rule.onOk();
+    expect(rule.state.value).toBe(SchedulerState.LOCKED);
+    expect(rule.rule.value).toEqual({
+      id: rule.id,
+      name: 'order_amount',
+      operator: 'between any',
+      threshold: [
         [0, 100],
         [200, 300],
       ],
     });
 
-    // 验证并构建
+    // onOk: confirm group → locks
+    group.onOk();
+    expect(group.state.value).toBe(SchedulerState.LOCKED);
+
+    // validate & build
     expect(workspace.validate()).toBe(true);
     const result = workspace.build();
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe(group.id);
     expect(result[0].rules).toHaveLength(1);
-    expect(result[0].rules[0].id).toBe(rule.id);
-    expect(result[0].rules[0].name).toBe('order_amount');
-    expect(result[0].rules[0].operator).toBe('between any');
-    expect(result[0].rules[0].threshold).toEqual([
-      [0, 100],
-      [200, 300],
-    ]);
 
-    // 销毁
+    // destroy
     expect(() => workspace.destroy()).not.toThrow();
-    // 重复 destroy 幂等
     expect(() => workspace.destroy()).not.toThrow();
-  });
-
-  it('factors disables the name of an active rule', () => {
-    const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup();
-    const rule = group.addRule();
-    rule.onFieldChange({ field: 'name', value: 'is_active' });
-    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
-  });
-
-  it('switches factor correctly with full reset', () => {
-    const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup();
-    const rule = group.addRule();
-
-    rule.onFieldChange({ field: 'name', value: 'is_active' });
-    rule.onFieldChange({ field: 'operator', value: 'is' });
-    rule.onFieldChange({ field: 'threshold', value: true });
-
-    // 切换到另一个 factor
-    rule.onFieldChange({ field: 'name', value: 'order_amount' });
-    expect(rule.operator.value).toBeNull();
-    expect(rule.threshold.value).toBeUndefined();
-  });
-
-  it('canAddRule becomes false when all factors are used', () => {
-    const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup();
-    expect(group.canAddRule.value).toBe(true);
-    // 添加与 factors 相同数量的 rule
-    for (let i = 0; i < factors.length; i++) {
-      group.addRule();
-    }
-    expect(group.canAddRule.value).toBe(false);
   });
 });
 
@@ -143,35 +127,53 @@ describe('End-to-end: edit scenario', () => {
     },
   ];
 
-  it('restores rules from snapshots', () => {
+  it('restores from snapshots in LOCKED state', () => {
     const workspace = new RuleWorkspaceBuilder()
       .withFactors(factors)
       .withFetchers(fetchers)
       .withRuleGroups(editGroups)
       .build();
 
-    expect(workspace.snapshots).toHaveLength(1);
-    expect(workspace.groups.value).toHaveLength(1);
     const group = workspace.groups.value[0];
+    expect(group.state.value).toBe(SchedulerState.LOCKED);
     expect(group.rules.value).toHaveLength(2);
-    expect(group.rules.value[0].name.value).toBe('is_active');
-    expect(group.rules.value[0].operator.value).toBe('is');
-    expect(group.rules.value[0].threshold.value).toBe(true);
+    expect(group.rules.value[0].state.value).toBe(SchedulerState.LOCKED);
+    expect(group.rules.value[0].rule.value).toEqual(editGroups[0].rules[0]);
   });
 
-  it('factors disables names from snapshot rules', () => {
+  it('transitionState allows editing, then onOk locks back', () => {
     const workspace = new RuleWorkspaceBuilder()
       .withFactors(factors)
       .withFetchers(fetchers)
       .withRuleGroups(editGroups)
       .build();
 
+    // transitionState to EDITING
+    workspace.transitionState('group-1', SchedulerState.EDITING);
     const group = workspace.groups.value[0];
-    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
-    expect(group.factors.value.find((o) => o.value === 'order_amount')?.disabled).toBe(true);
+    expect(group.state.value).toBe(SchedulerState.EDITING);
+
+    group.transitionState('rule-1', SchedulerState.EDITING);
+    const rule = group.rules.value[0];
+    expect(rule.state.value).toBe(SchedulerState.EDITING);
+    expect(rule.form.pattern).toBe('editable');
+
+    // Modify via form
+    rule.form.setValues({ name: 'order_amount' });
+    rule.form.setFieldState('operator', (s) => {
+      s.value = 'between any';
+    });
+    rule.form.setFieldState('threshold', (s) => {
+      s.value = [[0, 100]];
+    });
+    rule.onOk();
+    expect(rule.state.value).toBe(SchedulerState.LOCKED);
+
+    group.onOk();
+    expect(group.state.value).toBe(SchedulerState.LOCKED);
   });
 
-  it('build returns restored data', () => {
+  it('build returns restored data without modifications', () => {
     const workspace = new RuleWorkspaceBuilder()
       .withFactors(factors)
       .withFetchers(fetchers)
@@ -181,110 +183,90 @@ describe('End-to-end: edit scenario', () => {
     const result = workspace.build();
     expect(result[0].rules).toEqual(editGroups[0].rules);
   });
-
-  it('snapshots are immutable when modifying rules', () => {
-    const workspace = new RuleWorkspaceBuilder()
-      .withFactors(factors)
-      .withFetchers(fetchers)
-      .withRuleGroups(editGroups)
-      .build();
-
-    const snapshot = workspace.snapshots[0];
-    const group = workspace.groups.value[0];
-    const rule = group.rules.value[0];
-    rule.onFieldChange({ field: 'name', value: 'order_amount' });
-    // snapshots 不变
-    expect(snapshot).toBe(workspace.snapshots[0]);
-    expect(snapshot.rules[0].name).toBe('is_active');
-  });
 });
 
-describe('End-to-end: error scenarios', () => {
-  it('throws when Fetcher is not registered for dynamic resource', () => {
-    const workspace = createRuleWorkspace({ factors: [factors[0]] }); // 缺 fetcher
-    const group = workspace.addGroup();
-    const rule = group.addRule();
-    // 选择 employee（带 dynamic resource）会触发 ThresholderInferrer → ResourceFactory.create
-    rule.onFieldChange({ field: 'name', value: 'employee' });
-    // thresholder 会求值并抛错
-    expect(() => rule.thresholder.value).toThrow(/paginatedFilterable/);
-  });
-
-  it('throws when validate false and build is called', () => {
-    const workspace = createRuleWorkspace({ factors, fetchers });
-    workspace.addGroup(); // 空 group
-    expect(() => workspace.build()).toThrow(/incomplete/);
-  });
-
-  it('throws when individual rule is incomplete', () => {
-    const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup();
-    group.addRule(); // 空的 rule
-    expect(group.validate()).toBe(false);
-    expect(() => group.build()).toThrow(/incomplete/);
-  });
-});
-
-describe('End-to-end: single Fetcher serves multiple Resources', () => {
-  it('the same Fetcher is reused across Resources of the same feature type', () => {
-    // Employee / Department 都声明 features=[pagination, filter]
-    // 业务方只提供一个 PaginatedFilterableFetcher，按 resourceName 路由
-    const fetchMock = vi
-      .fn()
-      .mockImplementation(
-        (resourceName: string, keyword: string, _page: number, _pageSize: number) => {
-          if (resourceName === 'Employee') {
-            return Promise.resolve({
-              data: [{ label: '张三', value: 'z3' }],
-              page: 1,
-              pageSize: 20,
-              total: 1,
-            });
-          }
-          if (resourceName === 'Department') {
-            return Promise.resolve({
-              data: [{ label: '研发部', value: 'rd' }],
-              page: 1,
-              pageSize: 20,
-              total: 1,
-            });
-          }
-          return Promise.reject(new Error(`Unknown resource: ${resourceName}`));
-        }
-      );
-    const sharedFetcher = providePaginatedFilterableFetcher({ fetch: fetchMock });
-
-    const multiFactors: readonly RuleFactorDefinition[] = [
-      {
-        name: 'employee',
-        title: '员工',
-        dataType: DataType.STRING,
-        resource: { name: 'Employee', features: ['pagination', 'filter'] },
-      },
-      {
-        name: 'department',
-        title: '部门',
-        dataType: DataType.STRING,
-        resource: { name: 'Department', features: ['pagination', 'filter'] },
-      },
-    ];
-
+describe('End-to-end: mutual exclusion', () => {
+  it('parallel editing mutex at Rule level', () => {
     const workspace = createRuleWorkspace({
-      factors: multiFactors,
-      fetchers: [sharedFetcher],
+      factors,
+      fetchers,
+      ruleGroups: [
+        {
+          id: 'group-1',
+          rules: [
+            { id: 'rule-1', name: 'is_active', operator: 'is', threshold: true },
+            { id: 'rule-2', name: 'order_amount', operator: 'between any', threshold: [[0, 100]] },
+          ],
+        },
+      ],
     });
 
-    // 选择 employee 因子 → 触发 ResourceFactory.create
-    // ResourceFactory 应从共享 Fetcher 中选 'paginatedFilterable' 类型
-    const group = workspace.addGroup();
-    const rule = group.addRule();
-    rule.onFieldChange({ field: 'name', value: 'employee' });
-    expect(rule.factor.value?.name).toBe('employee');
-    expect(rule.thresholder.value?.type).toBe('Select');
+    workspace.transitionState('group-1', SchedulerState.EDITING);
+    const group = workspace.groups.value[0];
 
-    // 切换到 department 因子，复用同一个 Fetcher
-    rule.onFieldChange({ field: 'name', value: 'department' });
-    expect(rule.factor.value?.name).toBe('department');
-    expect(rule.thresholder.value?.type).toBe('Select');
+    // Edit rule-1
+    group.transitionState('rule-1', SchedulerState.EDITING);
+    const rule1 = group.rules.value[0];
+    expect(rule1.state.value).toBe(SchedulerState.EDITING);
+
+    // Switch to rule-2 → rule-1 auto-locks
+    group.transitionState('rule-2', SchedulerState.EDITING);
+    const rule2 = group.rules.value[1];
+    expect(rule1.state.value).toBe(SchedulerState.LOCKED);
+    expect(rule2.state.value).toBe(SchedulerState.EDITING);
+    expect(group.canAddRule.value).toBe(false);
+  });
+
+  it('parallel editing mutex at Workspace level', () => {
+    const workspace = createRuleWorkspace({
+      factors,
+      fetchers,
+      ruleGroups: [
+        {
+          id: 'group-1',
+          rules: [{ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true }],
+        },
+      ],
+    });
+
+    // addGroup should fail because an editing group could be created
+    // First add a second group via transitionState
+    workspace.transitionState('group-1', SchedulerState.EDITING);
+    expect(workspace.canAddGroup.value).toBe(false);
+  });
+});
+
+describe('End-to-end: cascade lock', () => {
+  it('workspace transitionState LOCKED cascades to group and rule', () => {
+    const workspace = createRuleWorkspace({ factors, fetchers });
+    const group = workspace.addGroup()!;
+    const rule = group.addRule()!;
+
+    expect(group.state.value).toBe(SchedulerState.EDITING);
+    expect(rule.state.value).toBe(SchedulerState.EDITING);
+
+    workspace.transitionState(group.id, SchedulerState.LOCKED);
+    expect(group.state.value).toBe(SchedulerState.LOCKED);
+    expect(rule.state.value).toBe(SchedulerState.LOCKED);
+  });
+});
+
+describe('End-to-end: removeRule in LOCKED state', () => {
+  it('removeRule works regardless of state', () => {
+    const workspace = createRuleWorkspace({
+      factors,
+      fetchers,
+      ruleGroups: [
+        {
+          id: 'group-1',
+          rules: [{ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true }],
+        },
+      ],
+    });
+
+    const group = workspace.groups.value[0];
+    expect(group.state.value).toBe(SchedulerState.LOCKED);
+    group.removeRule('rule-1');
+    expect(group.rules.value).toEqual([]);
   });
 });

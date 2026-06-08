@@ -5,6 +5,7 @@ import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
 import { DefaultStaticResourceFactory } from '../factory/StaticResourceFactory';
 import type { FetcherProvider } from '../fetcher/FetcherProvider';
+import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { RuleWorkspaceScheduler } from '../scheduler/RuleWorkspaceScheduler';
 
@@ -43,6 +44,11 @@ export class RuleWorkspaceBuilder {
       new DefaultDynamicResourceFactory(registry)
     );
     const thresholderInferrer = new ThresholderInferrer(resourceFactory);
-    return new RuleWorkspaceScheduler(this.factors, thresholderInferrer, this.ruleGroups);
+    const operatorInferrer = new OperatorInferrer();
+    return new RuleWorkspaceScheduler(
+      this.factors,
+      { operatorInferrer, thresholderInferrer },
+      this.ruleGroups
+    );
   }
 }

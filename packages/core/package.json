@@ -18,7 +18,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@formily/core": "^2.3.3",
     "@preact/signals-core": "^1.14.2",
+    "nanoevents": "^9.1.0",
     "nanoid": "^5.1.11"
   },
   "devDependencies": {

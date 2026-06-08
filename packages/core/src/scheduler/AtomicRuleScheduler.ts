@@ -1,151 +1,146 @@
-import { batch, computed, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
-import type { ThresholdComponentProperties } from '../component/ThresholdComponentProperties';
+import { computed, effect, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
 import type { AtomicRule } from '../dsl/AtomicRule';
-import type { FieldDataSource } from '../dsl/FieldDataSource';
 import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
-import { OperatorInferrer } from '../inferrer/OperatorInferrer';
-import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
+import { SchedulerState } from '../dsl/SchedulerState';
+import { TransitionEventType } from '../dsl/TransitionEventType';
+import { createAtomicRuleForm, type AtomicRuleForm, type Inferrers } from './AtomicRuleForm';
+import {
+  createTransitionEventEmitter,
+  type TransitionEventEmitter,
+} from './TransitionEventEmitter';
 
 /**
- * 表单字段标识
- */
-export type FieldName = 'name' | 'operator' | 'threshold';
-
-/**
- * 表单字段变更 Action
- */
-export interface FieldChangeAction {
-  readonly field: FieldName;
-  readonly value: unknown;
-}
-
-/**
- * 原子规则设置器
+ * 原子规则调度器
  *
- * 负责单个原子规则的状态管理、推断联动、生命周期管理
+ * 自身状态通过 computed 从所属 AtomicRuleGroupScheduler 的共享 Signal 派生，
+ * 暴露只读状态信号、Formily 表单委托，以及用户行为接收入口。
+ * 内部将调度器状态同步到 Formily Form 的 pattern 属性。
  */
 export class AtomicRuleScheduler {
   readonly id: string;
-  readonly factor: ReadonlySignal<RuleFactorDefinition | null>;
-  readonly operators: ReadonlySignal<readonly FieldDataSource[]>;
-  readonly thresholder: ReadonlySignal<ThresholdComponentProperties | null>;
-  readonly name: Signal<string | null>;
-  readonly operator: Signal<string | null>;
-  readonly threshold: Signal<unknown>;
+  readonly form: AtomicRuleForm;
 
+  /** 当前状态（编辑态 / 锁定态），通过 computed 从 Group 的 editingRuleId 派生 */
+  readonly state: ReadonlySignal<SchedulerState>;
+  /** 是否处于编辑态（派生信号，便于视图层绑定） */
+  readonly editable: ReadonlySignal<boolean>;
+  /** 上次用户确认且数据无误时更新的原子规则配置 */
+  readonly rule: Signal<AtomicRule | null>;
+
+  /** 已激活的规则因子定义 */
+  readonly factor: ReadonlySignal<RuleFactorDefinition | null>;
+
+  private readonly emitter: TransitionEventEmitter<string>;
   private readonly factors: ReadonlySignal<readonly RuleFactorDefinition[]>;
-  private readonly operatorInferrer = new OperatorInferrer();
-  private readonly thresholderInferrer: ThresholderInferrer;
   private readonly unsubscribers: (() => void)[] = [];
   private destroyed = false;
 
   constructor(
     id: string,
+    editingRuleId: Signal<string | null>,
     factors: ReadonlySignal<readonly RuleFactorDefinition[]>,
-    thresholderInferrer: ThresholderInferrer,
+    inferrers: Inferrers,
     snapshot?: AtomicRule
   ) {
     this.id = id;
     this.factors = factors;
-    this.thresholderInferrer = thresholderInferrer;
-    this.name = signal<string | null>(snapshot?.name ?? null);
-    this.operator = signal<string | null>(snapshot?.operator ?? null);
-    this.threshold = signal<unknown>(snapshot?.threshold);
 
-    // factor 由 name + factors 派生
-    this.factor = computed(() => {
-      const n = this.name.value;
-      if (n == null) return null;
-      return this.factors.value.find((f) => f.name === n) ?? null;
+    // 创建 Formily 表单（effects 驱动推断联动，推断结果留在 form 内部）
+    this.form = createAtomicRuleForm({
+      factors: factors.value,
+      inferrers,
+      initialValues: snapshot
+        ? { name: snapshot.name, operator: snapshot.operator, threshold: snapshot.threshold }
+        : undefined,
     });
 
-    // operators 由 factor 派生
-    this.operators = computed<readonly FieldDataSource[]>(() => {
-      const f = this.factor.value;
-      if (!f) return [];
-      return this.operatorInferrer.infer(f);
+    // 状态：从 Group 的 editingRuleId computed 派生
+    this.state = computed<SchedulerState>(() =>
+      editingRuleId.value === this.id ? SchedulerState.EDITING : SchedulerState.LOCKED
+    );
+    this.editable = computed<boolean>(() => this.state.value === SchedulerState.EDITING);
+
+    // 已确认数据：与 build() 返回值一致
+    this.rule = signal<AtomicRule | null>(snapshot ?? null);
+
+    // factor 从 form name 字段值 + factors 派生
+    this.factor = computed<RuleFactorDefinition | null>(() => {
+      const nameValue = this.form.values.name as string | null;
+      if (!nameValue) return null;
+      return this.factors.value.find((f) => f.name === nameValue) ?? null;
     });
 
-    // thresholder 由 factor 派生
-    this.thresholder = computed<ThresholdComponentProperties | null>(() => {
-      const f = this.factor.value;
-      if (!f) return null;
-      return this.thresholderInferrer.infer(f);
-    });
+    // 事件发射器
+    this.emitter = createTransitionEventEmitter<string>();
 
-    // 用户决策：用 subscribe 而非 effect，避免初始化时立即重置
-    // signals-core 的 subscribe 内部用 effect 实现，effect 第一次会立即执行回调
-    // 因此用 firstRun 标志位跳过首次执行，保证编辑场景下 snapshot 还原不被误清空
-    let firstRun = true;
-    const unsubscribe = this.name.subscribe(() => {
-      if (this.destroyed) return;
-      if (firstRun) {
-        firstRun = false;
-        return;
-      }
-      // name 变化 → 重置 operator / threshold
-      batch(() => {
-        this.operator.value = null;
-        this.threshold.value = undefined;
-      });
+    // pattern 同步：state → form.pattern
+    const unsubEffect = effect(() => {
+      this.form.pattern = this.state.value === SchedulerState.EDITING ? 'editable' : 'disabled';
     });
-    this.unsubscribers.push(unsubscribe);
+    this.unsubscribers.push(unsubEffect);
+  }
+
+  /** 事件发射器（供父级 Group 订阅） */
+  get transitionEvents(): TransitionEventEmitter<string> {
+    return this.emitter;
+  }
+
+  /** 验证配置是否完整可用 */
+  validate(): boolean {
+    const name = this.form.values.name;
+    const operator = this.form.values.operator;
+    const threshold = this.form.values.threshold;
+    return name != null && operator != null && threshold != null && threshold !== undefined;
+  }
+
+  /** 构建原子规则（返回值与 rule.value 始终一致） */
+  build(): AtomicRule {
+    if (this.rule.value === null) {
+      throw new Error(
+        `[sisyphus] AtomicRuleScheduler "${this.id}" has no confirmed data. Call onOk() first.`
+      );
+    }
+    return this.rule.value;
   }
 
   /**
-   * 表单字段变更回调
+   * 确认规则配置（用户行为驱动）
+   *
+   * 内部判断表单配置是否满足规则约束，更新内部数据，然后发射 OK 事件
    */
-  onFieldChange = (action: FieldChangeAction): void => {
+  onOk = (): void => {
     if (this.destroyed) return;
-    switch (action.field) {
-      case 'name':
-        // 只有在 name 真正变化时才赋值（subscribe 才会触发重置）
-        if (this.name.value !== (action.value as string | null)) {
-          this.name.value = action.value as string | null;
-        }
-        return;
-      case 'operator':
-        this.operator.value = action.value as string | null;
-        return;
-      case 'threshold':
-        this.threshold.value = action.value;
-        return;
-    }
+    if (!this.validate()) return;
+    this.rule.value = {
+      id: this.id,
+      name: this.form.values.name as string,
+      operator: this.form.values.operator as string,
+      threshold: this.form.values.threshold,
+    };
+    this.emitter.emit(TransitionEventType.OK, this.id);
   };
 
   /**
-   * 验证配置是否完整
+   * 激活规则配置编辑（用户行为驱动）
+   *
+   * 发射 EDIT 事件，父级通过 editingRuleId 控制状态
    */
-  validate(): boolean {
-    return (
-      this.factor.value !== null &&
-      this.operator.value !== null &&
-      this.threshold.value !== null &&
-      this.threshold.value !== undefined
-    );
-  }
+  onEdit = (): void => {
+    if (this.destroyed) return;
+    this.emitter.emit(TransitionEventType.EDIT, this.id);
+  };
 
   /**
-   * 构建原子规则
+   * 取消规则配置（用户行为驱动）
+   *
+   * 无内部逻辑，直接发射 CANCEL 事件
    */
-  build(): AtomicRule {
-    if (!this.validate()) {
-      throw new Error(
-        `[sisyphus] AtomicRuleScheduler "${this.id}" is not complete. ` +
-          `Ensure factor/operator/threshold are all set.`
-      );
-    }
-    return {
-      id: this.id,
-      name: this.name.value as string,
-      operator: this.operator.value as string,
-      threshold: this.threshold.value,
-    };
-  }
+  onCancel = (): void => {
+    if (this.destroyed) return;
+    this.emitter.emit(TransitionEventType.CANCEL, this.id);
+  };
 
-  /**
-   * 销毁并释放订阅
-   */
+  /** 销毁并释放订阅 */
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;

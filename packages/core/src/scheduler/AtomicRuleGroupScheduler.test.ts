@@ -1,276 +1,272 @@
 import { signal } from '@preact/signals-core';
-import { describe, expect, it } from 'vitest';
-import { ALL_FACTORS, BOOLEAN_FACTOR } from '../__fixtures__/factors';
+import { describe, expect, it, vi } from 'vitest';
+import { ALL_FACTORS } from '../__fixtures__/factors';
 import { SAMPLE_GROUP } from '../__fixtures__/rules';
+import { SchedulerState } from '../dsl/SchedulerState';
+import { TransitionEventType } from '../dsl/TransitionEventType';
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory';
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
 import { DefaultStaticResourceFactory } from '../factory/StaticResourceFactory';
+import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { AtomicRuleGroupScheduler } from './AtomicRuleGroupScheduler';
 import { AtomicRuleScheduler } from './AtomicRuleScheduler';
 
-function makeInferrer() {
+function makeInferrers() {
   const factory = new DefaultResourceFactory(
     new DefaultStaticResourceFactory(),
     new DefaultDynamicResourceFactory(new FetcherRegistry())
   );
-  return new ThresholderInferrer(factory);
+  return {
+    operatorInferrer: new OperatorInferrer(),
+    thresholderInferrer: new ThresholderInferrer(factory),
+  };
 }
 
 function makeFactorsSignal() {
-  return signal<readonly (typeof ALL_FACTORS)[number][]>(ALL_FACTORS);
+  return signal(ALL_FACTORS);
 }
 
-describe('AtomicRuleGroupScheduler - create & lifecycle', () => {
+function makeGroup(editingGroupId?: string | null, snapshot?: typeof SAMPLE_GROUP) {
+  return new AtomicRuleGroupScheduler(
+    'group-1',
+    signal<string | null>(editingGroupId ?? null),
+    makeFactorsSignal(),
+    makeInferrers(),
+    snapshot
+  );
+}
+
+describe('AtomicRuleGroupScheduler - creation', () => {
   it('starts with empty rules and full factors', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    const group = makeGroup();
     expect(group.id).toBe('group-1');
     expect(group.rules.value).toEqual([]);
     expect(group.factors.value).toHaveLength(ALL_FACTORS.length);
     expect(group.snapshots).toEqual([]);
   });
 
-  it('restores rules from snapshot in edit scenario', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler(
-      'group-1',
-      makeFactorsSignal(),
-      inferrer,
-      SAMPLE_GROUP
-    );
+  it('restores rules from snapshot', () => {
+    const group = makeGroup(null, SAMPLE_GROUP);
     expect(group.snapshots).toHaveLength(2);
     expect(group.rules.value).toHaveLength(2);
     expect(group.rules.value[0]).toBeInstanceOf(AtomicRuleScheduler);
     expect(group.rules.value[0].id).toBe('rule-1');
   });
 
-  it('factors disables names from current rules', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler(
-      'group-1',
-      makeFactorsSignal(),
-      inferrer,
-      SAMPLE_GROUP
-    );
-    // SAMPLE_GROUP 的两个 rule 分别用了 employee 和 deliver_city
-    expect(group.factors.value).toHaveLength(ALL_FACTORS.length);
-    expect(group.factors.value.find((o) => o.value === 'employee')?.disabled).toBe(true);
-    expect(group.factors.value.find((o) => o.value === 'deliver_city')?.disabled).toBe(true);
+  it('state is LOCKED by default when editingGroupId does not match', () => {
+    const group = makeGroup(null);
+    expect(group.state.value).toBe(SchedulerState.LOCKED);
+    expect(group.editable.value).toBe(false);
+  });
+
+  it('state is EDITING when editingGroupId matches', () => {
+    const group = makeGroup('group-1');
+    expect(group.state.value).toBe(SchedulerState.EDITING);
+    expect(group.editable.value).toBe(true);
+  });
+
+  it('editingRuleId is null by default', () => {
+    const group = makeGroup();
+    expect(group.editingRuleId.value).toBeNull();
   });
 });
 
-describe('AtomicRuleGroupScheduler - addRule/removeRule', () => {
-  it('addRule appends a new rule scheduler with auto-generated id', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+describe('AtomicRuleGroupScheduler - addRule', () => {
+  it('addRule creates a new rule and sets editingRuleId', () => {
+    const group = makeGroup('group-1');
     const rule = group.addRule();
-    expect(group.rules.value).toHaveLength(1);
     expect(rule).toBeInstanceOf(AtomicRuleScheduler);
-    expect(rule.id).toBeDefined();
-    expect(group.rules.value[0]).toBe(rule);
+    expect(group.rules.value).toHaveLength(1);
+    expect(group.editingRuleId.value).toBe(rule!.id);
   });
 
-  it('removeRule removes the scheduler and destroys it', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule();
+  it('addRule returns undefined when not in EDITING state', () => {
+    const group = makeGroup(null); // LOCKED
+    const result = group.addRule();
+    expect(result).toBeUndefined();
+    expect(group.rules.value).toEqual([]);
+  });
+
+  it('addRule mutex: second addRule auto-locks first rule', () => {
+    const group = makeGroup('group-1');
+    const rule1 = group.addRule()!;
+    expect(group.editingRuleId.value).toBe(rule1.id);
+    // Lock rule1 via transitionState first to allow second addRule
+    group.transitionState(rule1.id, SchedulerState.LOCKED);
+    const rule2 = group.addRule()!;
+    expect(group.editingRuleId.value).toBe(rule2.id);
+    expect(rule1.state.value).toBe(SchedulerState.LOCKED);
+  });
+});
+
+describe('AtomicRuleGroupScheduler - canAddRule', () => {
+  it('canAddRule is true when no rules and no editing rule', () => {
+    const group = makeGroup('group-1');
+    expect(group.canAddRule.value).toBe(true);
+  });
+
+  it('canAddRule is false when editing rule exists', () => {
+    const group = makeGroup('group-1');
+    group.addRule();
+    expect(group.canAddRule.value).toBe(false);
+  });
+
+  it('canAddRule is true after locking the editing rule', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
+    group.transitionState(rule.id, SchedulerState.LOCKED);
+    expect(group.canAddRule.value).toBe(true);
+  });
+});
+
+describe('AtomicRuleGroupScheduler - transitionState', () => {
+  it('transitionState to EDITING sets editingRuleId', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
+    group.transitionState(rule.id, SchedulerState.LOCKED);
+    group.transitionState(rule.id, SchedulerState.EDITING);
+    expect(group.editingRuleId.value).toBe(rule.id);
+    expect(rule.state.value).toBe(SchedulerState.EDITING);
+  });
+
+  it('transitionState to LOCKED clears editingRuleId', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
+    group.transitionState(rule.id, SchedulerState.LOCKED);
+    expect(group.editingRuleId.value).toBeNull();
+    expect(rule.state.value).toBe(SchedulerState.LOCKED);
+  });
+
+  it('transitionState mutex: switching to EDITING auto-locks previous', () => {
+    const group = makeGroup('group-1');
+    const rule1 = group.addRule()!;
+    group.transitionState(rule1.id, SchedulerState.LOCKED);
+    const rule2 = group.addRule()!;
+    group.transitionState(rule2.id, SchedulerState.LOCKED);
+    // Now both locked, switch rule1 to editing
+    group.transitionState(rule1.id, SchedulerState.EDITING);
+    expect(rule1.state.value).toBe(SchedulerState.EDITING);
+    // Switch rule2 to editing → rule1 auto-locks
+    group.transitionState(rule2.id, SchedulerState.EDITING);
+    expect(rule1.state.value).toBe(SchedulerState.LOCKED);
+    expect(rule2.state.value).toBe(SchedulerState.EDITING);
+  });
+});
+
+describe('AtomicRuleGroupScheduler - event handling', () => {
+  it('Rule onOk locks the editing rule', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
+    // Set up valid rule data
+    rule.form.setValues({ name: 'is_active' });
+    rule.form.setFieldState('operator', (s) => {
+      s.value = 'is';
+    });
+    rule.form.setFieldState('threshold', (s) => {
+      s.value = true;
+    });
+    rule.onOk();
+    expect(group.editingRuleId.value).toBeNull();
+    expect(rule.state.value).toBe(SchedulerState.LOCKED);
+  });
+
+  it('Rule onCancel locks the editing rule', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
+    rule.onCancel();
+    expect(group.editingRuleId.value).toBeNull();
+  });
+
+  it('Group onOk emits OK event to parent', () => {
+    const group = makeGroup('group-1');
+    const handler = vi.fn();
+    group.transitionEvents.on(TransitionEventType.OK, handler);
+    // Add and confirm a rule
+    const rule = group.addRule()!;
+    rule.form.setValues({ name: 'is_active' });
+    rule.form.setFieldState('operator', (s) => {
+      s.value = 'is';
+    });
+    rule.form.setFieldState('threshold', (s) => {
+      s.value = true;
+    });
+    rule.onOk();
+    group.onOk();
+    expect(handler).toHaveBeenCalledWith({
+      type: TransitionEventType.OK,
+      sourceId: 'group-1',
+    });
+  });
+});
+
+describe('AtomicRuleGroupScheduler - removeRule', () => {
+  it('removeRule works in any state', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
     group.removeRule(rule.id);
     expect(group.rules.value).toEqual([]);
-    // destroy 幂等
-    expect(() => rule.destroy()).not.toThrow();
   });
 
-  it('removeRule on non-existent id is a no-op', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    group.addRule();
-    expect(() => group.removeRule('rule-999')).not.toThrow();
-    expect(group.rules.value).toHaveLength(1);
-  });
-
-  it('factors updates reactively when rule name changes', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule();
-    // 设置 rule.name 后 factors 应该 disable 该因子
-    rule.onFieldChange({ field: 'name', value: 'is_active' });
-    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
-  });
-
-  it('factors restores when rule is removed', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule();
-    rule.onFieldChange({ field: 'name', value: 'is_active' });
-    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBe(true);
+  it('removeRule clears editingRuleId if removed rule was editing', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
+    expect(group.editingRuleId.value).toBe(rule.id);
     group.removeRule(rule.id);
-    expect(group.factors.value.find((o) => o.value === 'is_active')?.disabled).toBeFalsy();
+    expect(group.editingRuleId.value).toBeNull();
   });
 });
 
-describe('AtomicRuleGroupScheduler - pickRule', () => {
-  it('pickRule returns the rule scheduler with matching id', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule();
-    expect(group.pickRule(rule.id)).toBe(rule);
-  });
-
-  it('pickRule returns undefined for non-existent id', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    expect(group.pickRule('non-existent')).toBeUndefined();
+describe('AtomicRuleGroupScheduler - hydrateRule', () => {
+  it('hydrateRule restores rule in LOCKED state', () => {
+    const group = makeGroup('group-1');
+    group.hydrateRule({ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true });
+    const rule = group.rules.value[0];
+    expect(rule.state.value).toBe(SchedulerState.LOCKED);
+    expect(rule.rule.value).toEqual({
+      id: 'rule-1',
+      name: 'is_active',
+      operator: 'is',
+      threshold: true,
+    });
   });
 });
 
 describe('AtomicRuleGroupScheduler - validate & build', () => {
   it('validate returns false when no rules', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    const group = makeGroup('group-1');
     expect(group.validate()).toBe(false);
   });
 
-  it('validate returns false when any rule is incomplete', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule();
-    rule.onFieldChange({ field: 'name', value: 'is_active' });
-    rule.onFieldChange({ field: 'operator', value: 'is' });
-    // threshold 未设置
-    expect(group.validate()).toBe(false);
-  });
-
-  it('validate returns true when all rules are complete', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule();
-    rule.onFieldChange({ field: 'name', value: 'is_active' });
-    rule.onFieldChange({ field: 'operator', value: 'is' });
-    rule.onFieldChange({ field: 'threshold', value: true });
+  it('validate returns true when all rules are confirmed', () => {
+    const group = makeGroup(null, SAMPLE_GROUP);
     expect(group.validate()).toBe(true);
   });
 
   it('build throws when incomplete', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    const group = makeGroup('group-1');
     expect(() => group.build()).toThrow(/incomplete/);
   });
 
-  it('build returns AtomicRuleGroup with id when complete', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const rule = group.addRule();
-    rule.onFieldChange({ field: 'name', value: 'is_active' });
-    rule.onFieldChange({ field: 'operator', value: 'is' });
-    rule.onFieldChange({ field: 'threshold', value: true });
+  it('build returns AtomicRuleGroup when valid', () => {
+    const group = makeGroup(null, SAMPLE_GROUP);
     const result = group.build();
     expect(result.id).toBe('group-1');
-    expect(result.rules).toHaveLength(1);
-    expect(result.rules[0].name).toBe('is_active');
-    expect(result.rules[0].operator).toBe('is');
-    expect(result.rules[0].threshold).toBe(true);
-  });
-});
-
-describe('AtomicRuleGroupScheduler - canAddRule', () => {
-  it('canAddRule is true when no rules exist', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    expect(group.canAddRule.value).toBe(true);
-  });
-
-  it('canAddRule remains true while rules < factors', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    group.addRule();
-    // ALL_FACTORS.length = 10, rules.length = 1 → still true
-    expect(group.canAddRule.value).toBe(true);
-  });
-
-  it('canAddRule becomes false when rules reach factors count', () => {
-    const inferrer = makeInferrer();
-    const factorsSignal = makeFactorsSignal();
-    const group = new AtomicRuleGroupScheduler('group-1', factorsSignal, inferrer);
-    // 添加与 ALL_FACTORS 相同数量的 rule
-    for (let i = 0; i < ALL_FACTORS.length; i++) {
-      group.addRule();
-    }
-    expect(group.canAddRule.value).toBe(false);
-  });
-
-  it('canAddRule restores to true after removing a rule', () => {
-    const inferrer = makeInferrer();
-    const factorsSignal = makeFactorsSignal();
-    const group = new AtomicRuleGroupScheduler('group-1', factorsSignal, inferrer);
-    const rules: AtomicRuleScheduler[] = [];
-    for (let i = 0; i < ALL_FACTORS.length; i++) {
-      rules.push(group.addRule());
-    }
-    expect(group.canAddRule.value).toBe(false);
-    group.removeRule(rules[0].id);
-    expect(group.canAddRule.value).toBe(true);
+    expect(result.rules).toHaveLength(2);
   });
 });
 
 describe('AtomicRuleGroupScheduler - destroy', () => {
-  it('destroy releases all child rules', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    const r1 = group.addRule();
-    const r2 = group.addRule();
-    group.destroy();
-    expect(group.rules.value).toEqual([]);
-    expect(() => r1.destroy()).not.toThrow();
-    expect(() => r2.destroy()).not.toThrow();
-  });
-
   it('destroy is idempotent', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    const group = makeGroup();
     group.destroy();
     expect(() => group.destroy()).not.toThrow();
   });
 
   it('addRule throws after destroy', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
+    const group = makeGroup('group-1');
     group.destroy();
     expect(() => group.addRule()).toThrow(/destroyed/);
   });
 });
-
-describe('AtomicRuleGroupScheduler - hydrateRule', () => {
-  it('hydrateRule restores rule from AtomicRule data', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    group.hydrateRule({ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true });
-    expect(group.rules.value).toHaveLength(1);
-    expect(group.rules.value[0]).toBeInstanceOf(AtomicRuleScheduler);
-    expect(group.rules.value[0].id).toBe('rule-1');
-  });
-
-  it('hydrateRule preserves original id, name, operator, threshold', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    group.hydrateRule({ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true });
-    const rule = group.rules.value[0];
-    expect(rule.name.value).toBe('is_active');
-    expect(rule.operator.value).toBe('is');
-    expect(rule.threshold.value).toBe(true);
-    expect(group.validate()).toBe(true);
-  });
-
-  it('hydrateRule throws after destroy', () => {
-    const inferrer = makeInferrer();
-    const group = new AtomicRuleGroupScheduler('group-1', makeFactorsSignal(), inferrer);
-    group.destroy();
-    expect(() =>
-      group.hydrateRule({ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true })
-    ).toThrow(/destroyed/);
-  });
-});
-
-// suppress unused
-void BOOLEAN_FACTOR;

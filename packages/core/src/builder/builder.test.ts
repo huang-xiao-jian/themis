@@ -27,9 +27,9 @@ describe('RuleWorkspaceBuilder', () => {
   it('withFactors is overridable', () => {
     const workspace = new RuleWorkspaceBuilder().withFactors([]).withFactors(ALL_FACTORS).build();
     // 通过 addGroup + addRule + 设置 name 验证 factors 已生效
-    const group = workspace.addGroup();
-    const rule = group.addRule();
-    rule.onFieldChange({ field: 'name', value: 'is_active' });
+    const group = workspace.addGroup()!;
+    const rule = group.addRule()!;
+    rule.form.setValues({ name: 'is_active' });
     expect(rule.factor.value?.name).toBe('is_active');
   });
 
@@ -51,11 +51,14 @@ describe('RuleWorkspaceBuilder', () => {
       .withFactors(factors)
       .withFetchers([fetcher])
       .build();
-    const group = workspace.addGroup();
-    const rule = group.addRule();
-    rule.onFieldChange({ field: 'name', value: 'employee_dyn' });
+    const group = workspace.addGroup()!;
+    const rule = group.addRule()!;
+    rule.form.setValues({ name: 'employee_dyn' });
     // 不抛错即表示 fetcher 已成功注册
-    expect(rule.thresholder.value?.type).toBe('Select');
+    const thresholdField = rule.form.fields['threshold'] as unknown as {
+      componentProps: { type: string };
+    };
+    expect(thresholdField.componentProps.type).toBe('Select');
   });
 
   it('build twice returns different instances', () => {
