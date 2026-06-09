@@ -68,9 +68,6 @@ classDiagram
 
   class WorkspaceCoordinationEventType {
     <<enum>>
-    OK
-    EDIT
-    CANCEL
     REMOVE
   }
 
@@ -86,7 +83,7 @@ classDiagram
     EDIT
     CANCEL
     REMOVE
-  }
+
 
   class GroupCoordinationEvent {
     <<interface>>
@@ -97,7 +94,6 @@ classDiagram
   class WorkspaceCoordination {
     <<interface>>
     +bus: EventBus
-    +editingGroupId: Signal
     +allFactors: Signal
   }
 
@@ -106,7 +102,7 @@ classDiagram
     +bus: EventBus
     +editingRuleId: Signal
     +factors: Signal
-  }
+
 
   class AtomicRule {
     <<interface>>
@@ -114,12 +110,7 @@ classDiagram
 
   class AtomicRuleGroup {
     <<interface>>
-  }
-
-  class AtomicRuleGroupScheduler {
-    <<class>>
     +coordination: GroupCoordination
-    +state: computed
   }
 
   class AtomicRuleScheduler {
@@ -154,7 +145,6 @@ classDiagram
 
   %% State dependencies
   AtomicRuleScheduler ..> SchedulerState
-  AtomicRuleGroupScheduler ..> SchedulerState
 
   %% Composition (lifecycle-bound)
   AtomicRuleScheduler *-- AtomicRuleForm
@@ -164,23 +154,21 @@ classDiagram
 
   %% Protocol: parent realizes coordination, child depends on coordination
   RuleWorkspaceScheduler ..|> WorkspaceCoordination
-  AtomicRuleGroupScheduler ..> WorkspaceCoordination
-  AtomicRuleGroupScheduler ..|> GroupCoordination
+  AtomicRuleGroup ..|> GroupCoordination
   AtomicRuleScheduler ..> GroupCoordination
 
   %% Event (level-specific coordination events)
-  AtomicRuleGroupScheduler ..> WorkspaceCoordinationEvent
+  AtomicRuleGroup ..> WorkspaceCoordinationEvent
   AtomicRuleScheduler ..> GroupCoordinationEvent
 
   %% Signal channel (downstream dependency)
-  RuleWorkspaceScheduler ..> AtomicRuleGroupScheduler
-  AtomicRuleGroupScheduler ..> AtomicRuleScheduler
+  RuleWorkspaceScheduler ..> AtomicRuleGroup
+  AtomicRuleGroup ..> AtomicRuleScheduler
 
   %% Data dependencies
   AtomicRuleGroup o-- AtomicRule
   AtomicRuleScheduler ..> AtomicRule
-  AtomicRuleGroupScheduler ..> AtomicRuleGroup
-  AtomicRuleGroupScheduler ..> FactorOptionsInferrer
+  AtomicRuleGroup ..> FactorOptionsInferrer
 
   WorkspaceCoordinationEvent ..> WorkspaceCoordinationEventType
   GroupCoordinationEvent ..> GroupCoordinationEventType
