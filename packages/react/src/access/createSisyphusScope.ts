@@ -8,7 +8,7 @@ export function createSisyphusScope(options: SisyphusScopeOptions): SisyphusScop
   const renderer = new DefaultComponentRenderer(registry);
 
   for (const plugin of options.plugins) {
-    plugin.install({ registry });
+    plugin.onRegister({ registry });
   }
 
   return {

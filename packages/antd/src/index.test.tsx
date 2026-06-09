@@ -13,6 +13,6 @@ describe('@sisyphus/antd public API', () => {
   it('should create a plugin with correct name', () => {
     const plugin = createAntdPlugin();
     expect(plugin.name).toBe('antd');
-    expect(typeof plugin.install).toBe('function');
+    expect(typeof plugin.onRegister).toBe('function');
   });
 });

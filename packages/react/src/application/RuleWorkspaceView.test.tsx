@@ -18,7 +18,9 @@ describe('RuleWorkspaceView', () => {
 
     const mockScope = {
       renderer: () => ({
-        render: (props: RuleWorkspaceViewProperties) => <StubComponent {...props} />,
+        renderRuleWorkspaceView: (props: RuleWorkspaceViewProperties) => (
+          <StubComponent {...props} />
+        ),
       }),
     } as unknown as SisyphusScope;
 
@@ -27,10 +29,7 @@ describe('RuleWorkspaceView', () => {
     );
 
     // Act
-    const { getByTestId } = render(
-      <RuleWorkspaceView type="RuleWorkspaceView" scheduler={mockScheduler} />,
-      { wrapper }
-    );
+    const { getByTestId } = render(<RuleWorkspaceView scheduler={mockScheduler} />, { wrapper });
 
     // Assert
     expect(getByTestId('stub')).toBeDefined();
@@ -47,7 +46,9 @@ describe('RuleWorkspaceView', () => {
 
     const mockScope = {
       renderer: () => ({
-        render: (props: RuleWorkspaceViewProperties) => <StubComponent {...props} />,
+        renderRuleWorkspaceView: (props: RuleWorkspaceViewProperties) => (
+          <StubComponent {...props} />
+        ),
       }),
     } as unknown as SisyphusScope;
 
@@ -56,10 +57,9 @@ describe('RuleWorkspaceView', () => {
     );
 
     // Act
-    render(<RuleWorkspaceView type="RuleWorkspaceView" scheduler={mockScheduler} />, { wrapper });
+    render(<RuleWorkspaceView scheduler={mockScheduler} />, { wrapper });
 
     // Assert
-    expect(receivedProps[0].type).toBe('RuleWorkspaceView');
     expect(receivedProps[0].scheduler).toBe(mockScheduler);
   });
 });

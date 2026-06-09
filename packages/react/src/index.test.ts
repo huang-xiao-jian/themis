@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  AtomicRuleGroupView,
-  AtomicRuleView,
   createSisyphusScope,
   RuleWorkspaceView,
   SisyphusScopeProvider,
@@ -10,9 +8,7 @@ import {
 } from './index';
 
 describe('@sisyphus/react public API', () => {
-  it('should export application layer editor components', () => {
-    expect(AtomicRuleView).toBeDefined();
-    expect(AtomicRuleGroupView).toBeDefined();
+  it('should export the workspace view application component', () => {
     expect(RuleWorkspaceView).toBeDefined();
   });
 

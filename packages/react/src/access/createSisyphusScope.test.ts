@@ -13,20 +13,18 @@ describe('createSisyphusScope', () => {
     expect(scope.renderer()).toBeDefined();
   });
 
-  it('should call install on each plugin with SisyphusContext', () => {
+  it('should call onRegister on each plugin with SisyphusContext', () => {
     // Arrange
-    const installMock = vi.fn();
-    const plugin = { name: 'test-plugin', install: installMock };
+    const onRegisterMock = vi.fn();
+    const plugin = { name: 'test-plugin', onRegister: onRegisterMock };
 
     // Act
     createSisyphusScope({ plugins: [plugin] });
 
     // Assert
-    expect(installMock).toHaveBeenCalledTimes(1);
-    const context: SisyphusContext = installMock.mock.calls[0][0];
+    expect(onRegisterMock).toHaveBeenCalledTimes(1);
+    const context: SisyphusContext = onRegisterMock.mock.calls[0][0];
     expect(context.registry).toBeDefined();
-    expect(typeof context.registry.registerAtomicRuleView).toBe('function');
-    expect(typeof context.registry.registerAtomicRuleGroupView).toBe('function');
     expect(typeof context.registry.registerRuleWorkspaceView).toBe('function');
   });
 
@@ -35,13 +33,13 @@ describe('createSisyphusScope', () => {
     const callOrder: string[] = [];
     const pluginA = {
       name: 'plugin-a',
-      install: () => {
+      onRegister: () => {
         callOrder.push('a');
       },
     };
     const pluginB = {
       name: 'plugin-b',
-      install: () => {
+      onRegister: () => {
         callOrder.push('b');
       },
     };

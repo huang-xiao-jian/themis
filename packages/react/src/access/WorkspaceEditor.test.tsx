@@ -12,14 +12,14 @@ describe('WorkspaceEditor', () => {
   it('should render RuleWorkspaceView with the provided workspace scheduler', () => {
     // Arrange
     const StubWorkspaceView = (props: RuleWorkspaceViewProperties) => (
-      <div data-testid="workspace">{props.type}</div>
+      <div data-testid="workspace">{String(props.scheduler === mockWorkspace)}</div>
     );
 
     const scope = createSisyphusScope({
       plugins: [
         {
           name: 'test-plugin',
-          install: (context) => {
+          onRegister: (context) => {
             context.registry.registerRuleWorkspaceView(StubWorkspaceView);
           },
         },
@@ -35,7 +35,7 @@ describe('WorkspaceEditor', () => {
 
     // Assert
     expect(getByTestId('workspace')).toBeDefined();
-    expect(getByTestId('workspace').textContent).toBe('RuleWorkspaceView');
+    expect(getByTestId('workspace').textContent).toBe('true');
   });
 
   it('should throw when used outside of SisyphusScopeProvider', () => {

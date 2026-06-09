@@ -1,7 +1,7 @@
 import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useSignals } from '@preact/signals-react/runtime';
 import { Show } from '@preact/signals-react/utils';
-import type { AtomicRuleViewProperties } from '@sisyphus/react';
+import type { AtomicRuleScheduler } from '@sisyphus/core';
 import { Button, Col, Flex, Row } from 'antd';
 import type { ReactElement } from 'react';
 import { useSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
@@ -9,8 +9,12 @@ import { RuleNameSelect } from './formily/RuleNameSelect';
 import { RuleOperatorSelect } from './formily/RuleOperatorSelect';
 import { RuleThresholdRenderer } from './formily/RuleThreshold';
 
+interface AntdAtomicRuleViewProps {
+  readonly scheduler: AtomicRuleScheduler;
+}
+
 /** antd 原子规则编辑器视图，使用 Row/Col Grid 布局渲染完整行 */
-export function AntdAtomicRuleView({ scheduler }: AtomicRuleViewProperties): ReactElement {
+export function AntdAtomicRuleView({ scheduler }: AntdAtomicRuleViewProps): ReactElement {
   useSignals();
   const config = useSisyphusAntdConfig();
   const layout = config.atomicRuleLayout;

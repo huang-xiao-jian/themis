@@ -1,9 +1,16 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@sisyphus/antd": ["packages/antd/src/index.ts"],
+      "@sisyphus/core": ["packages/core/src/index.ts"],
+      "@sisyphus/react": ["packages/react/src/index.ts"]
+    },
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,

@@ -21,7 +21,7 @@ function AntdRuleGroupList({ scheduler }: { scheduler: RuleWorkspaceScheduler })
           title="规则组"
           extra={<Button type="text" danger icon={<DeleteOutlined />} onClick={group.onRemove} />}
         >
-          <AntdAtomicRuleGroupView type="AtomicRuleGroupView" scheduler={group} />
+          <AntdAtomicRuleGroupView scheduler={group} />
         </Card>
       ))}
     </Flex>

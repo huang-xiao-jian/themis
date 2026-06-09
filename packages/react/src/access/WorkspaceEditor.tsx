@@ -10,5 +10,5 @@ export interface WorkspaceEditorProps {
 
 /** 业务方入口组件 */
 export function WorkspaceEditor({ workspace }: WorkspaceEditorProps): ReactElement {
-  return <RuleWorkspaceView type="RuleWorkspaceView" scheduler={workspace} />;
+  return <RuleWorkspaceView scheduler={workspace} />;
 }

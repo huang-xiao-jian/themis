@@ -2,11 +2,14 @@ import { PlusOutlined } from '@ant-design/icons';
 import { FormProvider } from '@formily/react';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { AtomicRuleGroupScheduler } from '@sisyphus/core';
-import type { AtomicRuleGroupViewProperties } from '@sisyphus/react';
 import { Button, Flex } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 import { AntdAtomicRuleView } from './AntdAtomicRuleView';
+
+interface AntdAtomicRuleGroupViewProps {
+  readonly scheduler: AtomicRuleGroupScheduler;
+}
 
 /** 规则列表，独立追踪 rules 和 factors 信号变化 */
 function AntdAtomicRules({ scheduler }: { scheduler: AtomicRuleGroupScheduler }): ReactElement {
@@ -17,7 +20,7 @@ function AntdAtomicRules({ scheduler }: { scheduler: AtomicRuleGroupScheduler })
     <Flex vertical gap="medium">
       {rules.map((rule) => (
         <FormProvider key={rule.id} form={rule.form}>
-          <AntdAtomicRuleView key={rule.id} type="AtomicRuleView" scheduler={rule} />
+          <AntdAtomicRuleView key={rule.id} scheduler={rule} />
         </FormProvider>
       ))}
     </Flex>
@@ -45,9 +48,7 @@ function AntdAtomicRuleActions({
 }
 
 /** antd 规则组编辑器视图 */
-export function AntdAtomicRuleGroupView({
-  scheduler,
-}: AtomicRuleGroupViewProperties): ReactElement {
+export function AntdAtomicRuleGroupView({ scheduler }: AntdAtomicRuleGroupViewProps): ReactElement {
   return (
     <Flex vertical gap="medium">
       <AntdAtomicRules scheduler={scheduler} />

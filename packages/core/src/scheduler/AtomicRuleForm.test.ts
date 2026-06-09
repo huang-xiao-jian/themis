@@ -1,5 +1,7 @@
+import { signal, type Signal } from '@preact/signals-core';
 import { assert, describe, expect, it } from 'vitest';
 import { ALL_FACTORS } from '../__fixtures__/factors';
+import type { FieldDataSource } from '../dsl/FieldDataSource';
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory';
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
@@ -8,6 +10,7 @@ import { FactorInferrer } from '../inferrer/FactorInferrer';
 import { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
 import { createAtomicRuleForm } from './AtomicRuleForm';
+import { createGroupCoordination } from './Coordination';
 
 function makeInferrers() {
   const factory = new DefaultResourceFactory(
@@ -21,10 +24,21 @@ function makeInferrers() {
   };
 }
 
+function makeFieldDataSourceSignal(): Signal<readonly FieldDataSource[]> {
+  return signal<readonly FieldDataSource[]>(
+    ALL_FACTORS.map((factor) => ({ label: factor.title, value: factor.name }))
+  );
+}
+
+function makeCoordination() {
+  return createGroupCoordination(makeFieldDataSourceSignal());
+}
+
 describe('AtomicRuleForm - creation', () => {
   it('creates form with name, operator, threshold fields', () => {
     const form = createAtomicRuleForm({
       inferrers: makeInferrers(),
+      coordination: makeCoordination(),
       initialValues: { name: 'is_active', operator: 'is', threshold: true },
     });
 
@@ -36,6 +50,7 @@ describe('AtomicRuleForm - creation', () => {
   it('default pattern is editable', () => {
     const form = createAtomicRuleForm({
       inferrers: makeInferrers(),
+      coordination: makeCoordination(),
     });
 
     expect(form.pattern).toBe('editable');
@@ -46,6 +61,7 @@ describe('AtomicRuleForm - inference linkage', () => {
   it('changing name updates operator field dataSource internally', () => {
     const form = createAtomicRuleForm({
       inferrers: makeInferrers(),
+      coordination: makeCoordination(),
     });
 
     form.setValues({ name: 'is_active' });
@@ -58,6 +74,7 @@ describe('AtomicRuleForm - inference linkage', () => {
   it('changing name resets operator and threshold values', () => {
     const form = createAtomicRuleForm({
       inferrers: makeInferrers(),
+      coordination: makeCoordination(),
     });
 
     // Set initial values
@@ -79,6 +96,7 @@ describe('AtomicRuleForm - inference linkage', () => {
   it('threshold componentProps is updated from inference', () => {
     const form = createAtomicRuleForm({
       inferrers: makeInferrers(),
+      coordination: makeCoordination(),
     });
 
     form.setValues({ name: 'is_active' });
@@ -101,6 +119,7 @@ describe('AtomicRuleForm - snapshot restoration', () => {
   it('restores initial values without resetting operator/threshold', () => {
     const form = createAtomicRuleForm({
       inferrers: makeInferrers(),
+      coordination: makeCoordination(),
       initialValues: { name: 'is_active', operator: 'is', threshold: true },
     });
 

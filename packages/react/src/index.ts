@@ -1,18 +1,13 @@
 // Application Layer - Protocol Types
 export type {
-  AtomicRuleGroupViewProperties,
-  AtomicRuleViewProperties,
-  ComponentRenderer,
-  ComponentRendererRegistry,
-  EditorComponentProperties,
   RuleWorkspaceViewProperties,
   SisyphusContext,
   SisyphusPlugin,
+  ViewRegistry,
+  ViewRenderer,
 } from './application/protocol';
 
 // Application Layer - Editor Components
-export { AtomicRuleGroupView } from './application/AtomicRuleGroupView';
-export { AtomicRuleView } from './application/AtomicRuleView';
 export { RuleWorkspaceView } from './application/RuleWorkspaceView';
 
 // Access Layer - Types

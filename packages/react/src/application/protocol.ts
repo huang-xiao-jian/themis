@@ -1,66 +1,34 @@
-import type {
-  AtomicRuleGroupScheduler,
-  AtomicRuleScheduler,
-  RuleWorkspaceScheduler,
-} from '@sisyphus/core';
+import type { RuleWorkspaceScheduler } from '@sisyphus/core';
 import type { ComponentType, ReactElement } from 'react';
-
-/** AtomicRuleView 组件属性 */
-export interface AtomicRuleViewProperties {
-  /** 组件类型标识 */
-  readonly type: 'AtomicRuleView';
-  /** 业务逻辑实体 */
-  readonly scheduler: AtomicRuleScheduler;
-}
-
-/** AtomicRuleGroupView 组件属性 */
-export interface AtomicRuleGroupViewProperties {
-  /** 组件类型标识 */
-  readonly type: 'AtomicRuleGroupView';
-  /** 业务逻辑实体 */
-  readonly scheduler: AtomicRuleGroupScheduler;
-}
 
 /** RuleWorkspaceView 组件属性 */
 export interface RuleWorkspaceViewProperties {
-  /** 组件类型标识 */
-  readonly type: 'RuleWorkspaceView';
   /** 业务逻辑实体 */
   readonly scheduler: RuleWorkspaceScheduler;
 }
 
-/** 编辑器组件属性联合类型 */
-export type EditorComponentProperties =
-  | AtomicRuleViewProperties
-  | AtomicRuleGroupViewProperties
-  | RuleWorkspaceViewProperties;
-
 /** 编辑器组件渲染器注册表 */
-export interface ComponentRendererRegistry {
-  /** 注册 AtomicRuleView 组件 */
-  registerAtomicRuleView(component: ComponentType<AtomicRuleViewProperties>): void;
-  /** 注册 AtomicRuleGroupView 组件 */
-  registerAtomicRuleGroupView(component: ComponentType<AtomicRuleGroupViewProperties>): void;
+export interface ViewRegistry {
   /** 注册 RuleWorkspaceView 组件 */
   registerRuleWorkspaceView(component: ComponentType<RuleWorkspaceViewProperties>): void;
 }
 
 /** 组件渲染器协议 */
-export interface ComponentRenderer {
-  /** 渲染编辑器组件 */
-  render(props: EditorComponentProperties): ReactElement;
+export interface ViewRenderer {
+  /** 渲染工作空间编辑组件 */
+  renderRuleWorkspaceView(props: RuleWorkspaceViewProperties): ReactElement;
 }
 
 /** Sisyphus 上下文（插件可访问） */
 export interface SisyphusContext {
   /** 组件渲染器注册表 */
-  readonly registry: ComponentRendererRegistry;
+  readonly registry: ViewRegistry;
 }
 
 /** 组件渲染器插件 */
 export interface SisyphusPlugin {
   /** 插件名称 */
-  name: string;
-  /** 安装插件 */
-  install(context: SisyphusContext): void;
+  readonly name: string;
+  /** 注册插件 */
+  onRegister(context: SisyphusContext): void;
 }
