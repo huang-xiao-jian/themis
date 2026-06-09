@@ -66,16 +66,31 @@ classDiagram
     LOCKED
   }
 
-  class TransitionEventType {
+  class WorkspaceCoordinationEventType {
     <<enum>>
     OK
     EDIT
     CANCEL
+    REMOVE
   }
 
-  class TransitionEvent {
+  class WorkspaceCoordinationEvent {
     <<interface>>
-    +type: TransitionEventType
+    +type: WorkspaceCoordinationEventType
+    +sourceId: string
+  }
+
+  class GroupCoordinationEventType {
+    <<enum>>
+    OK
+    EDIT
+    CANCEL
+    REMOVE
+  }
+
+  class GroupCoordinationEvent {
+    <<interface>>
+    +type: GroupCoordinationEventType
     +sourceId: string
   }
 
@@ -153,9 +168,9 @@ classDiagram
   AtomicRuleGroupScheduler ..|> GroupCoordination
   AtomicRuleScheduler ..> GroupCoordination
 
-  %% Event (dependency on TransitionEvent)
-  AtomicRuleGroupScheduler ..> TransitionEvent
-  AtomicRuleScheduler ..> TransitionEvent
+  %% Event (level-specific coordination events)
+  AtomicRuleGroupScheduler ..> WorkspaceCoordinationEvent
+  AtomicRuleScheduler ..> GroupCoordinationEvent
 
   %% Signal channel (downstream dependency)
   RuleWorkspaceScheduler ..> AtomicRuleGroupScheduler
@@ -167,7 +182,8 @@ classDiagram
   AtomicRuleGroupScheduler ..> AtomicRuleGroup
   AtomicRuleGroupScheduler ..> FactorOptionsInferrer
 
-  TransitionEvent ..> TransitionEventType
+  WorkspaceCoordinationEvent ..> WorkspaceCoordinationEventType
+  GroupCoordinationEvent ..> GroupCoordinationEventType
 ```
 
 ## 业务方使用示例

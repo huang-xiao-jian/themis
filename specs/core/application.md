@@ -12,47 +12,18 @@
 
 三层调度器（`RuleWorkspaceScheduler` → `AtomicRuleGroupScheduler` → `AtomicRuleScheduler`）之间通过两个通道协作：
 
-- **事件总线（上行）**：子级发射 `TransitionEvent` 通知父级用户行为的发生，事件订阅机制由依赖库（`nanoevents`）处理
+- **事件总线（上行）**：子级发射协调事件通知父级用户行为的发生，事件订阅机制由依赖库（`nanoevents`）处理
 - **信号通道（下行）**：父级通过层级协调实体封装共享状态，子级通过 `computed` 派生自身状态，父级不直接修改子级状态
 
 每层协议显式包含事件总线与信号通道两部分，构成完整的层级通信契约。
 
-### TransitionEvent 事件模型
-
-事件是子级向父级通信的唯一载体，与用户行为入口对应
-
-```ts
-/**
- * 状态迁移事件类型
- *
- * - OK：用户确认配置（onOk）
- * - EDIT：用户请求进入编辑态（onEdit）
- * - CANCEL：用户取消编辑（onCancel，仅 Rule 级别）
- */
-enum TransitionEventType {
-  OK = 'ok',
-  EDIT = 'edit',
-  CANCEL = 'cancel',
-}
-
-/**
- * 状态迁移事件
- *
- * 事件流向：子级 → 父级（单向）
- */
-interface TransitionEvent<TId = string> {
-  /** 事件类型 */
-  readonly type: TransitionEventType;
-  /** 事件来源子级标识 */
-  readonly sourceId: TId;
-}
-```
-
-> **事件发射器**：子级 `Scheduler` 内部通过依赖库（`nanoevents`）提供事件订阅 / 取消订阅能力。`onOk`/`onEdit`/`onCancel` 内部触发事件发射，父级在创建子级时自动订阅，在销毁 / 移除子级时自动取消订阅。具体 `API` 由依赖库决定。
-
 ### 层级协调实体
 
 每对父子级调度器之间使用独立的协调实体，显式封装事件总线与信号通道两部分，而非单个协议适用于多层级。每个父级调度器持有一个协调实体，子级通过该实体访问共享状态：
+
+> 事件是子级向父级通信的唯一载体，与用户行为入口对应。每层协议独立定义事件类型与事件接口，确保层级间通信契约自包含。
+
+> **事件发射器**：子级 `Scheduler` 内部通过依赖库（`nanoevents`）提供事件订阅 / 取消订阅能力。`onOk`/`onEdit`/`onCancel`/`onRemove` 内部触发事件发射，父级在创建子级时自动订阅，在销毁 / 移除子级时自动取消订阅。具体 `API` 由依赖库决定。
 
 #### WorkspaceCoordination（Workspace → Group 协议）
 
@@ -60,25 +31,50 @@ interface TransitionEvent<TId = string> {
 
 **事件总线（上行：Group → Workspace）**：
 
-| 事件类型 | 触发入口                            | 父级处理逻辑                                        |
-| -------- | ----------------------------------- | --------------------------------------------------- |
-| `OK`     | `AtomicRuleGroupScheduler.onOk()`   | 校验通过后更新 `editingGroupId.value = null`        |
-| `EDIT`   | `AtomicRuleGroupScheduler.onEdit()` | 应用互斥约束后更新 `editingGroupId.value = groupId` |
+| 事件类型 | 触发入口                              | 父级处理逻辑                                        |
+| -------- | ------------------------------------- | --------------------------------------------------- |
+| `OK`     | `AtomicRuleGroupScheduler.onOk()`     | 校验通过后更新 `editingGroupId.value = null`        |
+| `EDIT`   | `AtomicRuleGroupScheduler.onEdit()`   | 应用互斥约束后更新 `editingGroupId.value = groupId` |
+| `CANCEL` | `AtomicRuleGroupScheduler.onCancel()` | 更新 `editingGroupId.value = null`                  |
+| `REMOVE` | `AtomicRuleGroupScheduler.onRemove()` | 移除该 Group 实例，清理事件订阅                     |
 
 **信号通道（下行：Workspace → Group）**：
 
 ```ts
 /**
+ * Workspace 级协调事件类型（Group → Workspace）
+ *
+ * - OK：用户确认配置（onOk）
+ * - EDIT：用户请求进入编辑态（onEdit）
+ * - CANCEL：用户取消编辑（onCancel）
+ * - REMOVE：用户请求移除自身（onRemove）
+ */
+enum WorkspaceCoordinationEventType {
+  OK = 'ok',
+  EDIT = 'edit',
+  CANCEL = 'cancel',
+  REMOVE = 'remove',
+}
+
+/** Workspace 级协调事件（Group → Workspace，单向） */
+interface WorkspaceCoordinationEvent {
+  /** 事件类型 */
+  readonly type: WorkspaceCoordinationEventType;
+  /** 事件来源 Group 标识 */
+  readonly sourceId: string;
+}
+
+/**
  * Workspace 级协调实体（Workspace → Group 协议）
  *
- * 事件总线（上行）：Group → Workspace，有效事件类型 OK | EDIT
+ * 事件总线（上行）：Group → Workspace，有效事件类型 OK | EDIT | CANCEL | REMOVE
  * 信号通道（下行）：Workspace → Group
  * - 子级 AtomicRuleGroupScheduler 通过 computed 从 editingGroupId 派生 state
  * - 子级通过 allFactors 共享规则因子定义
  */
 interface WorkspaceCoordination {
   // ── 事件总线（上行：Group → Workspace）────────────
-  /** 事件总线，有效事件类型：OK | EDIT（具体类型由依赖库 nanoevents 决定） */
+  /** 事件总线，有效事件类型：OK | EDIT | CANCEL | REMOVE（具体类型由依赖库 nanoevents 决定） */
   readonly bus: EventBus;
 
   // ── 信号通道（下行：Workspace → Group）────────────
@@ -87,11 +83,6 @@ interface WorkspaceCoordination {
   /** 可用规则因子定义列表（Workspace 级共享） */
   readonly allFactors: Signal<readonly RuleFactorDefinition[]>;
 }
-
-/** Workspace 级有效事件类型（Group → Workspace） */
-type WorkspaceTransitionEvent = TransitionEvent & {
-  readonly type: TransitionEventType.OK | TransitionEventType.EDIT;
-};
 ```
 
 #### GroupCoordination（Group → Rule 协议）
@@ -105,21 +96,45 @@ type WorkspaceTransitionEvent = TransitionEvent & {
 | `OK`     | `AtomicRuleScheduler.onOk()`     | 校验通过后更新 `editingRuleId.value = null`       |
 | `EDIT`   | `AtomicRuleScheduler.onEdit()`   | 应用互斥约束后更新 `editingRuleId.value = ruleId` |
 | `CANCEL` | `AtomicRuleScheduler.onCancel()` | 更新 `editingRuleId.value = null`                 |
+| `REMOVE` | `AtomicRuleScheduler.onRemove()` | 移除该 Rule 实例，清理事件订阅                    |
 
 **信号通道（下行：Group → Rule）**：
 
 ```ts
 /**
+ * Group 级协调事件类型（Rule → Group）
+ *
+ * - OK：用户确认配置（onOk）
+ * - EDIT：用户请求进入编辑态（onEdit）
+ * - CANCEL：用户取消编辑（onCancel）
+ * - REMOVE：用户请求移除自身（onRemove）
+ */
+enum GroupCoordinationEventType {
+  OK = 'ok',
+  EDIT = 'edit',
+  CANCEL = 'cancel',
+  REMOVE = 'remove',
+}
+
+/** Group 级协调事件（Rule → Group，单向） */
+interface GroupCoordinationEvent {
+  /** 事件类型 */
+  readonly type: GroupCoordinationEventType;
+  /** 事件来源 Rule 标识 */
+  readonly sourceId: string;
+}
+
+/**
  * Group 级协调实体（Group → Rule 协议）
  *
- * 事件总线（上行）：Rule → Group，有效事件类型 OK | EDIT | CANCEL
+ * 事件总线（上行）：Rule → Group，有效事件类型 OK | EDIT | CANCEL | REMOVE
  * 信号通道（下行）：Group → Rule
  * - 子级 AtomicRuleScheduler 通过 computed 从 editingRuleId 派生 state
  * - 子级通过 factors 获取可用规则因子（组内已用因子标记 disabled，确保因子仅配置一次）
  */
 interface GroupCoordination {
   // ── 事件总线（上行：Rule → Group）────────────
-  /** 事件总线，有效事件类型：OK | EDIT | CANCEL（具体类型由依赖库 nanoevents 决定） */
+  /** 事件总线，有效事件类型：OK | EDIT | CANCEL | REMOVE（具体类型由依赖库 nanoevents 决定） */
   readonly bus: EventBus;
 
   // ── 信号通道（下行：Group → Rule）────────────
@@ -128,19 +143,14 @@ interface GroupCoordination {
   /** 可用规则因子集合（源自 WorkspaceCoordination.allFactors，组内已使用的因子标记 disabled） */
   readonly factors: ReadonlySignal<readonly FieldDataSource[]>;
 }
-
-/** Group 级有效事件类型（Rule → Group） */
-type GroupTransitionEvent = TransitionEvent & {
-  readonly type: TransitionEventType.OK | TransitionEventType.EDIT | TransitionEventType.CANCEL;
-};
 ```
 
 **层级间通信契约一览**：
 
-| 协议层级          | 协调实体                | 事件总线（上行）                               | 信号通道（下行）                |
-| ----------------- | ----------------------- | ---------------------------------------------- | ------------------------------- |
-| Workspace → Group | `WorkspaceCoordination` | `WorkspaceTransitionEvent`（OK \| EDIT）       | `editingGroupId` + `allFactors` |
-| Group → Rule      | `GroupCoordination`     | `GroupTransitionEvent`（OK \| EDIT \| CANCEL） | `editingRuleId` + `factors`     |
+| 协议层级          | 协调实体                | 事件总线（上行）                                               | 信号通道（下行）                |
+| ----------------- | ----------------------- | -------------------------------------------------------------- | ------------------------------- |
+| Workspace → Group | `WorkspaceCoordination` | `WorkspaceCoordinationEvent`（OK \| EDIT \| CANCEL \| REMOVE） | `editingGroupId` + `allFactors` |
+| Group → Rule      | `GroupCoordination`     | `GroupCoordinationEvent`（OK \| EDIT \| CANCEL \| REMOVE）     | `editingRuleId` + `factors`     |
 
 **状态流转路径**：
 
@@ -157,7 +167,7 @@ sequenceDiagram
   participant G as AtomicRuleGroupScheduler
   participant GC as GroupCoordination
 
-  U->>R: onOk()（事件总线：上行 GroupTransitionEvent.OK）
+  U->>R: onOk()（事件总线：上行 GroupCoordinationEvent.OK）
   activate R
   R->>R: 内部校验 + 更新数据
   R->>G: emit(OK, ruleId)（nanoevents）
@@ -221,7 +231,7 @@ stateDiagram-v2
 
 原子规则调度器。自身状态通过 `computed` 从所属 `AtomicRuleGroupScheduler` 的 `GroupCoordination` 派生，暴露只读状态信号、Formily 表单委托，以及用户行为接收入口。内部将调度器状态同步到 Formily Form 的 `pattern` 属性。
 
-> **协议角色**：事件总线（发射 `GroupTransitionEvent` 给 Group）+ 信号通道（从 Group 的 `GroupCoordination.editingRuleId` 派生 `state`，通过 `GroupCoordination.factors` 获取可用规则因子）。
+> **协议角色**：事件总线（发射 `GroupCoordinationEvent` 给 Group）+ 信号通道（从 Group 的 `GroupCoordination.editingRuleId` 派生 `state`，通过 `GroupCoordination.factors` 获取可用规则因子）。
 
 ```ts
 interface AtomicRuleScheduler {
@@ -254,27 +264,34 @@ interface AtomicRuleScheduler {
   /** 构建原子规则（返回值与 rule.value 始终一致） */
   build(): AtomicRule;
 
-  // ─── 用户行为接入（发射 TransitionEvent 给 Group）────────
+  // ─── 用户行为接入（发射 GroupCoordinationEvent 给 Group）────────
   /**
    * 确认规则配置（用户行为驱动）
    *
-   * 内部判断表单配置是否满足规则约束，更新内部数据，然后发射 `TransitionEventType.OK` 事件
+   * 内部判断表单配置是否满足规则约束，更新内部数据，然后发射 `GroupCoordinationEventType.OK` 事件
    */
   onOk(): void;
 
   /**
    * 取消规则配置（用户行为驱动）
    *
-   * 无内部逻辑，直接发射 `TransitionEventType.CANCEL` 事件
+   * 无内部逻辑，直接发射 `GroupCoordinationEventType.CANCEL` 事件
    */
   onCancel(): void;
 
   /**
    * 激活规则配置编辑（用户行为驱动）
    *
-   * 发射 `TransitionEventType.EDIT` 事件，父级通过 GroupCoordination.editingRuleId 控制状态
+   * 发射 `GroupCoordinationEventType.EDIT` 事件，父级通过 GroupCoordination.editingRuleId 控制状态
    */
   onEdit(): void;
+
+  /**
+   * 请求移除自身（用户行为驱动）
+   *
+   * 发射 `GroupCoordinationEventType.REMOVE` 事件，由父级 AtomicRuleGroupScheduler 执行实际移除操作
+   */
+  onRemove(): void;
 }
 ```
 
@@ -335,18 +352,20 @@ sequenceDiagram
   Note over WS, R: 信号通道（下行）：父级通过层级协调实体封装共享 Signal，子级 computed 派生状态
 
   rect rgb(240, 248, 255)
-    Note over U, WC: 外部调用 transitionState → 父级更新协调实体 → 子级状态自动响应
-    U->>WS: transitionState(groupId, EDITING)
+    Note over U, WC: 事件总线（上行）：子级 onEdit 发射 EDIT → 父级更新协调实体 → 子级状态自动响应
+    U->>G: onEdit()
+    G->>WS: emit(EDIT, groupId)（nanoevents）
     WS->>WC: editingGroupId.value = groupId
     WC-->>G: state = EDITING（computed 自动响应）
 
-    U->>G: transitionState(ruleId, EDITING)
+    U->>R: onEdit()
+    R->>G: emit(EDIT, ruleId)（nanoevents）
     G->>GC: editingRuleId.value = ruleId
     GC-->>R: state = EDITING（computed 自动响应）
   end
 
   rect rgb(255, 248, 240)
-    Note over U, GC: 事件总线（上行）：子级发射事件 → 父级更新协调实体 → 子级状态自动响应
+    Note over U, GC: 事件总线（上行）：子级 onOk 发射 OK → 父级更新协调实体 → 子级状态自动响应
     U->>R: onOk()
     R->>R: 内部校验 + 更新数据
     R->>G: emit(OK, ruleId)（nanoevents）
@@ -394,7 +413,7 @@ interface AtomicRuleGroup {
 /**
  * 规则组设置器
  *
- * **协议角色**：事件总线（发射 `WorkspaceTransitionEvent` 给 Workspace）+ 信号通道（从 Workspace 的 `WorkspaceCoordination.editingGroupId` 派生 `state`，同时通过自身 `GroupCoordination` 供 Rule 消费）
+ * **协议角色**：事件总线（发射 `WorkspaceCoordinationEvent` 给 Workspace）+ 信号通道（从 Workspace 的 `WorkspaceCoordination.editingGroupId` 派生 `state`，同时通过自身 `GroupCoordination` 供 Rule 消费）
  *
  * 管理原子规则集合，并实现规则配置约束：
  * - 特定规则因子仅允许配置一次（通过 usedFactors + factors.disabled 实现）
@@ -436,7 +455,7 @@ interface AtomicRuleGroupScheduler {
    * **状态约束**：仅 Group 处于编辑态时允许调用
    * **互斥行为**：新建的 Rule 默认进入编辑态（`GroupCoordination.editingRuleId` 更新为新 Rule ID），当前编辑中的 Rule（如有）自动锁定
    * **前置约束**：canAddRule=false 时调用静默返回 undefined
-   * **事件订阅**：创建后自动订阅 Rule 的 TransitionEvent（由 nanoevents 处理）
+   * **事件订阅**：创建后自动订阅 Rule 的 GroupCoordinationEvent（由 nanoevents 处理）
    */
   addRule(): AtomicRuleScheduler | undefined;
   /**
@@ -456,15 +475,6 @@ interface AtomicRuleGroupScheduler {
    */
   hydrateRule(rule: AtomicRule): void;
 
-  /**
-   * 切换指定规则的状态（内部更新 GroupCoordination.editingRuleId Signal）
-   *
-   * - 目标为 EDITING：应用互斥约束，更新 `GroupCoordination.editingRuleId.value = ruleId`
-   * - 目标为 LOCKED：更新 `GroupCoordination.editingRuleId.value = null`
-   * - 子级 `AtomicRuleScheduler.state` 通过 `computed` 自动响应
-   */
-  transitionState(ruleId: string, state: SchedulerState): void;
-
   /** 是否无规则（rules 集合为空） */
   isEmpty(): boolean;
 
@@ -477,20 +487,34 @@ interface AtomicRuleGroupScheduler {
    */
   build(): AtomicRuleGroup;
 
-  // ─── 用户行为接入（发射 TransitionEvent 给 Workspace）────────
+  // ─── 用户行为接入（发射 WorkspaceCoordinationEvent 给 Workspace）────────
   /**
    * 确认配置规则（用户行为驱动）
    *
-   * 内部判断规则组配置是否满足约束，更新内部数据，然后发射 `TransitionEventType.OK` 事件
+   * 内部判断规则组配置是否满足约束，更新内部数据，然后发射 `WorkspaceCoordinationEventType.OK` 事件
    */
   onOk(): void;
 
   /**
    * 激活配置编辑（用户行为驱动）
    *
-   * 发射 `TransitionEventType.EDIT` 事件
+   * 发射 `WorkspaceCoordinationEventType.EDIT` 事件
    */
   onEdit(): void;
+
+  /**
+   * 取消配置编辑（用户行为驱动）
+   *
+   * 无内部逻辑，直接发射 `WorkspaceCoordinationEventType.CANCEL` 事件
+   */
+  onCancel(): void;
+
+  /**
+   * 请求移除自身（用户行为驱动）
+   *
+   * 发射 `WorkspaceCoordinationEventType.REMOVE` 事件，由父级 RuleWorkspaceScheduler 执行实际移除操作
+   */
+  onRemove(): void;
 }
 ```
 
@@ -505,7 +529,7 @@ interface AtomicRuleGroupScheduler {
 
 统一入口，持有规则因子定义供调度器共享，并提供完整的生命周期管理能力：
 
-> **协议角色**：信号通道（通过 `WorkspaceCoordination` 封装 `editingGroupId` + `allFactors`）+ 事件总线（订阅 Group 的 `WorkspaceTransitionEvent`）。Workspace 是协议层级的顶部，无父级。
+> **协议角色**：信号通道（通过 `WorkspaceCoordination` 封装 `editingGroupId` + `allFactors`）+ 事件总线（订阅 Group 的 `WorkspaceCoordinationEvent`）。Workspace 是协议层级的顶部，无父级。
 
 ```ts
 interface RuleWorkspaceScheduler {
@@ -533,7 +557,7 @@ interface RuleWorkspaceScheduler {
    * **状态约束**：仅 Workspace 处于可编辑状态时允许调用
    * **互斥行为**：新建的 Group 默认进入编辑态（`WorkspaceCoordination.editingGroupId` 更新为新 Group ID），当前编辑中的 Group（如有）自动锁定
    * **前置约束**：canAddGroup=false 时调用静默返回 undefined
-   * **事件订阅**：创建后自动订阅 Group 的 TransitionEvent（由 nanoevents 处理）
+   * **事件订阅**：创建后自动订阅 Group 的 WorkspaceCoordinationEvent（由 nanoevents 处理）
    */
   addGroup(): AtomicRuleGroupScheduler | undefined;
   /**
@@ -552,16 +576,6 @@ interface RuleWorkspaceScheduler {
    * 恢复的 Group 及其内部 Rule 默认进入 **锁定态**
    */
   hydrateGroup(group: AtomicRuleGroup): void;
-
-  // 状态控制
-  /**
-   * 切换指定规则组的状态（内部更新 WorkspaceCoordination.editingGroupId Signal）
-   *
-   * - 目标为 EDITING：应用互斥约束，更新 `WorkspaceCoordination.editingGroupId.value = groupId`
-   * - 目标为 LOCKED：更新 `WorkspaceCoordination.editingGroupId.value = null`
-   * - 子级 `AtomicRuleGroupScheduler.state` 通过 `computed` 自动响应
-   */
-  transitionState(groupId: string, state: SchedulerState): void;
 
   // 验证与构建
   /** 验证所有规则组 */

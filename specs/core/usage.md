@@ -86,9 +86,9 @@ if (workspace.validate()) {
   // result: readonly AtomicRuleGroup[]
 }
 
-// 10. 编辑已有配置（需显式切换到编辑态，由父级控制状态）
-workspace.transitionState(group.id, SchedulerState.EDITING);
-group.transitionState(rule.id, SchedulerState.EDITING);
+// 10. 编辑已有配置（通过 onEdit 事件切换到编辑态）
+group.onEdit();
+rule.onEdit();
 // 通过 rule.form（Formily Form）驱动表单修改
 rule.onOk();
 group.onOk();
@@ -130,16 +130,19 @@ const group = workspace.pickGroup('group-1');
 const rule1 = group.pickRule('rule-1');
 // rule1.state.value === SchedulerState.LOCKED
 
-// 用户需显式切换到编辑态后才能修改（由父级控制状态）
-workspace.transitionState('group-1', SchedulerState.EDITING);
-group.transitionState('rule-1', SchedulerState.EDITING);
+const rule2 = group.pickRule('rule-2');
+// rule2.state.value === SchedulerState.LOCKED
+
+// 用户通过 onEdit 事件切换到编辑态
+group.onEdit();
+rule1.onEdit();
 // 通过 rule1.form（Formily Form）驱动表单修改
 rule1.onOk();
 group.onOk();
 
 // 编辑态下的并行编辑互斥（Group 级别约束，与 Workspace 级别独立）
-group.transitionState('rule-1', SchedulerState.EDITING); // rule1 进入编辑态
-group.transitionState('rule-2', SchedulerState.EDITING); // rule2 进入编辑态，rule1 自动锁定
+rule1.onEdit(); // rule1 进入编辑态
+rule2.onEdit(); // rule2 进入编辑态，rule1 自动锁定
 // rule1.state.value === SchedulerState.LOCKED
 // rule2.state.value === SchedulerState.EDITING
 // group.canAddRule.value === false（存在编辑中的 Rule，禁用新增）
