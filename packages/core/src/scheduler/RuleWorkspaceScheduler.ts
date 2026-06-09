@@ -12,7 +12,7 @@ import { createWorkspaceCoordination } from './Coordination';
  * 工作空间调度器
  *
  * 顶层入口：管理所有规则组、共享因素定义、生命周期管理
- * 信号通道（通过 WorkspaceCoordination 封装 editingGroupId + allFactors）
+ * 信号通道（通过 WorkspaceCoordination 封装 allFactors）
  * + 事件总线（订阅 Group 的 WorkspaceCoordinationEvent）
  */
 export class RuleWorkspaceScheduler {
@@ -25,9 +25,8 @@ export class RuleWorkspaceScheduler {
    * Workspace 级协调实体（Workspace → Group 协议）
    *
    * 封装供子级 Group 派生状态的共享信号：
-   * - coordination.editingGroupId：当前处于编辑态的 Group ID（null 表示无编辑中的 Group）
    * - coordination.allFactors：可用规则因子定义列表
-   * - coordination.bus：Group 上行事件总线（OK | EDIT | CANCEL | REMOVE）
+   * - coordination.bus：Group 上行事件总线（REMOVE）
    */
   readonly coordination: WorkspaceCoordination;
 
@@ -49,9 +48,8 @@ export class RuleWorkspaceScheduler {
     // 创建 Workspace 级协调实体
     this.coordination = createWorkspaceCoordination(factors);
 
-    // canAddGroup：无编辑中 Group 且无空规则 Group
+    // canAddGroup：无空规则 Group
     this.canAddGroup = computed<boolean>(() => {
-      if (this.coordination.editingGroupId.value !== null) return false;
       // 存在配置规则为空的 Group 时禁用新增
       return !this.groups.value.some((g) => g.isEmpty());
     });
@@ -92,7 +90,7 @@ export class RuleWorkspaceScheduler {
   /**
    * 创建规则组调度器（新建场景）
    *
-   * 新建的 Group 默认进入编辑态（WorkspaceCoordination.editingGroupId 更新为新 Group ID）
+   * 新建的 Group 默认进入锁定态（无编辑状态）
    */
   addGroup(): AtomicRuleGroupScheduler | undefined {
     if (this.destroyed) {
@@ -103,8 +101,7 @@ export class RuleWorkspaceScheduler {
     }
     const newId = nanoid();
     const scheduler = new AtomicRuleGroupScheduler(newId, this.coordination, this.inferrers);
-    // 新建的 Group 自动进入编辑态
-    this.coordination.editingGroupId.value = newId;
+    // 新建的 Group 默认进入锁定态（无编辑状态）
     this.subscribeGroupEvents(scheduler);
     this.groups.value = [...this.groups.value, scheduler];
     return scheduler;
@@ -134,10 +131,6 @@ export class RuleWorkspaceScheduler {
       }
     }
     this.groups.value = next;
-    // 若删除的是编辑中的 Group，清空 editingGroupId
-    if (this.coordination.editingGroupId.value === groupId) {
-      this.coordination.editingGroupId.value = null;
-    }
   }
 
   /** 验证所有规则组 */
@@ -177,34 +170,11 @@ export class RuleWorkspaceScheduler {
     const unsubs: (() => void)[] = [];
 
     unsubs.push(
-      this.coordination.bus.on(WorkspaceCoordinationEventType.OK, (e) => {
-        if (e.sourceId !== scheduler.id) return;
-        // Group 确认 → 锁定
-        this.coordination.editingGroupId.value = null;
-      })
-    );
-
-    unsubs.push(
-      this.coordination.bus.on(WorkspaceCoordinationEventType.EDIT, (e) => {
-        if (e.sourceId !== scheduler.id) return;
-        this.coordination.editingGroupId.value = scheduler.id;
-      })
-    );
-
-    unsubs.push(
-      this.coordination.bus.on(WorkspaceCoordinationEventType.CANCEL, (e) => {
-        if (e.sourceId !== scheduler.id) return;
-        this.coordination.editingGroupId.value = null;
-      })
-    );
-
-    unsubs.push(
       this.coordination.bus.on(WorkspaceCoordinationEventType.REMOVE, (e) => {
         if (e.sourceId !== scheduler.id) return;
         this.removeGroup(scheduler.id);
       })
     );
-
     this.groupEventUnsubscribers.set(scheduler.id, unsubs);
   }
 

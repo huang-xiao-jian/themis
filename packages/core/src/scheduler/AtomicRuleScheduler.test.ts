@@ -1,4 +1,3 @@
-import type { ReadonlySignal } from '@preact/signals-core';
 import { signal, type Signal } from '@preact/signals-core';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS, BOOLEAN_FACTOR } from '../__fixtures__/factors';
@@ -34,11 +33,8 @@ function makeFieldDataSourceSignal(): Signal<readonly FieldDataSource[]> {
   );
 }
 
-function makeCoordination(
-  editingRuleId?: string | null,
-  editable?: ReadonlySignal<boolean>
-): GroupCoordination {
-  const c = createGroupCoordination(makeFieldDataSourceSignal(), editable ?? signal(true));
+function makeCoordination(editingRuleId?: string | null): GroupCoordination {
+  const c = createGroupCoordination(makeFieldDataSourceSignal());
   c.editingRuleId.value = editingRuleId ?? null;
   return c;
 }
@@ -283,95 +279,6 @@ describe('AtomicRuleScheduler - destroy', () => {
     scheduler.destroy();
     scheduler.onOk();
     expect(handler).not.toHaveBeenCalled();
-  });
-});
-
-describe('AtomicRuleScheduler - Group readonly propagation', () => {
-  it('state is LOCKED when Group editable is false, even if editingRuleId matches', () => {
-    const groupEditable = signal(false);
-    const coordination = makeCoordination('rule-1', groupEditable);
-    const scheduler = new AtomicRuleScheduler('rule-1', coordination, makeInferrers());
-    expect(scheduler.state.value).toBe(SchedulerState.LOCKED);
-    expect(scheduler.editable.value).toBe(false);
-  });
-
-  it('state transitions from LOCKED to EDITING when Group becomes editable', () => {
-    const groupEditable = signal(false);
-    const coordination = makeCoordination('rule-1', groupEditable);
-    const scheduler = new AtomicRuleScheduler('rule-1', coordination, makeInferrers());
-    expect(scheduler.state.value).toBe(SchedulerState.LOCKED);
-
-    groupEditable.value = true;
-    expect(scheduler.state.value).toBe(SchedulerState.EDITING);
-    expect(scheduler.editable.value).toBe(true);
-  });
-
-  it('state transitions from EDITING to LOCKED when Group becomes readonly', () => {
-    const groupEditable = signal(true);
-    const coordination = makeCoordination('rule-1', groupEditable);
-    const scheduler = new AtomicRuleScheduler('rule-1', coordination, makeInferrers());
-    expect(scheduler.state.value).toBe(SchedulerState.EDITING);
-
-    groupEditable.value = false;
-    expect(scheduler.state.value).toBe(SchedulerState.LOCKED);
-    expect(scheduler.editable.value).toBe(false);
-  });
-
-  it('form pattern reflects Group readonly state', () => {
-    const groupEditable = signal(true);
-    const coordination = makeCoordination('rule-1', groupEditable);
-    const scheduler = new AtomicRuleScheduler('rule-1', coordination, makeInferrers());
-    expect(scheduler.form.pattern).toBe('editable');
-
-    groupEditable.value = false;
-    expect(scheduler.form.pattern).toBe('disabled');
-  });
-
-  it('onEdit is silently ignored when Group is readonly', () => {
-    const groupEditable = signal(false);
-    const coordination = makeCoordination(null, groupEditable);
-    const scheduler = makeScheduler(coordination);
-    const handler = vi.fn();
-    coordination.bus.on(GroupCoordinationEventType.EDIT, handler);
-
-    scheduler.onEdit();
-
-    expect(handler).not.toHaveBeenCalled();
-  });
-
-  it('onOk is silently ignored when Group is readonly', () => {
-    const groupEditable = signal(false);
-    const coordination = makeCoordination('rule-1', groupEditable);
-    const scheduler = makeScheduler(coordination);
-    const handler = vi.fn();
-    coordination.bus.on(GroupCoordinationEventType.OK, handler);
-
-    scheduler.form.setValues({ name: 'is_active' });
-    scheduler.form.setFieldState('operator', (s) => {
-      s.value = 'is';
-    });
-    scheduler.form.setFieldState('threshold', (s) => {
-      s.value = true;
-    });
-    scheduler.onOk();
-
-    expect(handler).not.toHaveBeenCalled();
-    expect(scheduler.rule.value).toBeNull();
-  });
-
-  it('onRemove still works when Group is readonly', () => {
-    const groupEditable = signal(false);
-    const coordination = makeCoordination('rule-1', groupEditable);
-    const scheduler = makeScheduler(coordination);
-    const handler = vi.fn();
-    coordination.bus.on(GroupCoordinationEventType.REMOVE, handler);
-
-    scheduler.onRemove();
-
-    expect(handler).toHaveBeenCalledWith({
-      type: GroupCoordinationEventType.REMOVE,
-      sourceId: 'rule-1',
-    });
   });
 });
 

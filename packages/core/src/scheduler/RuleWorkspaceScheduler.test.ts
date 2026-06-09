@@ -41,27 +41,20 @@ describe('RuleWorkspaceScheduler - creation', () => {
     expect(workspace.groups.value).toHaveLength(1);
     expect(workspace.groups.value[0]).toBeInstanceOf(AtomicRuleGroupScheduler);
   });
-
-  it('coordination.editingGroupId is null by default', () => {
-    const workspace = makeWorkspace();
-    expect(workspace.coordination.editingGroupId.value).toBeNull();
-  });
 });
 
 describe('RuleWorkspaceScheduler - addGroup', () => {
-  it('addGroup creates a new group and sets editingGroupId', () => {
+  it('addGroup creates a new group', () => {
     const workspace = makeWorkspace();
     const group = workspace.addGroup();
     expect(group).toBeInstanceOf(AtomicRuleGroupScheduler);
     expect(workspace.groups.value).toHaveLength(1);
-    expect(workspace.coordination.editingGroupId.value).toBe(group!.id);
-    expect(group!.state.value).toBe(SchedulerState.EDITING);
   });
 
   it('addGroup returns undefined when canAddGroup is false', () => {
     const workspace = makeWorkspace();
-    workspace.addGroup(); // first group (editing)
-    const result = workspace.addGroup(); // second should fail (editing group exists)
+    workspace.addGroup(); // first group (empty)
+    const result = workspace.addGroup(); // second should fail (empty group exists)
     expect(result).toBeUndefined();
     expect(workspace.groups.value).toHaveLength(1);
   });
@@ -79,65 +72,19 @@ describe('RuleWorkspaceScheduler - canAddGroup', () => {
     expect(workspace.canAddGroup.value).toBe(true);
   });
 
-  it('canAddGroup is false when editing group exists', () => {
+  it('canAddGroup is false when empty-rule group exists', () => {
     const workspace = makeWorkspace();
     workspace.addGroup();
     expect(workspace.canAddGroup.value).toBe(false);
   });
 
-  it('canAddGroup is false when empty-rule group exists', () => {
-    const workspace = makeWorkspace();
-    const group = workspace.addGroup()!;
-    // Lock the group via onCancel but it has no rules
-    group.onCancel();
-    expect(workspace.canAddGroup.value).toBe(false);
-  });
-
-  it('canAddGroup is true when locked group has confirmed rules', () => {
+  it('canAddGroup is true when all groups have confirmed rules', () => {
     const workspace = makeWorkspace([SAMPLE_GROUP]);
     expect(workspace.canAddGroup.value).toBe(true);
   });
 });
 
 describe('RuleWorkspaceScheduler - event handling', () => {
-  it('Group onEdit sets editingGroupId', () => {
-    const workspace = makeWorkspace([SAMPLE_GROUP]);
-    const group = workspace.groups.value[0];
-    group.onEdit();
-    expect(workspace.coordination.editingGroupId.value).toBe('group-1');
-    expect(group.state.value).toBe(SchedulerState.EDITING);
-  });
-
-  it('Group onCancel clears editingGroupId', () => {
-    const workspace = makeWorkspace();
-    const group = workspace.addGroup()!;
-    expect(workspace.coordination.editingGroupId.value).toBe(group.id);
-    group.onCancel();
-    expect(workspace.coordination.editingGroupId.value).toBeNull();
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
-  });
-
-  it('Group onOk locks the editing group and cascades', () => {
-    const workspace = makeWorkspace();
-    const group = workspace.addGroup()!;
-    const rule = group.addRule()!;
-    // Confirm the rule
-    rule.form.setValues({ name: 'is_active' });
-    rule.form.setFieldState('operator', (s) => {
-      s.value = 'is';
-    });
-    rule.form.setFieldState('threshold', (s) => {
-      s.value = true;
-    });
-    rule.onOk();
-    // Confirm the group
-    group.onOk();
-    expect(workspace.coordination.editingGroupId.value).toBeNull();
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
-    expect(group.coordination.editingRuleId.value).toBeNull();
-    expect(rule.state.value).toBe(SchedulerState.LOCKED);
-  });
-
   it('Group onRemove triggers removeGroup in workspace', () => {
     const workspace = makeWorkspace();
     const group = workspace.addGroup()!;
@@ -154,14 +101,6 @@ describe('RuleWorkspaceScheduler - removeGroup', () => {
     expect(workspace.groups.value).toEqual([]);
   });
 
-  it('removeGroup clears editingGroupId if removed group was editing', () => {
-    const workspace = makeWorkspace();
-    const group = workspace.addGroup()!;
-    expect(workspace.coordination.editingGroupId.value).toBe(group.id);
-    workspace.removeGroup(group.id);
-    expect(workspace.coordination.editingGroupId.value).toBeNull();
-  });
-
   it('removeGroup on non-existent id is a no-op', () => {
     const workspace = makeWorkspace();
     expect(() => workspace.removeGroup('nope')).not.toThrow();
@@ -169,14 +108,13 @@ describe('RuleWorkspaceScheduler - removeGroup', () => {
 });
 
 describe('RuleWorkspaceScheduler - hydrateGroup', () => {
-  it('hydrateGroup restores group in LOCKED state', () => {
+  it('hydrateGroup restores group with rules in LOCKED state', () => {
     const workspace = makeWorkspace();
     workspace.hydrateGroup({
       id: 'group-1',
       rules: [{ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true }],
     });
     const group = workspace.groups.value[0];
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
     expect(group.rules.value[0].state.value).toBe(SchedulerState.LOCKED);
   });
 

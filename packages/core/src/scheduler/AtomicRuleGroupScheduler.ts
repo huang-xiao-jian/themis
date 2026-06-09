@@ -1,9 +1,8 @@
-import { computed, effect, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
+import { computed, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
 import { nanoid } from 'nanoid';
 import type { AtomicRule, AtomicRuleGroup } from '../dsl/AtomicRule';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
 import { GroupCoordinationEventType } from '../dsl/GroupCoordinationEventType';
-import { SchedulerState } from '../dsl/SchedulerState';
 import { WorkspaceCoordinationEventType } from '../dsl/WorkspaceCoordinationEventType';
 import { FactorOptionsInferrer } from '../inferrer/FactorOptionsInferrer';
 import type { Inferrers } from './AtomicRuleForm';
@@ -19,7 +18,6 @@ type DisposeFn = () => void;
  * 管理原子规则集合，并实现规则配置约束：
  * - 特定规则因子仅允许配置一次（通过 usedFactors + factors.disabled 实现）
  * - 原子规则最大数量等同于规则因子的数量（通过 canAddRule 暴露）
- * - 编辑态 / 锁定态状态通过 computed 从 WorkspaceCoordination.editingGroupId 派生
  * - 组内不支持并行编辑，最多 1 个 Rule 处于编辑态；存在编辑中的 Rule 时禁用 addRule
  */
 export class AtomicRuleGroupScheduler {
@@ -33,10 +31,8 @@ export class AtomicRuleGroupScheduler {
   readonly id: string;
   /** 已创建的规则实例列表 */
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
-  /** 当前状态（编辑态 / 锁定态），通过 computed 从 WorkspaceCoordination.editingGroupId 派生 */
-  readonly state: ReadonlySignal<SchedulerState>;
-  /** 是否处于编辑态（派生信号） */
-  readonly editable: ReadonlySignal<boolean>;
+  /** 是否可继续添加原子规则 */
+  readonly canAddRule: ReadonlySignal<boolean>;
 
   /**
    * Group 级协调实体（Group → Rule 协议）
@@ -47,9 +43,6 @@ export class AtomicRuleGroupScheduler {
    * - coordination.bus：Rule 上行事件总线（OK | EDIT | CANCEL | REMOVE）
    */
   readonly coordination: GroupCoordination;
-
-  /** 是否可继续添加原子规则 */
-  readonly canAddRule: ReadonlySignal<boolean>;
 
   private readonly factorOptionsInferrer = new FactorOptionsInferrer();
   private readonly inferrers: Inferrers;
@@ -67,14 +60,6 @@ export class AtomicRuleGroupScheduler {
     this.snapshots = snapshot?.rules ?? [];
     this.inferrers = inferrers;
     this.workspaceCoordination = workspaceCoordination;
-
-    // 状态：从 WorkspaceCoordination 的 editingGroupId computed 派生
-    this.state = computed<SchedulerState>(() =>
-      workspaceCoordination.editingGroupId.value === this.id
-        ? SchedulerState.EDITING
-        : SchedulerState.LOCKED
-    );
-    this.editable = computed<boolean>(() => this.state.value === SchedulerState.EDITING);
 
     // 初始化 rules 信号（空集合）
     this.rules = signal<readonly AtomicRuleScheduler[]>([]);
@@ -100,9 +85,7 @@ export class AtomicRuleGroupScheduler {
           workspaceCoordination.allFactors.value,
           this.usedFactors.value
         )
-      ),
-      // editable 传递 Group 级编辑态，Rule 级状态以此为前置约束
-      this.editable
+      )
     );
 
     // 从 snapshot 构造初始 rule scheduler
@@ -116,27 +99,18 @@ export class AtomicRuleGroupScheduler {
         this.rules.value.length < workspaceCoordination.allFactors.value.length &&
         this.coordination.editingRuleId.value === null
     );
-
-    this.disposers.push(
-      effect(() => {
-        if (this.state.value === SchedulerState.LOCKED) {
-          // 级联关闭规则编辑态
-          this.coordination.editingRuleId.value = null;
-        }
-      })
-    );
   }
 
   /**
    * 创建原子规则调度器（新建场景）
    *
-   * 仅 Group 处于编辑态时允许调用；新建的 Rule 默认进入编辑态
+   * 新建的 Rule 默认进入编辑态
    */
   addRule(): AtomicRuleScheduler | undefined {
     if (this.destroyed) {
       throw new Error(`[sisyphus] AtomicRuleGroupScheduler "${this.id}" is destroyed.`);
     }
-    if (this.state.value !== SchedulerState.EDITING || !this.canAddRule.value) {
+    if (!this.canAddRule.value) {
       return undefined;
     }
     const newId = nanoid();
@@ -217,46 +191,6 @@ export class AtomicRuleGroupScheduler {
   }
 
   /**
-   * 确认配置规则（用户行为驱动）
-   *
-   * 内部判断规则组配置是否满足约束，然后发射 OK 事件（上行到 Workspace 的 bus）
-   */
-  onOk = (): void => {
-    if (this.destroyed) return;
-    if (!this.validate()) return;
-    this.workspaceCoordination.bus.emit(WorkspaceCoordinationEventType.OK, {
-      type: WorkspaceCoordinationEventType.OK,
-      sourceId: this.id,
-    });
-  };
-
-  /**
-   * 激活配置编辑（用户行为驱动）
-   *
-   * 发射 EDIT 事件（上行到 Workspace 的 bus）
-   */
-  onEdit = (): void => {
-    if (this.destroyed) return;
-    this.workspaceCoordination.bus.emit(WorkspaceCoordinationEventType.EDIT, {
-      type: WorkspaceCoordinationEventType.EDIT,
-      sourceId: this.id,
-    });
-  };
-
-  /**
-   * 取消配置编辑（用户行为驱动）
-   *
-   * 发射 CANCEL 事件（上行到 Workspace 的 bus）
-   */
-  onCancel = (): void => {
-    if (this.destroyed) return;
-    this.workspaceCoordination.bus.emit(WorkspaceCoordinationEventType.CANCEL, {
-      type: WorkspaceCoordinationEventType.CANCEL,
-      sourceId: this.id,
-    });
-  };
-
-  /**
    * 请求移除自身（用户行为驱动）
    *
    * 发射 REMOVE 事件（上行到 Workspace 的 bus），父级负责实际移除并清理事件订阅
@@ -287,7 +221,7 @@ export class AtomicRuleGroupScheduler {
   }
 
   isEmpty(): boolean {
-    return this.rules.value.length === 0;
+    return !this.rules.value.some((r) => r.rule.value !== null);
   }
 
   /** 订阅 Rule 事件（通过 GroupCoordination.bus，需 sourceId 过滤） */

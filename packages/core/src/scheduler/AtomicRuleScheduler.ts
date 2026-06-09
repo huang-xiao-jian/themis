@@ -14,8 +14,7 @@ type DisposeFn = () => void;
  * 暴露只读状态信号、Formily 表单委托，以及用户行为接收入口。
  *
  * 状态派生规则：
- * - Group 只读时（editable=false），Rule 始终为 LOCKED
- * - Group 可编辑时（editable=true），由 editingRuleId 决定是否可编辑
+ * - 由 editingRuleId 决定是否可编辑：editingRuleId === this.id → EDITING，否则 → LOCKED
  *
  * 内部将调度器状态同步到 Formily Form 的 pattern 属性。
  */
@@ -23,9 +22,7 @@ export class AtomicRuleScheduler {
   readonly id: string;
   readonly form: AtomicRuleForm;
 
-  /** 是否处于交互态，限制范围内全部操作，主要受限于 Group 的状态 */
-  readonly interactive: ReadonlySignal<boolean>;
-  /** 当前状态（编辑态 / 锁定态），通过 computed 从 Group 的 editable + editingRuleId 派生 */
+  /** 当前状态（编辑态 / 锁定态），通过 computed 从 Group 的 editingRuleId 派生 */
   readonly state: ReadonlySignal<SchedulerState>;
   /** 是否处于编辑态（派生信号，便于视图层绑定） */
   readonly editable: ReadonlySignal<boolean>;
@@ -56,7 +53,6 @@ export class AtomicRuleScheduler {
     });
 
     // 状态：从 GroupCoordination 的 editingRuleId computed 派生
-    this.interactive = computed<boolean>(() => coordination.interactive.value);
     this.state = computed<SchedulerState>(() =>
       coordination.editingRuleId.value === this.id ? SchedulerState.EDITING : SchedulerState.LOCKED
     );
@@ -99,7 +95,6 @@ export class AtomicRuleScheduler {
    */
   onOk = (): void => {
     if (this.destroyed) return;
-    if (!this.coordination.interactive.value) return;
     if (!this.validate()) return;
     this.rule.value = {
       id: this.id,
@@ -120,7 +115,6 @@ export class AtomicRuleScheduler {
    */
   onEdit = (): void => {
     if (this.destroyed) return;
-    if (!this.coordination.interactive.value) return;
     this.coordination.bus.emit(GroupCoordinationEventType.EDIT, {
       type: GroupCoordinationEventType.EDIT,
       sourceId: this.id,

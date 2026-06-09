@@ -26,9 +26,8 @@ function makeInferrers() {
   };
 }
 
-function makeGroup(editingGroupId?: string | null, snapshot?: typeof SAMPLE_GROUP) {
+function makeGroup(snapshot?: typeof SAMPLE_GROUP) {
   const coordination = createWorkspaceCoordination(ALL_FACTORS);
-  coordination.editingGroupId.value = editingGroupId ?? null;
   return new AtomicRuleGroupScheduler('group-1', coordination, makeInferrers(), snapshot);
 }
 
@@ -48,22 +47,10 @@ describe('AtomicRuleGroupScheduler - creation', () => {
   });
 
   it('restores rules from snapshot', () => {
-    const group = makeGroup(null, SAMPLE_GROUP);
+    const group = makeGroup(SAMPLE_GROUP);
     expect(group.rules.value).toHaveLength(2);
     expect(group.rules.value[0]).toBeInstanceOf(AtomicRuleScheduler);
     expect(group.rules.value[0].id).toBe('rule-1');
-  });
-
-  it('state is LOCKED by default when editingGroupId does not match', () => {
-    const group = makeGroup(null);
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
-    expect(group.editable.value).toBe(false);
-  });
-
-  it('state is EDITING when editingGroupId matches', () => {
-    const group = makeGroup('group-1');
-    expect(group.state.value).toBe(SchedulerState.EDITING);
-    expect(group.editable.value).toBe(true);
   });
 
   it('coordination.editingRuleId is null by default', () => {
@@ -74,22 +61,15 @@ describe('AtomicRuleGroupScheduler - creation', () => {
 
 describe('AtomicRuleGroupScheduler - addRule', () => {
   it('addRule creates a new rule and sets editingRuleId', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule();
     expect(rule).toBeInstanceOf(AtomicRuleScheduler);
     expect(group.rules.value).toHaveLength(1);
     expect(group.coordination.editingRuleId.value).toBe(rule!.id);
   });
 
-  it('addRule returns undefined when not in EDITING state', () => {
-    const group = makeGroup(null); // LOCKED
-    const result = group.addRule();
-    expect(result).toBeUndefined();
-    expect(group.rules.value).toEqual([]);
-  });
-
   it('addRule mutex: second addRule auto-locks first rule', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule1 = group.addRule()!;
     expect(group.coordination.editingRuleId.value).toBe(rule1.id);
     // Lock rule1 via onOk first to allow second addRule
@@ -109,18 +89,18 @@ describe('AtomicRuleGroupScheduler - addRule', () => {
 
 describe('AtomicRuleGroupScheduler - canAddRule', () => {
   it('canAddRule is true when no rules and no editing rule', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     expect(group.canAddRule.value).toBe(true);
   });
 
   it('canAddRule is false when editing rule exists', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     group.addRule();
     expect(group.canAddRule.value).toBe(false);
   });
 
   it('canAddRule is true after locking the editing rule', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
     rule.onCancel();
     expect(group.canAddRule.value).toBe(true);
@@ -129,7 +109,7 @@ describe('AtomicRuleGroupScheduler - canAddRule', () => {
 
 describe('AtomicRuleGroupScheduler - event handling', () => {
   it('Rule onEdit sets editingRuleId', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
     rule.onCancel(); // lock first
     rule.onEdit();
@@ -138,7 +118,7 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
   });
 
   it('Rule onCancel clears editingRuleId', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
     rule.onCancel();
     expect(group.coordination.editingRuleId.value).toBeNull();
@@ -146,7 +126,7 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
   });
 
   it('Rule onEdit mutex: switching to EDITING auto-locks previous', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule1 = group.addRule()!;
     rule1.onCancel(); // lock rule1
     const rule2 = group.addRule()!;
@@ -160,7 +140,7 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
     expect(rule2.state.value).toBe(SchedulerState.EDITING);
   });
   it('Rule onOk locks the editing rule', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
     // Set up valid rule data
     rule.form.setValues({ name: 'is_active' });
@@ -176,51 +156,14 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
   });
 
   it('Rule onCancel locks the editing rule', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
     rule.onCancel();
     expect(group.coordination.editingRuleId.value).toBeNull();
   });
 
-  it('Group onOk emits OK event to parent (workspace coordination bus)', () => {
-    const workspaceCoordination = createWorkspaceCoordination(ALL_FACTORS);
-    workspaceCoordination.editingGroupId.value = 'group-1';
-    const group = makeGroupWithCoordination(workspaceCoordination);
-    const handler = vi.fn();
-    workspaceCoordination.bus.on(WorkspaceCoordinationEventType.OK, handler);
-    // Add and confirm a rule
-    const rule = group.addRule()!;
-    rule.form.setValues({ name: 'is_active' });
-    rule.form.setFieldState('operator', (s) => {
-      s.value = 'is';
-    });
-    rule.form.setFieldState('threshold', (s) => {
-      s.value = true;
-    });
-    rule.onOk();
-    group.onOk();
-    expect(handler).toHaveBeenCalledWith({
-      type: WorkspaceCoordinationEventType.OK,
-      sourceId: 'group-1',
-    });
-  });
-
-  it('Group onCancel clears editingGroupId', () => {
-    const workspaceCoordination = createWorkspaceCoordination(ALL_FACTORS);
-    workspaceCoordination.editingGroupId.value = 'group-1';
-    const group = makeGroupWithCoordination(workspaceCoordination);
-    const handler = vi.fn();
-    workspaceCoordination.bus.on(WorkspaceCoordinationEventType.CANCEL, handler);
-    group.onCancel();
-    expect(handler).toHaveBeenCalledWith({
-      type: WorkspaceCoordinationEventType.CANCEL,
-      sourceId: 'group-1',
-    });
-  });
-
   it('Group onRemove emits REMOVE event', () => {
     const workspaceCoordination = createWorkspaceCoordination(ALL_FACTORS);
-    workspaceCoordination.editingGroupId.value = 'group-1';
     const group = makeGroupWithCoordination(workspaceCoordination);
     const handler = vi.fn();
     workspaceCoordination.bus.on(WorkspaceCoordinationEventType.REMOVE, handler);
@@ -232,7 +175,7 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
   });
 
   it('Rule onRemove triggers removeRule in parent group', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
     rule.onRemove();
     expect(group.rules.value).toEqual([]);
@@ -241,14 +184,14 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
 
 describe('AtomicRuleGroupScheduler - removeRule', () => {
   it('removeRule works in any state', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
     group.removeRule(rule.id);
     expect(group.rules.value).toEqual([]);
   });
 
   it('removeRule clears editingRuleId if removed rule was editing', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
     expect(group.coordination.editingRuleId.value).toBe(rule.id);
     group.removeRule(rule.id);
@@ -258,7 +201,7 @@ describe('AtomicRuleGroupScheduler - removeRule', () => {
 
 describe('AtomicRuleGroupScheduler - hydrateRule', () => {
   it('hydrateRule restores rule in LOCKED state', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     group.hydrateRule({ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true });
     const rule = group.rules.value[0];
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
@@ -273,7 +216,7 @@ describe('AtomicRuleGroupScheduler - hydrateRule', () => {
 
 describe('AtomicRuleGroupScheduler - factor uniqueness', () => {
   it('confirmed rule factor is marked disabled in coordination.factors', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     const rule = group.addRule()!;
 
     // 确认规则前，所有因子均可用
@@ -297,7 +240,7 @@ describe('AtomicRuleGroupScheduler - factor uniqueness', () => {
   });
 
   it('snapshot-restored rule factor is marked disabled', () => {
-    const group = makeGroup(null, SAMPLE_GROUP);
+    const group = makeGroup(SAMPLE_GROUP);
     const factors = group.coordination.factors.value;
     // SAMPLE_GROUP 中包含 employee 和 deliver_city 两条规则
     const employee = factors.find((f) => f.value === 'employee');
@@ -309,22 +252,22 @@ describe('AtomicRuleGroupScheduler - factor uniqueness', () => {
 
 describe('AtomicRuleGroupScheduler - validate & build', () => {
   it('validate returns false when no rules', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     expect(group.validate()).toBe(false);
   });
 
   it('validate returns true when all rules are confirmed', () => {
-    const group = makeGroup(null, SAMPLE_GROUP);
+    const group = makeGroup(SAMPLE_GROUP);
     expect(group.validate()).toBe(true);
   });
 
   it('build throws when incomplete', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     expect(() => group.build()).toThrow(/incomplete/);
   });
 
   it('build returns AtomicRuleGroup when valid', () => {
-    const group = makeGroup(null, SAMPLE_GROUP);
+    const group = makeGroup(SAMPLE_GROUP);
     const result = group.build();
     expect(result.id).toBe('group-1');
     expect(result.rules).toHaveLength(2);
@@ -339,7 +282,7 @@ describe('AtomicRuleGroupScheduler - destroy', () => {
   });
 
   it('addRule throws after destroy', () => {
-    const group = makeGroup('group-1');
+    const group = makeGroup();
     group.destroy();
     expect(() => group.addRule()).toThrow(/destroyed/);
   });

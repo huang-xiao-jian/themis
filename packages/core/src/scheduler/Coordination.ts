@@ -14,11 +14,8 @@ import { WorkspaceCoordinationEventType } from '../dsl/WorkspaceCoordinationEven
  */
 export type EventBus<Events extends EventsMap> = Emitter<Events>;
 
-/** Workspace 级事件映射（Group → Workspace，OK | EDIT | CANCEL | REMOVE） */
+/** Workspace 级事件映射（Group → Workspace，REMOVE） */
 interface WorkspaceCoordinationEvents {
-  [WorkspaceCoordinationEventType.OK]: (e: WorkspaceCoordinationEvent) => void;
-  [WorkspaceCoordinationEventType.EDIT]: (e: WorkspaceCoordinationEvent) => void;
-  [WorkspaceCoordinationEventType.CANCEL]: (e: WorkspaceCoordinationEvent) => void;
   [WorkspaceCoordinationEventType.REMOVE]: (e: WorkspaceCoordinationEvent) => void;
 }
 
@@ -33,19 +30,16 @@ interface GroupCoordinationEvents {
 /**
  * Workspace 级协调实体（Workspace → Group 协议）
  *
- * 事件总线（上行）：Group → Workspace，有效事件类型 OK | EDIT | CANCEL | REMOVE
+ * 事件总线（上行）：Group → Workspace，有效事件类型 REMOVE
  * 信号通道（下行）：Workspace → Group
- * - 子级 AtomicRuleGroupScheduler 通过 computed 从 editingGroupId 派生 state
  * - 子级通过 allFactors 共享规则因子定义
  */
 export interface WorkspaceCoordination {
   // ── 事件总线（上行：Group → Workspace）────────────
-  /** 事件总线，有效事件类型：OK | EDIT | CANCEL | REMOVE */
+  /** 事件总线，有效事件类型：REMOVE */
   readonly bus: EventBus<WorkspaceCoordinationEvents>;
 
   // ── 信号通道（下行：Workspace → Group）────────────
-  /** 当前处于编辑态的 Group ID（null 表示无编辑中的 Group） */
-  readonly editingGroupId: Signal<string | null>;
   /** 可用规则因子定义列表（Workspace 级共享） */
   readonly allFactors: Signal<readonly RuleFactorDefinition[]>;
 }
@@ -67,8 +61,6 @@ export interface GroupCoordination {
   readonly editingRuleId: Signal<string | null>;
   /** 可用规则因子集合（源自 WorkspaceCoordination.allFactors，组内已使用的因子标记 disabled） */
   readonly factors: ReadonlySignal<readonly FieldDataSource[]>;
-  /** AtomicRuleScheduler 是否处于交互态，受限于 Group 的状态 */
-  readonly interactive: ReadonlySignal<boolean>;
 }
 
 /**
@@ -81,7 +73,6 @@ export function createWorkspaceCoordination(
 ): WorkspaceCoordination {
   return {
     bus: createNanoEvents<WorkspaceCoordinationEvents>(),
-    editingGroupId: signal<string | null>(null),
     allFactors: signal<readonly RuleFactorDefinition[]>([...factors]),
   };
 }
@@ -92,13 +83,11 @@ export function createWorkspaceCoordination(
  * 由 AtomicRuleGroupScheduler 持有，供 AtomicRuleScheduler 消费
  */
 export function createGroupCoordination(
-  factors: ReadonlySignal<readonly FieldDataSource[]>,
-  interactive: ReadonlySignal<boolean>
+  factors: ReadonlySignal<readonly FieldDataSource[]>
 ): GroupCoordination {
   return {
     bus: createNanoEvents<GroupCoordinationEvents>(),
     editingRuleId: signal<string | null>(null),
     factors,
-    interactive,
   };
 }

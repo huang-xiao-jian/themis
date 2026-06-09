@@ -52,9 +52,8 @@ describe('End-to-end: create scenario', () => {
   it('completes the full workflow: addGroup → addRule → form → onOk → lock', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
 
-    // addGroup: new group enters EDITING
+    // addGroup
     const group = workspace.addGroup()!;
-    expect(group.state.value).toBe(SchedulerState.EDITING);
 
     // addRule: new rule enters EDITING
     const rule = group.addRule()!;
@@ -99,10 +98,6 @@ describe('End-to-end: create scenario', () => {
       ],
     });
 
-    // onOk: confirm group → locks
-    group.onOk();
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
-
     // validate & build
     expect(workspace.validate()).toBe(true);
     const result = workspace.build();
@@ -135,7 +130,6 @@ describe('End-to-end: edit scenario', () => {
       .build();
 
     const group = workspace.groups.value[0];
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
     expect(group.rules.value).toHaveLength(2);
     expect(group.rules.value[0].state.value).toBe(SchedulerState.LOCKED);
     expect(group.rules.value[0].rule.value).toEqual(editGroups[0].rules[0]);
@@ -148,11 +142,7 @@ describe('End-to-end: edit scenario', () => {
       .withRuleGroups(editGroups)
       .build();
 
-    // onEdit to enter EDITING
     const group = workspace.groups.value[0];
-    group.onEdit();
-    expect(group.state.value).toBe(SchedulerState.EDITING);
-
     const rule = group.rules.value[0];
     rule.onEdit();
     expect(rule.state.value).toBe(SchedulerState.EDITING);
@@ -168,9 +158,6 @@ describe('End-to-end: edit scenario', () => {
     });
     rule.onOk();
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
-
-    group.onOk();
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
   });
 
   it('build returns restored data without modifications', () => {
@@ -202,7 +189,6 @@ describe('End-to-end: mutual exclusion', () => {
     });
 
     const group = workspace.groups.value[0];
-    group.onEdit();
 
     // Edit rule-1
     const rule1 = group.rules.value[0];
@@ -217,37 +203,15 @@ describe('End-to-end: mutual exclusion', () => {
     expect(group.canAddRule.value).toBe(false);
   });
 
-  it('parallel editing mutex at Workspace level', () => {
+  it('canAddGroup is false when empty-rule group exists', () => {
     const workspace = createRuleWorkspace({
       factors,
       fetchers,
-      ruleGroups: [
-        {
-          id: 'group-1',
-          rules: [{ id: 'rule-1', name: 'is_active', operator: 'is', threshold: true }],
-        },
-      ],
     });
 
-    // editingGroupId is set by snapshot loading, but canAddGroup should be false when editing
-    const group = workspace.groups.value[0];
-    group.onEdit();
+    // addGroup creates an empty group, which blocks canAddGroup
+    workspace.addGroup();
     expect(workspace.canAddGroup.value).toBe(false);
-  });
-});
-
-describe('End-to-end: cascade lock', () => {
-  it('workspace Group onOk cascades to group and rule', () => {
-    const workspace = createRuleWorkspace({ factors, fetchers });
-    const group = workspace.addGroup()!;
-    const rule = group.addRule()!;
-
-    expect(group.state.value).toBe(SchedulerState.EDITING);
-    expect(rule.state.value).toBe(SchedulerState.EDITING);
-
-    group.onCancel();
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
-    expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 });
 
@@ -265,7 +229,6 @@ describe('End-to-end: removeRule in LOCKED state', () => {
     });
 
     const group = workspace.groups.value[0];
-    expect(group.state.value).toBe(SchedulerState.LOCKED);
     group.removeRule('rule-1');
     expect(group.rules.value).toEqual([]);
   });

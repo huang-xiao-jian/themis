@@ -57,9 +57,8 @@ const fetchers = [
 // 3. 构建 RuleWorkspace
 const workspace = new RuleWorkspaceBuilder().withFactors(factors).withFetchers(fetchers).build();
 
-// 4. 创建规则组（新建的 Group 默认进入编辑态）
+// 4. 创建规则组
 const group = workspace.addGroup();
-// group.state.value === SchedulerState.EDITING
 
 // 5. 创建原子规则（新建的 Rule 默认进入编辑态）
 const rule = group.addRule();
@@ -75,9 +74,7 @@ const rule = group.addRule();
 rule.onOk();
 // rule.state.value === SchedulerState.LOCKED
 
-// 8. 确认规则组配置，进入锁定态（Group 接收确认指令，内部校验通过后由 Workspace 写入状态）
-group.onOk();
-// group.state.value === SchedulerState.LOCKED
+// 8. 验证并构建（build 阶段执行业务校验）
 
 // 9. 验证并构建（build 阶段执行业务校验）
 if (workspace.validate()) {
@@ -87,11 +84,9 @@ if (workspace.validate()) {
 }
 
 // 10. 编辑已有配置（通过 onEdit 事件切换到编辑态）
-group.onEdit();
 rule.onEdit();
 // 通过 rule.form（Formily Form）驱动表单修改
 rule.onOk();
-group.onOk();
 
 // 11. 锁定态下仍可删除规则
 group.removeRule(rule.id); // 删除不受锁定态限制
@@ -123,9 +118,8 @@ const workspace = new RuleWorkspaceBuilder()
   .withRuleGroups(groups)
   .build();
 
-// 存量配置默认进入锁定态
+// 获取规则组
 const group = workspace.pickGroup('group-1');
-// group.state.value === SchedulerState.LOCKED
 
 const rule1 = group.pickRule('rule-1');
 // rule1.state.value === SchedulerState.LOCKED
@@ -134,11 +128,9 @@ const rule2 = group.pickRule('rule-2');
 // rule2.state.value === SchedulerState.LOCKED
 
 // 用户通过 onEdit 事件切换到编辑态
-group.onEdit();
 rule1.onEdit();
 // 通过 rule1.form（Formily Form）驱动表单修改
 rule1.onOk();
-group.onOk();
 
 // 编辑态下的并行编辑互斥（Group 级别约束，与 Workspace 级别独立）
 rule1.onEdit(); // rule1 进入编辑态
