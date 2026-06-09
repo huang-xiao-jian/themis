@@ -1,101 +1,101 @@
-# 应用层
+# Application Layer
 
-编排领域逻辑，负责规则配置的数据、行为封装
+Orchestrates domain logic and encapsulates rule-configuration data and behavior.
 
-## 前置依赖
+## Prerequisites
 
-- [规则配置内核](./spec.md)
-- [领域层](./domain.md)
-- [规则因子解释器](../interpreter.md)
+- [Core spec](./spec.md)
+- [Domain layer](./domain.md)
+- [Rule factor interpreter](../interpreter.md)
 
-## 层级间协议
+## Layer-to-Layer Protocol
 
-三层调度器（`RuleWorkspaceScheduler` → `AtomicRuleGroup` → `AtomicRuleScheduler`）之间通过两个通道协作：
+The three schedulers (`RuleWorkspaceScheduler` → `AtomicRuleGroup` → `AtomicRuleScheduler`) collaborate through two channels:
 
-- **事件总线（上行）**：子级发射协调事件通知父级用户行为的发生，事件订阅机制由依赖库（`nanoevents`）处理
-- **信号通道（下行）**：父级通过层级协调实体封装共享状态，子级通过 `computed` 派生自身状态或者 `effect` 执行副作用，父级不直接操作子级
+- **Event bus (upstream)**: child components emit coordination events to notify the parent that a user action has occurred. Event subscription is handled by the dependency library (`nanoevents`).
+- **Signal channel (downstream)**: the parent wraps shared state in hierarchical coordination entities. Children derive their own state through `computed` or run side effects through `effect`; the parent does not directly manipulate the child.
 
-每层协议显式包含事件总线与信号通道两部分，构成完整的层级通信契约。
+Each layer protocol explicitly contains both the event bus and the signal channel, forming a complete hierarchical communication contract.
 
-### 层级协调实体
+### Hierarchical Coordination Entity
 
-每对父子级调度器之间使用独立的协调实体，显式封装事件总线与信号通道两部分，而非单个协议适用于多层级。每个父级调度器持有一个协调实体，子级通过该实体访问共享状态：
+Each parent-child scheduler pair uses an independent coordination entity to explicitly encapsulate both the event bus and the signal channel, rather than applying a single protocol across multiple levels. Each parent scheduler owns a coordination entity, and the child accesses shared state through it:
 
-> 事件是子级向父级通信的唯一载体，与用户行为入口对应。每层协议独立定义事件类型与事件接口，确保层级间通信契约自包含。
+> Events are the only carrier for child-to-parent communication and correspond to user action entry points. Each layer protocol defines its own event types and event interfaces so that the communication contract is self-contained.
 
-> **事件发射器**：子级 `Scheduler` 内部通过依赖库（`nanoevents`）提供事件订阅 / 取消订阅能力。`onOk`/`onEdit`/`onCancel`/`onRemove` 内部触发事件发射，父级在创建子级时自动订阅，在销毁 / 移除子级时自动取消订阅。具体 `API` 由依赖库决定。
+> **Event emitter**: The child `Scheduler` uses the dependency library (`nanoevents`) to provide event subscribe / unsubscribe capabilities. `onOk` / `onEdit` / `onCancel` / `onRemove` emit events internally. The parent subscribes when the child is created and unsubscribes automatically when the child is destroyed or removed. The concrete `API` is determined by the dependency library.
 
-#### WorkspaceCoordination（Workspace → Group 协议）
+#### WorkspaceCoordination (Workspace → Group protocol)
 
-`RuleWorkspaceScheduler` 持有，供 `AtomicRuleGroup` 消费。
+Owned by `RuleWorkspaceScheduler` and consumed by `AtomicRuleGroup`.
 
-**事件总线（上行：Group → Workspace）**：
+**Event bus (upstream: Group → Workspace)**:
 
-| 事件类型 | 触发入口                     | 父级处理逻辑                    |
-| -------- | ---------------------------- | ------------------------------- |
-| `REMOVE` | `AtomicRuleGroup.onRemove()` | 移除该 Group 实例，清理事件订阅 |
+| Event type | Trigger entry point          | Parent handling logic                                |
+| ---------- | ---------------------------- | ---------------------------------------------------- |
+| `REMOVE`   | `AtomicRuleGroup.onRemove()` | Remove the Group instance and clean up subscriptions |
 
-**信号通道（下行：Workspace → Rule）**：无
+**Signal channel (downstream: Workspace → Rule)**: none
 
 ```ts
 /**
- * Workspace 级协调事件类型（Group → Workspace）
+ * Workspace-level coordination event type (Group → Workspace)
  *
- * - REMOVE：用户请求移除自身（onRemove）
+ * - REMOVE: user requests self-removal (onRemove)
  */
 enum WorkspaceCoordinationEventType {
   REMOVE = 'remove',
 }
 
-/** Workspace 级协调事件（Group → Workspace，单向） */
+/** Workspace-level coordination event (Group → Workspace, one-way) */
 interface WorkspaceCoordinationEvent {
-  /** 事件类型 */
+  /** Event type */
   readonly type: WorkspaceCoordinationEventType;
-  /** 事件来源 Group 标识 */
+  /** Source Group identifier */
   readonly sourceId: string;
 }
 
 /**
- * Workspace 级协调实体（Workspace → Group 协议）
+ * Workspace-level coordination entity (Workspace → Group protocol)
  *
- * 事件总线（上行）：Group → Workspace，有效事件类型 REMOVE
- * 信号通道（下行）：Workspace → Group
- * - 子级通过 allFactors 共享规则因子定义
+ * Event bus (upstream): Group → Workspace, valid event type REMOVE
+ * Signal channel (downstream): Workspace → Group
+ * - children share rule factor definitions through allFactors
  */
 interface WorkspaceCoordination {
-  // ── 事件总线（上行：Group → Workspace）────────────
-  /** 事件总线，有效事件类型：REMOVE（具体类型由依赖库 nanoevents 决定） */
+  // ── Event bus (upstream: Group → Workspace)────────────
+  /** Event bus; valid event type: REMOVE (the concrete type is determined by nanoevents) */
   readonly bus: EventBus;
 
-  // ── 信号通道（下行：Workspace → Group）────────────
-  /** 可用规则因子定义列表（Workspace 级共享） */
+  // ── Signal channel (downstream: Workspace → Group)────────────
+  /** Available rule factor definition list (shared at the Workspace level) */
   readonly allFactors: Signal<readonly RuleFactorDefinition[]>;
 }
 ```
 
-#### GroupCoordination（Group → Rule 协议）
+#### GroupCoordination (Group → Rule protocol)
 
-`AtomicRuleGroup` 持有，供 `AtomicRuleScheduler` 消费。
+Owned by `AtomicRuleGroup` and consumed by `AtomicRuleScheduler`.
 
-**事件总线（上行：Rule → Group）**：
+**Event bus (upstream: Rule → Group)**:
 
-| 事件类型 | 触发入口                         | 父级处理逻辑                                      |
-| -------- | -------------------------------- | ------------------------------------------------- |
-| `OK`     | `AtomicRuleScheduler.onOk()`     | 校验通过后更新 `editingRuleId.value = null`       |
-| `EDIT`   | `AtomicRuleScheduler.onEdit()`   | 应用互斥约束后更新 `editingRuleId.value = ruleId` |
-| `CANCEL` | `AtomicRuleScheduler.onCancel()` | 更新 `editingRuleId.value = null`                 |
-| `REMOVE` | `AtomicRuleScheduler.onRemove()` | 移除该 Rule 实例，清理事件订阅                    |
+| Event type | Trigger entry point              | Parent handling logic                                                        |
+| ---------- | -------------------------------- | ---------------------------------------------------------------------------- |
+| `OK`       | `AtomicRuleScheduler.onOk()`     | After validation passes, update `editingRuleId.value = null`                 |
+| `EDIT`     | `AtomicRuleScheduler.onEdit()`   | Apply mutual-exclusion constraints and update `editingRuleId.value = ruleId` |
+| `CANCEL`   | `AtomicRuleScheduler.onCancel()` | Update `editingRuleId.value = null`                                          |
+| `REMOVE`   | `AtomicRuleScheduler.onRemove()` | Remove the Rule instance and clean up subscriptions                          |
 
-**信号通道（下行：Group → Rule）**：
+**Signal channel (downstream: Group → Rule)**:
 
 ```ts
 /**
- * Group 级协调事件类型（Rule → Group）
+ * Group-level coordination event type (Rule → Group)
  *
- * - OK：用户确认配置（onOk）
- * - EDIT：用户请求进入编辑态（onEdit）
- * - CANCEL：用户取消编辑（onCancel）
- * - REMOVE：用户请求移除自身（onRemove）
+ * - OK: user confirms configuration (onOk)
+ * - EDIT: user requests to enter editing state (onEdit)
+ * - CANCEL: user cancels editing (onCancel)
+ * - REMOVE: user requests self-removal (onRemove)
  */
 enum GroupCoordinationEventType {
   OK = 'ok',
@@ -104,84 +104,86 @@ enum GroupCoordinationEventType {
   REMOVE = 'remove',
 }
 
-/** Group 级协调事件（Rule → Group，单向） */
+/** Group-level coordination event (Rule → Group, one-way) */
 interface GroupCoordinationEvent {
-  /** 事件类型 */
+  /** Event type */
   readonly type: GroupCoordinationEventType;
-  /** 事件来源 Rule 标识 */
+  /** Source Rule identifier */
   readonly sourceId: string;
 }
 
 /**
- * Group 级协调实体（Group → Rule 协议）
+ * Group-level coordination entity (Group → Rule protocol)
  *
- * 事件总线（上行）：Rule → Group，有效事件类型 OK | EDIT | CANCEL | REMOVE
- * 信号通道（下行）：Group → Rule
- * - 子级 AtomicRuleScheduler 通过 computed 从 editingRuleId 派生 state
- * - 子级通过 factors 获取可用规则因子（组内已用因子标记 disabled，确保因子仅配置一次）
+ * Event bus (upstream): Rule → Group, valid event types OK | EDIT | CANCEL | REMOVE
+ * Signal channel (downstream): Group → Rule
+ * - child AtomicRuleScheduler derives state from editingRuleId via computed
+ * - child uses factors to obtain available rule factors (already-used factors in the group are marked disabled,
+ *   ensuring each factor can only be configured once)
  */
 interface GroupCoordination {
-  // ── 事件总线（上行：Rule → Group）────────────
-  /** 事件总线，有效事件类型：OK | EDIT | CANCEL | REMOVE（具体类型由依赖库 nanoevents 决定） */
+  // ── Event bus (upstream: Rule → Group)────────────
+  /** Event bus; valid event types: OK | EDIT | CANCEL | REMOVE (the concrete type is determined by nanoevents) */
   readonly bus: EventBus;
 
-  // ── 信号通道（下行：Group → Rule）────────────
-  /** 当前处于编辑态的 Rule ID（null 表示无编辑中的 Rule） */
+  // ── Signal channel (downstream: Group → Rule)────────────
+  /** Currently editing Rule ID (null means no rule is being edited) */
   readonly editingRuleId: Signal<string | null>;
-  /** 可用规则因子集合（源自 WorkspaceCoordination.allFactors，组内已使用的因子标记 disabled） */
+  /** Available rule factor set (derived from WorkspaceCoordination.allFactors; already-used factors in the group are marked disabled) */
   readonly factors: ReadonlySignal<readonly FieldDataSource[]>;
 }
 ```
 
-**层级间通信契约一览**：
+**Hierarchical communication contract overview**:
 
-| 协议层级          | 协调实体                | 事件总线（上行）                        | 信号通道（下行） |
-| ----------------- | ----------------------- | --------------------------------------- | ---------------- |
-| Workspace → Group | `WorkspaceCoordination` | `WorkspaceCoordinationEvent`（REMOVE）  | `allFactors`     |
-| Group → Rule      | `GroupCoordination`     | `GroupCoordinationEvent`（OK / REMOVE） | `factors`        |
+| Protocol layer    | Coordination entity     | Event bus (upstream)                       | Signal channel (downstream) |
+| ----------------- | ----------------------- | ------------------------------------------ | --------------------------- |
+| Workspace → Group | `WorkspaceCoordination` | `WorkspaceCoordinationEvent` (`REMOVE`)    | `allFactors`                |
+| Group → Rule      | `GroupCoordination`     | `GroupCoordinationEvent` (`OK` / `REMOVE`) | `factors`                   |
 
-**状态流转路径**：
+**State flow path**:
 
-1. 子级发射事件（如 `emit(OK, ruleId)`），事件类型受层级协议约束
-2. 父级 `handler` 接收事件，按协议定义的处理逻辑更新内部数据
+1. The child emits an event (for example, `emit(OK, ruleId)`), and the event type is constrained by the layer protocol.
+2. The parent `handler` receives the event and updates its internal data according to the protocol-defined handling logic.
 
-事件流转全景（以 Rule 确认为例）：
+Full event flow (using rule confirmation as an example):
 
 ```mermaid
 sequenceDiagram
-  participant U as User（视图层）
+  participant U as User (view layer)
   participant R as AtomicRuleScheduler
   participant G as AtomicRuleGroup
 
-  U->>R: onOk()（事件总线：上行 GroupCoordinationEvent.OK）
+  U->>R: onOk() (event bus: upstream GroupCoordinationEvent.OK)
   activate R
-  R->>R: 内部校验 + 更新数据
-  R->>G: emit(OK, ruleId)（nanoevents）
+  R->>R: Internal validation + data update
+  R->>G: emit(OK, ruleId) (nanoevents)
   deactivate R
 ```
 
-## 调度器状态控制
+## Scheduler State Control
 
-`AtomicRuleScheduler` 引入 **编辑态 / 锁定态** 状态控制，确保用户操作的有序性。
+`AtomicRuleScheduler` introduces **editing state / locked state** control to ensure orderly user operations.
 
 ```ts
 /**
- * 调度器状态枚举
+ * Scheduler state enum
  *
- * 控制 Scheduler 的可编辑性，编辑态允许修改表单字段，锁定态禁止修改（删除不受影响）
+ * Controls Scheduler editability. Editing state allows form fields to be modified,
+ * locked state forbids modification (deletion is not affected).
  */
 enum SchedulerState {
-  /** 编辑态 - 允许修改表单字段 */
+  /** Editing state - allows modification of form fields */
   EDITING = 'editing',
-  /** 锁定态 - 禁止修改表单字段（删除操作不受限制） */
+  /** Locked state - prohibits modification of form fields (deletion is unrestricted) */
   LOCKED = 'locked',
 }
 ```
 
 ```mermaid
 stateDiagram-v2
-  [*] --> EDITING : CREATED（新建）
-  [*] --> LOCKED : HYDRATED（存量）
+  [*] --> EDITING : CREATED (new)
+  [*] --> LOCKED : HYDRATED (existing)
 
   LOCKED --> EDITING : REQUEST_EDIT
   EDITING --> LOCKED : CONFIRMED
@@ -190,87 +192,89 @@ stateDiagram-v2
   EDITING --> [*] : DELETED
   LOCKED --> [*] : DELETED
 
-  note right of LOCKED : 表单字段只读
-  note right of EDITING : 表单字段可编辑
+  note right of LOCKED : Form fields are read-only
+  note right of EDITING : Form fields are editable
 ```
 
-## 调度器规则控制
+## Scheduler Rule Control
 
-### 并行编辑约束
+### Parallel Editing Constraints
 
-- `RuleWorkspaceScheduler` 级别：存在配置规则为空的 `Group` 时，禁用 **新增规则组**
-- `AtomicRuleScheduler` 级别：最多 **1 个 Rule** 处于编辑态，存在编辑中的 `Rule` 时禁用 **新增规则**
+- At the `RuleWorkspaceScheduler` level: if there is a `Group` with an empty rule configuration, disable **adding a new rule group**.
+- At the `AtomicRuleScheduler` level: at most **1 Rule** can be in editing state. When a Rule is being edited, disable **adding a new rule**.
 
-### 业务规则校验
+### Business Rule Validation
 
-`build` 阶段执行业务规则
+Business rules are enforced during the `build` phase:
 
-- `RuleWorkspaceScheduler.build()`：工作空间至少包含 **1 个已配置的规则组**，且每个规则组至少包含 **1 条已配置的原子规则**
-- 校验不通过时 `build()` 抛出异常，调用方应先用 `validate()` 进行前置检查
+- `RuleWorkspaceScheduler.build()`: the workspace must contain at least **1 configured rule group**, and each rule group must contain at least **1 configured atomic rule**.
+- If validation fails, `build()` throws an exception. Callers should use `validate()` first as a pre-check.
 
 ## AtomicRuleScheduler
 
-原子规则调度器。自身状态通过 `computed` 从所属 `AtomicRuleGroup` 的 `GroupCoordination.editingRuleId` 派生，暴露只读状态信号、Formily 表单委托，以及用户行为接收入口。内部将调度器状态同步到 Formily Form 的 `pattern` 属性。
+The atomic rule scheduler derives its own state through `computed` from the `AtomicRuleGroup`'s `GroupCoordination.editingRuleId`, exposes read-only state signals, a Formily form delegate, and user action entry points. Internally, it synchronizes scheduler state to the `pattern` property of the Formily form.
 
-> **协议角色**：事件总线（发射 `GroupCoordinationEvent` 给 Group）+ 信号通道（从 Group 的 `GroupCoordination.editingRuleId` 派生 `state`，通过 `GroupCoordination.factors` 获取可用规则因子）。
+> **Protocol role**: event bus (emits `GroupCoordinationEvent` to the Group) + signal channel (derives `state` from the Group's `GroupCoordination.editingRuleId`, and obtains available rule factors through `GroupCoordination.factors`).
 
 ```ts
 interface AtomicRuleScheduler {
-  // ─── 状态（从 Group.GroupCoordination.editingRuleId computed 派生）──────
-  /** 唯一标识 */
+  // ─── State (derived via computed from Group.GroupCoordination.editingRuleId)──────
+  /** Unique identifier */
   readonly id: string;
   /**
-   * 当前状态（编辑态 / 锁定态）
+   * Current state (editing / locked)
    *
-   * 通过 `computed` 从所属 Group 的 `GroupCoordination.editingRuleId` 派生：
-   * `GroupCoordination.editingRuleId === this.id` → EDITING，否则 → LOCKED
+   * Derived via `computed` from the associated Group's `GroupCoordination.editingRuleId`:
+   * `GroupCoordination.editingRuleId === this.id` → EDITING, otherwise → LOCKED
    */
   readonly state: Signal<SchedulerState>;
-  /** 是否处于编辑态（派生信号，便于视图层绑定） */
+  /** Whether the scheduler is in editing state (derived signal, convenient for view binding) */
   readonly editable: Signal<boolean>;
   /**
-   * 上次用户确认且数据无误时更新的原子规则配置
+   * The atomic rule configuration last confirmed by the user and known to be valid
    *
-   * 与 Formily Form 的不稳定态隔离：Form 字段的实时变化不影响 rule，仅在 onOk() 且内部校验通过后更新。
-   * `build()` 返回值与 `rule.value` 始终一致
+   * Isolated from the unstable Formily form state: live form field changes do not affect rule,
+   * and the rule is updated only after onOk() succeeds and internal validation passes.
+   * `build()` always matches `rule.value`
    */
   readonly rule: Signal<AtomicRule | null>;
-  /** 已确认的原子规则因子名（从 rule 信号 computed 派生） */
+  /** Confirmed atomic rule factor name (derived from the rule signal via computed) */
   readonly factorName: ReadonlySignal<string | null>;
-  /** 关联的表单实例（等效 Formily `Form`，由 createForm 创建，effects 驱动推断联动） */
+  /** Associated form instance (equivalent to Formily `Form`, created by createForm and wired through effects) */
   readonly form: AtomicRuleForm;
 
-  /** 验证配置是否完整可用 */
+  /** Validate whether the configuration is complete and usable */
   validate(): boolean;
-  /** 构建原子规则（返回值与 rule.value 始终一致） */
+  /** Build the atomic rule (the return value always matches `rule.value`) */
   build(): AtomicRule;
 
-  // ─── 用户行为接入（发射 GroupCoordinationEvent 给 Group）────────
+  // ─── User action entry points (emit GroupCoordinationEvent to Group)────────
   /**
-   * 确认规则配置（用户行为驱动）
+   * Confirm rule configuration (user-driven)
    *
-   * 内部判断表单配置是否满足规则约束，更新内部数据，然后发射 `GroupCoordinationEventType.OK` 事件
+   * Internally checks whether the form configuration satisfies rule constraints, updates internal data,
+   * and then emits `GroupCoordinationEventType.OK`
    */
   onOk(): void;
 
   /**
-   * 取消规则配置（用户行为驱动）
+   * Cancel rule configuration (user-driven)
    *
-   * 无内部逻辑，直接发射 `GroupCoordinationEventType.CANCEL` 事件
+   * No internal logic; directly emits `GroupCoordinationEventType.CANCEL`
    */
   onCancel(): void;
 
   /**
-   * 激活规则配置编辑（用户行为驱动）
+   * Activate rule editing (user-driven)
    *
-   * 发射 `GroupCoordinationEventType.EDIT` 事件，父级通过 GroupCoordination.editingRuleId 控制状态
+   * Emits `GroupCoordinationEventType.EDIT`; the parent controls state through GroupCoordination.editingRuleId
    */
   onEdit(): void;
 
   /**
-   * 请求移除自身（用户行为驱动）
+   * Request self-removal (user-driven)
    *
-   * 发射 `GroupCoordinationEventType.REMOVE` 事件，由父级 AtomicRuleGroup 执行实际移除操作
+   * Emits `GroupCoordinationEventType.REMOVE`; the parent AtomicRuleGroup performs the actual removal
    */
   onRemove(): void;
 }
@@ -278,34 +282,35 @@ interface AtomicRuleScheduler {
 
 ## AtomicRuleForm
 
-`AtomicRuleForm` 等效于 Formily `Form` 实例，不引入额外包装层。
+`AtomicRuleForm` is equivalent to a Formily `Form` instance and does not introduce an additional wrapper layer.
 
 ```ts
 import type { Form } from '@formily/core';
 
 /**
- * 原子规则表单 = Formily Form
+ * Atomic rule form = Formily Form
  *
- * 创建时通过 effects 注册推断联动：name 变化 → 推断 operators / thresholder → 重置 operator / threshold
+ * When created, effects are registered for inference linkage:
+ * name changes -> infer operators / thresholder -> reset operator / threshold
  *
- * **状态约束**：表单 pattern 由所属 AtomicRuleScheduler 控制
- * - EDITING → `pattern = 'editable'`
- * - LOCKED → `pattern = 'disabled'`
+ * **State constraint**: the form pattern is controlled by the owning AtomicRuleScheduler
+ * - EDITING -> `pattern = 'editable'`
+ * - LOCKED -> `pattern = 'disabled'`
  *
- * 三个核心字段（由 createField 创建）：
- * - name：规则因子（Select，dataSource 来源于 Group 级 factors）
- * - operator：操作符（Select，dataSource 来源于推断结果）
- * - threshold：阈值（动态组件，组件类型来源于推断结果）
+ * Three core fields (created by createField):
+ * - name: rule factor (Select, dataSource comes from Group-level factors)
+ * - operator: operator (Select, dataSource comes from the inference result)
+ * - threshold: threshold (dynamic component, component type comes from the inference result)
  */
 type AtomicRuleForm = Form;
 ```
 
-规则因子选择联动流程（编辑态下，由 Formily `effects` 驱动）：
+Rule-factor selection linkage flow (driven by Formily `effects` in editing state):
 
 ```mermaid
 sequenceDiagram
   participant U as User
-  participant FM as Form（AtomicRuleForm）
+  participant FM as Form (AtomicRuleForm)
   participant OI as OperatorInferrer
   participant TI as ThresholderInferrer
 
@@ -315,53 +320,53 @@ sequenceDiagram
   OI-->>FM: operators
   FM->>TI: infer(factor)
   TI-->>FM: thresholder
-  FM->>FM: field(operator/threshold) 重置
+  FM->>FM: field(operator/threshold) reset
   deactivate FM
 ```
 
-**状态切换与互斥流程**（事件总线上行 + 信号通道下行完整链路）：
+**State transition and mutual-exclusion flow** (full chain of upstream event bus + downstream signal channel):
 
 ```mermaid
 sequenceDiagram
-  participant U as User（视图层）
+  participant U as User (view layer)
   participant WS as RuleWorkspaceScheduler
   participant WC as WorkspaceCoordination
   participant G as AtomicRuleGroup
   participant GC as GroupCoordination
   participant R as AtomicRuleScheduler
 
-  Note over WS, R: 信号通道（下行）：父级通过层级协调实体封装共享 Signal，子级 computed 派生状态
+  Note over WS, R: Signal channel (downstream): the parent wraps shared Signal through hierarchical coordination entities, and the child derives state via computed
 
   rect rgb(240, 248, 255)
-    Note over U, GC: 事件总线（上行）：子级 onEdit 发射 EDIT → 父级更新协调实体 → 子级状态自动响应
+    Note over U, GC: Event bus (upstream): child onEdit emits EDIT -> parent updates coordination entity -> child state responds automatically
     U->>R: onEdit()
-    R->>G: emit(EDIT, ruleId)（nanoevents）
+    R->>G: emit(EDIT, ruleId) (nanoevents)
     G->>GC: editingRuleId.value = ruleId
-    GC-->>R: state = EDITING（computed 自动响应）
+    GC-->>R: state = EDITING (computed responds automatically)
   end
 
   rect rgb(255, 248, 240)
-    Note over U, GC: 事件总线（上行）：子级 onOk 发射 OK → 父级更新协调实体 → 子级状态自动响应
+    Note over U, GC: Event bus (upstream): child onOk emits OK -> parent updates coordination entity -> child state responds automatically
     U->>R: onOk()
-    R->>R: 内部校验 + 更新数据
-    R->>G: emit(OK, ruleId)（nanoevents）
+    R->>R: Internal validation + data update
+    R->>G: emit(OK, ruleId) (nanoevents)
     G->>GC: editingRuleId.value = null
-    GC-->>R: state = LOCKED（computed 自动响应）
+    GC-->>R: state = LOCKED (computed responds automatically)
   end
 ```
 
 ## AtomicRuleGroup
 
-规则组管理原子规则集合：
+The rule group manages a set of atomic rules:
 
 ```ts
 /**
- * 规则因子选项推断器
+ * Rule-factor option inferrer
  *
- * 1. 数据源：WorkspaceCoordination.allFactors（RuleWorkspace 通过 WorkspaceCoordination 共享的规则因子定义列表）
- * 2. 排除规则：已存在于 rules.signal 中的原子规则的 name（通过 usedFactors 获取）
- * 3. 输出格式：转换为 FieldDataSource[] 供 Select 组件使用，已使用的因子标记 disabled
- * 4. 作用域：AtomicRuleGroup 级别，每个规则组独立计算
+ * 1. Data source: WorkspaceCoordination.allFactors (the rule factor definition list shared by RuleWorkspace through WorkspaceCoordination)
+ * 2. Exclusion rule: the name of atomic rules already present in rules.signal (obtained via usedFactors)
+ * 3. Output format: converted to FieldDataSource[] for Select components; already-used factors are marked disabled
+ * 4. Scope: AtomicRuleGroup level, computed independently for each group
  */
 class FactorOptionsInferrer {
   infer(
@@ -370,152 +375,156 @@ class FactorOptionsInferrer {
   ): readonly FieldDataSource[];
 }
 
-/** 规则组初始化数据（编辑场景） */
+/** Rule-group initialization data (editing scenario) */
 interface AtomicRuleGroup {
-  /** 唯一标识 */
+  /** Unique identifier */
   readonly id: string;
-  /** 已有的原子规则列表 */
+  /** Existing atomic rule list */
   readonly rules: readonly AtomicRule[];
 }
 
 /**
- * 规则组
+ * Rule group
  *
- * **协议角色**：事件总线（发射 `WorkspaceCoordinationEvent` 给 Workspace）+ 信号通道（从 Workspace 的 `WorkspaceCoordination.allFactors` 派生 `factors`，同时通过自身 `GroupCoordination` 供 Rule 消费）
+ * **Protocol role**: event bus (emits `WorkspaceCoordinationEvent` to the Workspace) + signal channel
+ * (derives `factors` from the Workspace's `WorkspaceCoordination.allFactors`, and also exposes `GroupCoordination`
+ * for Rule consumption)
  *
- * 管理原子规则集合，并实现规则配置约束：
- * - 特定规则因子仅允许配置一次（通过 usedFactors + factors.disabled 实现）
- * - 原子规则最大数量等同于规则因子的数量（通过 canAddRule 暴露）
- * - 组内不支持并行编辑，最多 1 个 Rule 处于编辑态；存在编辑中的 Rule 时禁用 addRule
+ * Manages the atomic-rule set and enforces rule-configuration constraints:
+ * - A specific rule factor may only be configured once (implemented via usedFactors + factors.disabled)
+ * - The maximum number of atomic rules equals the number of rule factors (exposed through canAddRule)
+ * - Parallel editing is not supported within a group; at most 1 Rule can be in editing state. When a Rule is being edited, addRule is disabled
  */
 interface AtomicRuleGroup {
-  /** 规则组唯一标识 */
+  /** Unique rule-group identifier */
   readonly id: string;
-  /** 已创建的规则实例列表 */
+  /** List of created rule instances */
   readonly rules: Signal<readonly AtomicRuleScheduler[]>;
-  /** 是否可继续添加原子规则（rules.length < maxRuleCount 且存在未使用的规则因子，且当前无编辑中的 Rule） */
+  /** Whether another atomic rule can be added (`rules.length < maxRuleCount`, there are unused factors, and no Rule is currently editing) */
   readonly canAddRule: Signal<boolean>;
 
-  // ─── 协调实体（Group → Rule 层级协议）────────────
+  // ─── Coordination entity (Group → Rule layer protocol)────────────
   /**
-   * Group 级协调实体，封装供子级 Rule 使用的共享信号
+   * Group-level coordination entity, encapsulating shared signals used by child Rules
    *
-   * `GroupCoordination.factors`：可用规则因子集合（组内已用因子标记 disabled）
+   * `GroupCoordination.factors`: available rule-factor set (already-used factors in the group are marked disabled)
    */
   readonly coordination: GroupCoordination;
 
-  // ─── 生命周期管理（对 Rule）────────────
+  // ─── Lifecycle management (for Rule)────────────
   /**
-   * 创建原子规则设置器（新建场景）
+   * Create an atomic rule scheduler (new scenario)
    *
-   * **互斥行为**：新建的 Rule 默认进入编辑态，当前编辑中的 Rule（如有）自动锁定
-   * **前置约束**：canAddRule=false 时调用静默返回 undefined
+   * **Mutual exclusion behavior**: a newly created Rule enters editing state by default, and the currently editing Rule (if any) is automatically locked
+   * **Precondition**: returns undefined silently when canAddRule=false
    */
   addRule(): AtomicRuleScheduler | undefined;
   /**
-   * 获取原子规则设置器（精细操作场景）
+   * Get an atomic rule scheduler (fine-grained operations)
    */
   pickRule(ruleId: string): AtomicRuleScheduler | undefined;
   /**
-   * 移除原子规则
+   * Remove an atomic rule
    *
-   * **状态无关**：删除操作不受锁定态限制，任何状态下均可执行
+   * **State-independent**: deletion is not restricted by the locked state and can be performed in any state
    */
   removeRule(ruleId: string): void;
   /**
-   * 恢复原子规则设置器（编辑场景）
+   * Hydrate an atomic rule scheduler (editing scenario)
    *
-   * 恢复的 Rule 默认进入 **锁定态**
+   * The restored Rule enters **locked** state by default
    */
   hydrateRule(rule: AtomicRule): void;
 
-  /** 是否无规则（rules 集合为空） */
+  /** Whether there are no rules (`rules` set is empty) */
   isEmpty(): boolean;
 
-  /** 验证所有原子规则 */
+  /** Validate all atomic rules */
   validate(): boolean;
   /**
-   * 构建规则组
+   * Build the rule group
    *
-   * **业务校验**：规则组至少包含 1 条已配置的原子规则，校验不通过时抛出异常
+   * **Business validation**: the rule group must contain at least 1 configured atomic rule.
+   * If validation fails, throw an exception.
    */
   build(): AtomicRuleGroup;
 
-  // ─── 用户行为接入（发射 WorkspaceCoordinationEvent 给 Workspace）────────
+  // ─── User action entry points (emit WorkspaceCoordinationEvent to Workspace)────────
   /**
-   * 请求移除自身（用户行为驱动）
+   * Request self-removal (user-driven)
    *
-   * 发射 `WorkspaceCoordinationEventType.REMOVE` 事件，由父级 RuleWorkspaceScheduler 执行实际移除操作
+   * Emits `WorkspaceCoordinationEventType.REMOVE`; the parent RuleWorkspaceScheduler performs the actual removal
    */
   onRemove(): void;
 }
 ```
 
-**特别说明**：
+**Special notes**:
 
-- `FactorOptionsInferrer` 属于 `AtomicRuleGroup` 级别，每个规则组独立维护自己的 `factors`，不同规则组之间 **不共享**
-- `canAddRule` 综合数量约束（`rules.length < WorkspaceCoordination.allFactors.length`）与 **编辑互斥约束**
-- `removeRule` 不受状态约束，锁定态下仍可删除规则
+- `FactorOptionsInferrer` belongs to the `AtomicRuleGroup` level. Each rule group maintains its own `factors` independently; different rule groups do **not** share them.
+- `canAddRule` combines the quantity constraint (`rules.length < WorkspaceCoordination.allFactors.length`) with the editing mutual-exclusion constraint.
+- `removeRule` is not restricted by state and still works in locked state.
 
 ## RuleWorkspaceScheduler
 
-统一入口，持有规则因子定义供调度器共享，并提供完整的生命周期管理能力：
+A unified entry point that holds the rule factor definitions shared by the schedulers and provides complete lifecycle management:
 
-> **协议角色**：信号通道（通过 `WorkspaceCoordination` 封装 `allFactors`）+ 事件总线（订阅 Group 的 `WorkspaceCoordinationEvent`）。Workspace 是协议层级的顶部，无父级。
+> **Protocol role**: signal channel (encapsulates `allFactors` through `WorkspaceCoordination`) + event bus (subscribes to `WorkspaceCoordinationEvent` from Groups). The Workspace is the top of the protocol hierarchy and has no parent.
 
 ```ts
 interface RuleWorkspaceScheduler {
-  /** 初始化时传入的规则组快照数据（编辑场景），不可变 */
+  /** Snapshot data for rule groups passed in at initialization (editing scenario), immutable */
   readonly snapshots: readonly AtomicRuleGroup[];
-  /** 已创建的规则组实例列表 */
+  /** List of created rule-group instances */
   readonly groups: Signal<readonly AtomicRuleGroup[]>;
-  /** 是否可继续添加规则组（不存在配置规则为空的 Group） */
+  /** Whether another rule group can be added (no Group with an empty configuration exists) */
   readonly canAddGroup: Signal<boolean>;
 
-  // ─── 协调实体（Workspace → Group 层级协议）────────────
+  // ─── Coordination entity (Workspace → Group layer protocol)────────────
   /**
-   * Workspace 级协调实体，封装供子级 Group 使用的共享信号
+   * Workspace-level coordination entity, encapsulating shared signals used by child Groups
    *
-   * `WorkspaceCoordination.allFactors`：可用规则因子定义列表
+   * `WorkspaceCoordination.allFactors`: available rule-factor definition list
    */
   readonly coordination: WorkspaceCoordination;
 
-  // ─── 生命周期管理（对 Group）────────────
+  // ─── Lifecycle management (for Group)────────────
   /**
-   * 创建规则组（新建场景）
+   * Create a rule group (new scenario)
    *
-   * **前置约束**：canAddGroup=false 时调用静默返回 undefined
+   * **Precondition**: returns undefined silently when canAddGroup=false
    */
   addGroup(): AtomicRuleGroup | undefined;
   /**
-   * 获取规则组（精细操作场景）
+   * Get a rule group (fine-grained operations)
    */
   pickGroup(groupId: string): AtomicRuleGroup | undefined;
   /**
-   * 移除规则组
+   * Remove a rule group
    *
-   * **状态无关**：删除操作不受锁定态限制，任何状态下均可执行
+   * **State-independent**: deletion is not restricted by the locked state and can be performed in any state
    */
   removeGroup(groupId: string): void;
   /**
-   * 恢复规则组（编辑场景）
+   * Hydrate a rule group (editing scenario)
    *
-   * 恢复的 Group 及其内部 Rule 默认进入 **锁定态**
+   * The restored Group and all its internal Rules enter **locked** state by default
    */
   hydrateGroup(group: AtomicRuleGroup): void;
 
-  // 验证与构建
-  /** 验证所有规则组 */
+  // Validation and build
+  /** Validate all rule groups */
   validate(): boolean;
   /**
-   * 构建所有规则组
+   * Build all rule groups
    *
-   * **业务校验**：工作空间至少包含 1 个已配置的规则组，且每个规则组至少包含 1 条已配置的原子规则，校验不通过时抛出异常
+   * **Business validation**: the workspace must contain at least 1 configured rule group, and each rule group
+   * must contain at least 1 configured atomic rule. If validation fails, throw an exception.
    */
   build(): readonly AtomicRuleGroup[];
 
-  // 生命周期管理
-  /** 销毁工作空间，释放所有资源（订阅、缓存等） */
+  // Lifecycle management
+  /** Destroy the workspace and release all resources (subscriptions, caches, etc.) */
   destroy(): void;
 }
 ```

@@ -1,19 +1,15 @@
-# 文档规范
+# Document Specifications
 
-## 类型引用声明
+## Type Reference Declaration
 
-- 允许跨文档引用 `markdown block` 中声明的 `interface`，语法参考 `ES Module` 模块引用
+Allow cross-document references to the `interface` declared in the `markdown block`, following the syntax references in `ES Module` format.
 
 ```ts
-// 引用 spec.md 文档中出现 FieldDataSource 类型
+// Reference the FieldDataSource type mentioned in the spec.md document
 import { FieldDataSource } from './spec.md';
 ```
 
-## Mermaid 使用规范
-
-- 默认内部使用全英语，尽量避免使用中文内容
-
 ### Class Diagram
 
-- 默认使用简易类图，不声明 `properties` + `methods`
-- 类关联关系必须使用规范定义的关系（e.g. `Dependency`），不得自行生造
+- By default, use simple class diagrams and do not declare `properties` + `methods`
+- Association relationships between classes must be defined using standard conventions (e.g. `Dependency`), and should not be created randomly.

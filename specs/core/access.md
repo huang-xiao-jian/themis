@@ -1,18 +1,18 @@
-# 接入层
+# Access Layer
 
-对外暴露类型安全的 `API` 协议，简化业务方实例化内核应用层的过程
+Exposes a type-safe `API` contract to simplify instantiation of the core application layer for the application.
 
-## 前置依赖
+## Prerequisites
 
-- [规则配置内核](./spec.md)
-- [基础设施层](./infrastructure.md)
-- [应用层](./application.md)
+- [Core spec](./spec.md)
+- [Infrastructure layer](./infrastructure.md)
+- [Application layer](./application.md)
 
-## Fetcher 工厂函数
+## Fetcher Factory Functions
 
-通过 `provideXXXFetcher` 工厂函数创建类型安全的 `Fetcher` 注册项：
+Use the `provideXXXFetcher` factory functions to create type-safe `Fetcher` registrations:
 
-**重要**：不需传入 `resourceName`。一个 `Fetcher` 可被多个 `Resource` 复用，资源名称在调用时透传。
+**Important**: `resourceName` does not need to be passed in. One `Fetcher` can be reused by multiple `Resource`s, and the resource name is forwarded at call time.
 
 ```ts
 function provideElementaryFetcher<T extends FieldDataSource>(
@@ -32,13 +32,13 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 ): PaginatedFilterableFetcherProvider<T>;
 ```
 
-**与 `Fetcher` 调用约定的联动**：
+**How this aligns with the `Fetcher` calling convention**:
 
 ```ts
 const PAGINATED_FILTERABLE_FETCHER = providePaginatedFilterableFetcher<FieldDataSource>({
   fetch(resourceName, keyword, page, pageSize) {
-    // resourceName 来源于 DSL `RuleFactorDefinition.resource.name`
-    // 业务方可按 resourceName 路由到不同业务服务
+    // resourceName comes from DSL `RuleFactorDefinition.resource.name`
+    // The application can route to different backend services by resourceName
     if (resourceName === 'Employee') return api.searchEmployees(keyword, page, pageSize);
     if (resourceName === 'Department') return api.searchDepartments(keyword, page, pageSize);
     throw new Error(`[sisyphus] Unknown resource: ${resourceName}`);
@@ -46,16 +46,16 @@ const PAGINATED_FILTERABLE_FETCHER = providePaginatedFilterableFetcher<FieldData
 });
 ```
 
-## Builder Pattern 入口
+## Builder Pattern Entry Point
 
-**工厂函数 vs Builder Pattern** 职责边界：
+**Factory function vs Builder Pattern** responsibility boundary:
 
-- `createRuleWorkspace`：简化入口，一站式创建规则工作空间，适合简单场景
-- `RuleWorkspaceBuilder`：链式配置入口，适合需要精细控制配置的场景
+- `createRuleWorkspace`: a simplified one-stop entry point for creating a rule workspace, suitable for simple scenarios.
+- `RuleWorkspaceBuilder`: a chainable configuration entry point, suitable for scenarios that need fine-grained control.
 
 ```ts
 /**
- * 简化工厂函数 - 一站式创建（推荐新手场景）
+ * Simplified factory function - one-stop creation (recommended for newcomers)
  */
 function createRuleWorkspace(config: {
   factors: RuleFactorDefinition[];
@@ -64,26 +64,26 @@ function createRuleWorkspace(config: {
 }): RuleWorkspaceScheduler;
 
 /**
- * Builder Pattern - 链式配置入口（推荐标准场景）
+ * Builder Pattern - chainable configuration entry point (recommended standard scenario)
  */
 class RuleWorkspaceBuilder {
   /**
-   * 配置规则因子定义（必须）
+   * Configure rule factor definitions (required)
    */
   withFactors(factors: RuleFactorDefinition[]): RuleWorkspaceBuilder;
 
   /**
-   * 配置动态资源 Fetcher（DynamicResource 必须，StaticResource 由内核默认提供）
+   * Configure dynamic resource Fetchers (required for DynamicResource; StaticResource is provided by the core by default)
    */
   withFetchers(fetchers: readonly FetcherProvider[]): RuleWorkspaceBuilder;
 
   /**
-   * 配置已有规则组数据（编辑场景可选，新建场景可不传入）
+   * Configure existing rule-group data (optional for editing scenarios, can be omitted for new scenarios)
    */
   withRuleGroups(ruleGroups: readonly AtomicRuleGroup[]): RuleWorkspaceBuilder;
 
   /**
-   * 构建工作空间调度器
+   * Build the workspace scheduler
    */
   build(): RuleWorkspaceScheduler;
 }

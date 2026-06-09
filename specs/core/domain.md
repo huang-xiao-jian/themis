@@ -1,26 +1,26 @@
-# 领域层
+# Domain Layer
 
-封装核心业务规则，包括规则推断机制、操作符映射逻辑、阈值属性计算逻辑。根据 `RuleFactorDefinition` 定义推断可用 `operators` 和 `thresholder`，以及 `AtomicRuleGroup` 级别的可选规则因子选项推断
+Encapsulates the core business rules, including rule inference, operator mapping, and threshold-property calculation. It infers available `operators` and `thresholder` values from `RuleFactorDefinition`, and infers selectable rule-factor options at the `AtomicRuleGroup` level.
 
-## 前置依赖
+## Prerequisites
 
-- [规则配置内核](./spec.md)
-- [规则因子解释器](../interpreter.md)
+- [Core spec](./spec.md)
+- [Rule factor interpreter](../interpreter.md)
 
-## 核心推断逻辑
+## Core Inference Logic
 
-- `AtomicRule` 级别根据 `RuleFactorDefinition` 推断可用 `operators` 和 `thresholder`，参考 [规则因子解释器](../interpreter.md) 中的推断机制
-- `AtomicRuleGroup` 级别的规则因子选项推断，参考 [规则及规则因子描述](../spec.md) 中的规则配置约束章节
+- At the `AtomicRule` level, infer available `operators` and `thresholder` values from `RuleFactorDefinition`. See the inference mechanism in [Rule factor interpreter](../interpreter.md).
+- At the `AtomicRuleGroup` level, infer rule-factor options according to the rule-configuration constraints in [Rule factor specification](../spec.md).
 
-> 推断器由 `AtomicRuleScheduler` 在创建 Formily Form 的 `effects` 中调用，详见 [应用层 - AtomicRuleForm](./application.md#atomicruleform)
+> The inferrers are invoked by `AtomicRuleScheduler` inside the `effects` used to create the Formily form. See [Application layer - AtomicRuleForm](./application.md#atomicruleform).
 
-## 推断器类声明
+## Inferrer Class Declarations
 
 ```ts
 /**
- * 规则因子推断器
+ * Rule factor inferrer
  *
- * 根据因子名称查找对应的规则因子定义
+ * Looks up the matching rule factor definition by factor name.
  */
 class FactorInferrer {
   constructor(factors: readonly RuleFactorDefinition[]);
@@ -28,18 +28,19 @@ class FactorInferrer {
 }
 
 /**
- * 操作符推断器
+ * Operator inferrer
  *
- * 根据 dataType + semantic 确定“数据域”，再结合 mode（点/区间）和 quantity（单/多）确定“操作域”
+ * Uses dataType + semantic to determine the "data domain", then combines mode (point / range)
+ * and quantity (single / multiple) to determine the "operation domain".
  */
 class OperatorInferrer {
   infer(factor: RuleFactorDefinition): readonly FieldDataSource[];
 }
 
 /**
- * 阈值渲染组件属性推断器
+ * Threshold renderer property inferrer
  *
- * 根据 RuleFactorDefinition 推断中间形态的表单组件 + 表单组件属性
+ * Infers the intermediate form component and form component properties from RuleFactorDefinition.
  */
 class ThresholderInferrer {
   infer(factor: RuleFactorDefinition): ThresholdComponentProperties;

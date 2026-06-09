@@ -1,44 +1,45 @@
-# 业务方使用示例
+# Application Usage Example
 
-## 新建场景
+## New Scenario
 
 ```ts
 import { DataType, Mode, Quantity, SchedulerState } from '@sisyphus/core';
 import { RuleWorkspaceBuilder, providePaginatedFilterableFetcher } from '@sisyphus/core';
 
-// 1. 定义 DSL
-// 多个因子可以共享同一种 features 组合的 Fetcher（例：employee / department 都走分页过滤）
+// 1. Define the DSL
+// Multiple factors can share the same Fetcher for the same feature combination
+// (for example, employee / department both use pagination + filtering)
 const factors: RuleFactorDefinition[] = [
   {
     name: 'employee',
-    title: '员工',
+    title: 'Employee',
     dataType: DataType.STRING,
     resource: { name: 'Employee', features: ['pagination', 'filter'] },
   },
   {
     name: 'department',
-    title: '部门',
+    title: 'Department',
     dataType: DataType.STRING,
     resource: { name: 'Department', features: ['pagination', 'filter'] },
   },
   {
     name: 'deliver_city',
-    title: '目标城市',
+    title: 'Target City',
     dataType: DataType.STRING,
-    resource: { name: 'City' }, // 无 features = StaticResource（由内核默认提供）
+    resource: { name: 'City' }, // no features = StaticResource (provided by the core by default)
   },
   {
     name: 'order_amount',
-    title: '订单金额',
+    title: 'Order Amount',
     dataType: DataType.NUMBER,
     mode: Mode.RANGE,
     quantity: Quantity.MULTIPLE,
   },
 ];
 
-// 2. 提供 Fetcher（仅 DynamicResource 需要，StaticResource 由内核默认提供）
-// Fetcher 只与 features 相关，resourceName 在调用时透传
-// 同一个 Fetcher 可被 Employee / Department 复用
+// 2. Provide Fetchers (only required for DynamicResource; StaticResource is provided by the core by default)
+// Fetchers are related only to features; resourceName is forwarded at call time
+// The same Fetcher can be reused by Employee / Department
 const fetchers = [
   providePaginatedFilterableFetcher({
     fetch(resourceName, keyword, page, pageSize) {
@@ -54,51 +55,51 @@ const fetchers = [
   }),
 ];
 
-// 3. 构建 RuleWorkspace
+// 3. Build the RuleWorkspace
 const workspace = new RuleWorkspaceBuilder().withFactors(factors).withFetchers(fetchers).build();
 
-// 4. 创建规则组
+// 4. Create a rule group
 const group = workspace.addGroup();
 
-// 5. 创建原子规则（新建的 Rule 默认进入编辑态）
+// 5. Create an atomic rule (a newly created Rule enters editing state by default)
 const rule = group.addRule();
 // rule.state.value === SchedulerState.EDITING
 
-// 6. 通过 Formily Form 驱动表单交互（Formily effects 自动处理推断联动）
+// 6. Drive form interactions through Formily Form (Formily effects handle inference linkage automatically)
 // rule.form.name.value = 'employee'
 // rule.form.operator.value = 'eq'
 // rule.form.threshold.value = 100
-// Formily effects 自动完成 factor 切换 → operators / thresholder 推断
+// Formily effects automatically complete the factor switch -> operators / thresholder inference
 
-// 7. 确认规则配置，进入锁定态（Rule 接收确认指令，内部校验通过后由 Group 写入状态）
+// 7. Confirm the rule configuration and enter locked state (the Rule receives the confirmation command, and the Group writes state after internal validation passes)
 rule.onOk();
 // rule.state.value === SchedulerState.LOCKED
 
-// 8. 验证并构建（build 阶段执行业务校验）
+// 8. Validate and build (business validation runs during build)
 
-// 9. 验证并构建（build 阶段执行业务校验）
+// 9. Validate and build (business validation runs during build)
 if (workspace.validate()) {
   const result = workspace.build();
-  // 校验：至少 1 个已配置的规则组，每个规则组至少 1 条已配置的原子规则
+  // Validation: at least 1 configured rule group, and each rule group contains at least 1 configured atomic rule
   // result: readonly AtomicRuleGroup[]
 }
 
-// 10. 编辑已有配置（通过 onEdit 事件切换到编辑态）
+// 10. Edit an existing configuration (switch to editing state through onEdit)
 rule.onEdit();
-// 通过 rule.form（Formily Form）驱动表单修改
+// Drive form changes through rule.form (Formily Form)
 rule.onOk();
 
-// 11. 锁定态下仍可删除规则
-group.removeRule(rule.id); // 删除不受锁定态限制
+// 11. Rules can still be deleted in locked state
+group.removeRule(rule.id); // deletion is not restricted by the locked state
 
-// 12. 销毁工作空间，释放订阅与缓存
+// 12. Destroy the workspace and release subscriptions and caches
 workspace.destroy();
 ```
 
-## 编辑场景
+## Editing Scenario
 
 ```ts
-// 已有规则组数据（从外部加载）
+// Existing rule-group data (loaded from outside)
 import { AtomicRuleGroup, SchedulerState } from './spec.md';
 
 const groups: AtomicRuleGroup[] = [
@@ -106,19 +107,19 @@ const groups: AtomicRuleGroup[] = [
     id: 'group-1',
     rules: [
       { id: 'rule-1', name: 'employee', operator: 'eq', threshold: 100 },
-      { id: 'rule-2', name: 'deliver_city', operator: 'in', threshold: ['北京', '上海'] },
+      { id: 'rule-2', name: 'deliver_city', operator: 'in', threshold: ['Beijing', 'Shanghai'] },
     ],
   },
 ];
 
-// 初始化时传入已有数据（factors / fetchers 沿用新建场景中已定义的实例）
+// Pass existing data during initialization (factors / fetchers reuse the instances defined in the new scenario)
 const workspace = new RuleWorkspaceBuilder()
   .withFactors(factors)
   .withFetchers(fetchers)
   .withRuleGroups(groups)
   .build();
 
-// 获取规则组
+// Get the rule group
 const group = workspace.pickGroup('group-1');
 
 const rule1 = group.pickRule('rule-1');
@@ -127,15 +128,15 @@ const rule1 = group.pickRule('rule-1');
 const rule2 = group.pickRule('rule-2');
 // rule2.state.value === SchedulerState.LOCKED
 
-// 用户通过 onEdit 事件切换到编辑态
+// The user switches to editing state through onEdit
 rule1.onEdit();
-// 通过 rule1.form（Formily Form）驱动表单修改
+// Drive edits through rule1.form (Formily Form)
 rule1.onOk();
 
-// 编辑态下的并行编辑互斥（Group 级别约束，与 Workspace 级别独立）
-rule1.onEdit(); // rule1 进入编辑态
-rule2.onEdit(); // rule2 进入编辑态，rule1 自动锁定
+// Parallel editing mutual exclusion in editing state (group-level constraint, independent of the workspace-level constraint)
+rule1.onEdit(); // rule1 enters editing state
+rule2.onEdit(); // rule2 enters editing state, rule1 is automatically locked
 // rule1.state.value === SchedulerState.LOCKED
 // rule2.state.value === SchedulerState.EDITING
-// group.canAddRule.value === false（存在编辑中的 Rule，禁用新增）
+// group.canAddRule.value === false (a rule is being edited, so adding is disabled)
 ```

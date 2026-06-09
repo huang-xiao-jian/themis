@@ -1,8 +1,8 @@
-# React 代码规范
+# React Code Style Guidelines
 
-## 事件回调
+## Event Callback
 
-回调函数命名使用 `on` 作为前缀
+The naming of callback functions uses "on" as the prefix.
 
 ```tsx
 function AntdRuleWorkspaceView() {
@@ -13,8 +13,12 @@ function AntdRuleWorkspaceView() {
 
   return (
     <Button type="dashed" block onClick={onAddition}>
-      添加规则组
+      Add
     </Button>
   );
 }
 ```
+
+## Element Function
+
+- Use `jsx` mode instead of `React.createElement` legacy API

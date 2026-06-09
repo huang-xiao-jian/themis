@@ -1,18 +1,17 @@
-# 自动化测试规范
+# Automation Testing Specification
 
-## 技术栈
+## Technology Stack
 
 - Test Tool: `vitest`
   Test Docs: `https://vitest.dev/llms.txt`
-  Context7 Library Id: `/vitest-dev/vitest`
 
-## 测试规范
+## Test Specifications
 
-### 文件组织规范
+### File Organization Guidelines
 
-- 测试用例文件使用 `*.test.ts` 命名
-- 单元测试用例使用就近原则，与源文件放置于相同位置
-- 单元测试 `Test fixtures`，使用就近原则，与源文件放置于相同位置
+- The test case files are named with `*.test.ts`.
+- For unit test cases, the principle of proximity is adopted, and they are placed in the same location as the source files.
+- For unit tests, `Test fixtures` follow the principle of proximity and are also placed in the same location as the source files.
 
 ```shell
 ├── inference
@@ -21,10 +20,10 @@
 │   ├── OperatorInferrer.test.ts
 ```
 
-### 测试代码规范
+### Testing Code Standards
 
-- `vitest` API 必须明确的导入，不依赖全局变量
-- `vitest` 测试用例描述必须使用全英语
+- The `vitest` API must be explicitly imported and should not rely on global variables.
+- The test case descriptions in `vitest` must be written entirely in English.
 
 ```ts
 import { describe, expect, it, test } from 'vitest';
@@ -34,34 +33,33 @@ it('should return single point', () => {
 });
 ```
 
-### Formily 表单测试规范
+### Formily Form Testing Specification
 
-#### componentProps 断言方式
+#### Component Props Assertion Method
 
-Formily 的 `componentProps` 无法通过 `form.fields[x].componentProps` 可靠读取，必须通过 `getFieldState` 访问，并取 `component[1]`（数组第二项为实际组件属性对象）：
+The `componentProps` of Formily cannot be reliably read through `form.fields[x].componentProps`; instead, it must be accessed through `getFieldState` and then take `component[1]` (the second item in the array is the actual component property object):
 
 ```ts
-// ✅ 正确的断言方式
-const $threshold = form.getFieldState('threshold');
+// ✅ Correct assertion method const $threshold = form.getFieldState('threshold');
 assert(Array.isArray($threshold.component));
 expect($threshold.component[1]).toMatchObject({
   properties: { type: 'Switch' },
 });
 
-// ❌ 错误：直接访问 form.fields[x].componentProps 不可靠
+// ✖️ Error: Directly accessing form.fields[x].componentProps is unreliable
 ```
 
-### 测试运行
+### Test Run
 
-`vitest` 支持测试用例范围过滤：
+`vitest` supports filtering of test case ranges:
 
 ```bash
-# 运行特定测试用例
+# Run specific test cases
 pnpm vitest run -t "should return single point"
 
-# 运行文件名包含 Inferer 的测试用例
+# Test cases where the running file name contains "Inferer"
 pnpm vitest run "Inferer"
 
-# 运行特定 package 的测试用例文件
+# Run the test case files of a specific package
 pnpm vitest run --project @sisyphus/core
 ```

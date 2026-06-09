@@ -1,41 +1,41 @@
-# 规则因子描述
+# Rule Factor Specification
 
-## 业务目标
+## Business Goal
 
-基于 `json` 设计 `DSL` 用以描述 **规则因子** 语义化结构，**规则配置器** 通过解释 **规则因子描述** 提供可交互视图，用以配置业务规则。`DSL` 设计的核心在于 **规则配置器** 能构基于 **规则因子描述** 推断正确的 **匹配操作符**、**表单控件**、**边界值约束条件**
+Design a JSON-based DSL to describe the semantic structure of **rule factors**. The **rule configurator** interprets the **rule factor specification** and provides an interactive view for configuring business rules. The core purpose of the DSL is to let the **rule configurator** infer the correct **matching operators**, **form controls**, and **boundary constraints** from the **rule factor specification**.
 
-## 业务集成
+## Business Integration
 
-**规则因子** 与 **规则配置器** 为紧密协同关系，作为 **规则配置中心** 组成要素，规则配置器基于 **规则因子描述** 提供配置器，用户按需配置规则因子形成 **业务规则**。
+**Rule factors** and the **rule configurator** work together closely as parts of the **rule configuration center**. The rule configurator uses the **rule factor specification** to provide configuration capabilities, and users configure rule factors as needed to form **business rules**.
 
-## 设计原则
+## Design Principles
 
-设计核心在于描述规则因子的 **元模型**，而非具体的规则实例，必须遵循核心原则：
+The design focuses on describing the **metamodel** of rule factors rather than concrete rule instances. The following principles must be followed:
 
-- **声明式**：描述 `What`，而非 `How`，设计产出不应该包含任何技术实现细节
-- **语义驱动 UI**：描述语义，而非 `UI` 结构，设计阶段不应该假设 **框架** 或者 **组件库**
+- **Declarative**: describe `What`, not `How`. The design output must not include implementation details.
+- **Semantic-driven UI**: describe semantics, not the `UI` structure. The design phase must not assume a specific **framework** or **component library**.
 
-## 规则因子描述设计
+## Rule Factor Specification Design
 
-### 标识信息 RuleFactorAnnotation
+### Identification RuleFactorAnnotation
 
-描述规则因子的元信息：
+Describes the metadata of a rule factor:
 
-- `name` 规则因子名称，具备唯一性
-- `title` 规则因子名称
-- `description` 规则因子描述
+- `name`: the unique name of the rule factor
+- `title`: the display title of the rule factor
+- `description`: the description of the rule factor
 
 ```json
 {
   "name": "deliver_city",
-  "title": "目标城市",
-  "description": "选择可发送快递的目标城市"
+  "title": "Target City",
+  "description": "Select the city that can receive deliveries"
 }
 ```
 
-### 关联资源 RuleFactorResource
+### Associated Resource RuleFactorResource
 
-`RuleFactorResource` 定义可选范围，限制有限范围内进行，支持静态选项、动态选项，可选集合使用统一数据结构。
+`RuleFactorResource` defines a constrained selectable range. It supports static options and dynamic options, with a unified data structure for all option sets.
 
 ```ts
 interface FieldDataSource {
@@ -45,60 +45,60 @@ interface FieldDataSource {
 }
 ```
 
-静态资源描述：
+Static resource description:
 
-- `name` 资源名称，具备唯一性
-- `options` 资源列表，遵循数据结构约束
+- `name`: the unique resource name
+- `options`: the resource list, following the data structure constraints
 
-静态资源接口声明：
+Static resource interface:
 
 ```ts
 interface StaticRuleFactorResource {
-  // 约定的资源名称
+  // the agreed resource name
   name: string;
-  // 预设的可选项
+  // the preset option list
   options: FieldDataSource[];
 }
 ```
 
-静态资源案例：
+Static resource example:
 
 ```json
 {
   "resource": {
     "name": "City",
     "options": [
-      { "label": "北京", "value": "bj" },
-      { "label": "上海", "value": "sh" }
+      { "label": "Beijing", "value": "bj" },
+      { "label": "Shanghai", "value": "sh" }
     ]
   }
 }
 ```
 
-**动态资源** 为从服务端下发的数据源，根据数据源特性区分亚型：
+**Dynamic resources** are data sources provided by the server. They are classified into subtypes by capability:
 
-- 是否分页输出
-- 是否支持关键词过滤
+- whether they support pagination
+- whether they support keyword filtering
 
-动态 RuleFactorResource 描述：
+Dynamic `RuleFactorResource` description:
 
-- `name` 资源名称，具备唯一性，供应方约定
-- `features` 资源供应商支持的特性，例如：分页、关键词过滤
+- `name`: the unique resource name, agreed by the provider
+- `features`: the capabilities supported by the resource provider, such as pagination and keyword filtering
 
-动态资源接口声明：
+Dynamic resource interface:
 
 ```ts
 type DynamicRuleFactorResourceFeature = 'pagination' | 'filter';
 
 interface DynamicRuleFactorResource {
-  // 约定的资源名称
+  // the agreed resource name
   name: string;
-  // 资源供应商支持的特性
+  // supported capabilities of the resource provider
   features: DynamicRuleFactorResourceFeature[];
 }
 ```
 
-动态资源案例：
+Dynamic resource examples:
 
 ```json
 { "resource": { "name": "City" } }
@@ -113,18 +113,18 @@ interface DynamicRuleFactorResource {
 }
 ```
 
-### 数据元属性 RuleFactorMetadata
+### Data Metadata RuleFactorMetadata
 
-- `dataType` 原始数据类型，支持 `DataType` 枚举：`STRING` / `NUMBER` / `BOOLEAN`
-- `mode` 声明单点值或者区间值，支持 `Mode` 枚举：`POINT` / `RANGE`
-- `quantity` 声明多值或者单值，支持 `Quantity` 枚举：`SINGLE` / `MULTIPLE`
-- `semantic` 语义化场景，作为原始数据类型的精细化扩充，支持 `Semantic` 枚举
+- `dataType`: the primitive data type, supporting `DataType` enum values: `STRING` / `NUMBER` / `BOOLEAN`
+- `mode`: declares point or range values, supporting `Mode` enum values: `POINT` / `RANGE`
+- `quantity`: declares single or multiple values, supporting `Quantity` enum values: `SINGLE` / `MULTIPLE`
+- `semantic`: a semantic scenario used to refine the primitive data type, supporting `Semantic` enum values
 
-枚举声明（字符串风格，键名 `SCREAMING_SNAKE_CASE`，值与原字符串字面量保持一致以兼容运行时序列化）：
+Enum declarations use string values, with enum keys in `SCREAMING_SNAKE_CASE`. The values remain consistent with the original string literals to preserve runtime serialization compatibility:
 
 ```ts
 /**
- * 原始数据类型
+ * Primitive data type
  */
 enum DataType {
   STRING = 'string',
@@ -133,7 +133,7 @@ enum DataType {
 }
 
 /**
- * 模式：单点 / 区间
+ * Mode: point / range
  */
 enum Mode {
   POINT = 'point',
@@ -141,7 +141,7 @@ enum Mode {
 }
 
 /**
- * 数量：单值 / 多值
+ * Quantity: single / multiple
  */
 enum Quantity {
   SINGLE = 'single',
@@ -149,7 +149,7 @@ enum Quantity {
 }
 
 /**
- * 语义化场景，作为 dataType 的精细化扩充
+ * Semantic scenario, used as a refinement of dataType
  */
 enum Semantic {
   RATE = 'rate',
@@ -161,16 +161,16 @@ enum Semantic {
 }
 ```
 
-`mode` + `quantity` 正交逻辑：
+Orthogonal logic for `mode` + `quantity`:
 
-| mode    | quantity   | 业务含义     | 匹配逻辑                           |
-| :------ | :--------- | :----------- | :--------------------------------- |
-| `point` | `single`   | 单个值       | `target = value`                   |
-| `point` | `multiple` | 多个离散值   | `target in [v1, v2]`               |
-| `range` | `single`   | 单个连续区间 | `min <= target <= max`             |
-| `range` | `multiple` | 多个离散区间 | `(t between r1) or (t between r2)` |
+| mode    | quantity   | Business meaning         | Matching logic                     |
+| :------ | :--------- | :----------------------- | :--------------------------------- |
+| `point` | `single`   | Single value             | `target = value`                   |
+| `point` | `multiple` | Multiple discrete values | `target in [v1, v2]`               |
+| `range` | `single`   | Single continuous range  | `min <= target <= max`             |
+| `range` | `multiple` | Multiple discrete ranges | `(t between r1) or (t between r2)` |
 
-`semantic` 语义化场景支持：
+Supported `semantic` scenarios:
 
 - `rate`
 - `date`
@@ -178,31 +178,31 @@ enum Semantic {
 - `duration`
 - `percentage`
 
-### 数据约束与校验 RuleFactorConstraint
+### Validation Constraints RuleFactorConstraint
 
-`constraints` 用于定义边界值的校验规则
+`constraints` defines validation rules for boundary values.
 
-| 约束字段           | 适用类型        | 说明              |
-| :----------------- | :-------------- | :---------------- |
-| `min`              | number / string | 最小值 / 最小长度 |
-| `max`              | number / string | 最大值 / 最大长度 |
-| `exclusiveMinimum` | number / string | 最小值 / 最小长度 |
-| `exclusiveMaximum` | number / string | 最大值 / 最大长度 |
-| `step`             | number          | 步长              |
-| `precision`        | number          | 小数精度          |
-| `format`           | string          | 字符串格式        |
-| `pattern`          | string          | 正则表达式校验    |
+| Constraint field   | Applicable type | Description              |
+| :----------------- | :-------------- | :----------------------- |
+| `min`              | number / string | Minimum value / length   |
+| `max`              | number / string | Maximum value / length   |
+| `exclusiveMinimum` | number / string | Exclusive minimum        |
+| `exclusiveMaximum` | number / string | Exclusive maximum        |
+| `step`             | number          | Step size                |
+| `precision`        | number          | Decimal precision        |
+| `format`           | string          | String format            |
+| `pattern`          | string          | Regular expression check |
 
-特别说明：最大值，最小值约定：开区间 `(exclusiveMinimum, exclusiveMaximum)`，闭区间 `[min, max]`
+Special note: minimum and maximum values use open intervals for `exclusiveMinimum` / `exclusiveMaximum` and closed intervals for `min` / `max`.
 
-**多值场景** 的约束如下，约定闭区间：`[minItems, maxItems]`
+For **multi-value scenarios**, the constraints use the closed interval `[minItems, maxItems]`:
 
-| 约束字段   | quantity   | 说明     |
-| :--------- | :--------- | :------- |
-| `minItems` | `multiple` | 最少数量 |
-| `maxItems` | `multiple` | 最大数量 |
+| Constraint field | quantity   | Description   |
+| :--------------- | :--------- | :------------ |
+| `minItems`       | `multiple` | Minimum count |
+| `maxItems`       | `multiple` | Maximum count |
 
-### 规则因子定义
+### Rule Factor Definition
 
 ```ts
 interface RuleFactorDefinition {
@@ -221,36 +221,36 @@ interface RuleFactorDefinition {
 }
 ```
 
-## 规则配置
+## Rule Configuration
 
-### 规则配置业务概念
+### Rule Configuration Concepts
 
-- **原子规则**：最小粒度的规则语义模型，包含：匹配目标、匹配方式、匹配阈值
-- **规则组**：使用逻辑 **AND** 连接多个 **原子规则** 形成规则组，作为 **规则引擎** 执行时的规则单元
+- **Atomic rule**: the smallest semantic unit of a rule, including the target, operator, and threshold.
+- **Rule group**: a set of atomic rules joined with logical **AND** and used as the rule unit executed by the **rule engine**.
 
 ```ts
-// 原则规则
+// Atomic rule
 interface AtomicRule<T> {
-  // 无业务语义，仅作为存储唯一标识
+  // no business semantics, only a unique storage identifier
   id: string;
-  // 目标数据，基于业务语义命名，例如：DEVICE_ID, NETWORK_SECURITY_LEVEL，必须与“规则因子定义**中的名称一致
+  // target data; named by business semantics, e.g. DEVICE_ID, NETWORK_SECURITY_LEVEL, and must match the names in the "rule factor definition"
   name: string;
-  // 匹配方式，定义比较的逻辑行为，例如：BETWEEN, IN, GT
+  // matching operator, defining comparison behavior such as BETWEEN, IN, GT
   operator: string;
-  // 匹配阈值
+  // matching threshold
   threshold: T;
 }
 ```
 
-### 规则配置约束
+### Rule Configuration Constraints
 
-- 配置 **规则组** 时，特定 **规则因子** 仅允许配置一次
-  - 推断 **原子规则** 最大数量等同于 **规则因子** 的数量
-- 配置 **原子规则** 时，如果 **规则因子** 选择变更，需要重置 `Operator` + `Value` 的状态
+- When configuring a **rule group**, a specific **rule factor** may only be configured once.
+  - The inferred maximum number of **atomic rules** equals the number of **rule factors**.
+- When configuring an **atomic rule**, if the selected **rule factor** changes, the `Operator` and `Value` state must be reset.
 
-### 规则配置案例
+### Rule Configuration Example
 
-网络访问规则：访问设备必须位于 **设备白名单** 之内，访问时间必须处于 **工作时段**
+Network access rule: the device must be within the **device whitelist**, and the access time must fall within **working hours**.
 
 ```json
 [

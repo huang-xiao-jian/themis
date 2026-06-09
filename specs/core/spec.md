@@ -1,62 +1,62 @@
-# @sisyphus/core
+# `@sisyphus/core`
 
-规则配置的内核，负责 `Intermediate Representation` 的推断、匹配操作符 `Operator` 的推断、可用规则因子的推断、规则配置的逻辑封装
+The core of rule configuration, responsible for inferring `Intermediate Representation`, inferring matching `Operator`s, inferring available rule factors, and encapsulating the rule configuration logic.
 
-## 前置依赖
+## Prerequisites
 
-- [规则及规则因子描述](../spec.md)
-- [规则因子解释器](../interpreter.md)
+- [Rule factor specification](../spec.md)
+- [Rule factor interpreter](../interpreter.md)
 
-## 技术选型
+## Technology Choices
 
-使用依赖库 `API` 前，务必使用 `context7` 获取使用指导
+Before using any dependency library `API`, you must use `context7` to get implementation guidance.
 
-- [nanoid](https://www.npmjs.com/package/nanoid) 客户端生成唯一标识
-- [nanoevents](https://github.com/ai/nanoevents) 轻量级事件监听
-- [formily](https://github.com/alibaba/formily) 表单解决方案（`@formily/core`）
+- [nanoid](https://www.npmjs.com/package/nanoid) for client-side unique identifiers
+- [nanoevents](https://github.com/ai/nanoevents) for lightweight event listening
+- [formily](https://github.com/alibaba/formily) for forms (`@formily/core`)
 
-## 设计目标
+## Design Goals
 
-- **框架无关**：内核实现与框架/组件库解耦，便于多框架、多终端适配
-- **可测试性**：内核负责核心解释器、业务逻辑封装
-- **分层架构**：内核实现遵循领域驱动设计风格的分层架构
+- **Framework agnostic**: the core is decoupled from frameworks and component libraries, making it suitable for multiple frameworks and devices.
+- **Testability**: the core is responsible for the interpreter and business-logic encapsulation.
+- **Layered architecture**: the core follows a DDD-style layered architecture.
 
-## 设计约定
+## Design Convention
 
-- 响应式状态管理基于 `@preact/signals-core`，看做运行时标准，不纳入内核分层架构范畴
+- Reactive state management is based on `@preact/signals-core` and is treated as a runtime standard rather than part of the core layered architecture.
 
-## 分层架构
+## Layered Architecture
 
-- 接入层：对外暴露类型安全的 `API` 协议，简化业务方实例化内核应用层的过程
-- 基础设施层：将原始 `RuleFactorResource` 转化为 `Resource` 实体，定义动态资源获取的 `Fetcher` 抽象，依赖业务方提供 `Fetcher` 实现
-- 应用层：编排领域逻辑，负责规则配置的数据、行为封装
-- 领域层：封装核心业务规则，包括规则推断机制、操作符映射逻辑、阈值属性计算逻辑。根据 `RuleFactorDefinition` 定义推断可用 `operators` 和 `thresholder`，以及 `AtomicRuleGroup` 级别的可选规则因子选项推断
+- Access layer: exposes a type-safe `API` contract to simplify instantiation of the application layer.
+- Infrastructure layer: converts the raw `RuleFactorResource` into `Resource` entities and defines the `Fetcher` abstraction for dynamic resource loading, relying on `Fetcher` implementations supplied by the application.
+- Application layer: orchestrates domain logic and encapsulates rule configuration data and behavior.
+- Domain layer: encapsulates the core business rules, including rule inference, operator mapping, and threshold-property calculation. It infers available `operators` and `thresholder` values from `RuleFactorDefinition`, and infers selectable rule-factor options at the `AtomicRuleGroup` level.
 
-### 基础设施层
+### Infrastructure Layer
 
-将原始 `RuleFactorResource` 转化为 `Resource` 实体，定义动态资源获取的 `Fetcher` 抽象，依赖业务方提供 `Fetcher` 实现
+Converts the raw `RuleFactorResource` into `Resource` entities and defines the `Fetcher` abstraction for dynamic resource loading, relying on application-provided `Fetcher` implementations.
 
-[详见基础设施层设计](./infrastructure.md)
+[See infrastructure layer design](./infrastructure.md)
 
-### 接入层
+### Access Layer
 
-对外暴露类型安全的 `API` 协议，简化业务方实例化内核应用层的过程
+Exposes a type-safe `API` contract to simplify instantiation of the application layer.
 
-[详见接入层设计](./access.md)
+[See access layer design](./access.md)
 
-### 领域层
+### Domain Layer
 
-封装核心业务规则，包括规则推断机制、操作符映射逻辑、阈值属性计算逻辑
+Encapsulates the core business rules, including rule inference, operator mapping, and threshold-property calculation.
 
-[详见领域层设计](./domain.md)
+[See domain layer design](./domain.md)
 
-### 应用层
+### Application Layer
 
-编排领域逻辑，负责规则配置的数据、行为封装
+Orchestrates domain logic and encapsulates rule configuration data and behavior.
 
-[详见应用层设计](./application.md)
+[See application layer design](./application.md)
 
-### 领域模型
+### Domain Model
 
 ```mermaid
 classDiagram
@@ -174,6 +174,6 @@ classDiagram
   GroupCoordinationEvent ..> GroupCoordinationEventType
 ```
 
-## 业务方使用示例
+## Business Usage Example
 
-[详见使用示例](./usage.md)
+[See usage example](./usage.md)

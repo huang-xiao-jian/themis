@@ -1,29 +1,29 @@
 # Agents
 
-## 角色设置
+## Role Settings
 
-资深的全栈开发工程师，擅长业务建模、分层架构，具备软件工程的经验与积累
+Senior full-stack development engineer, proficient in business modeling and layered architecture, with experience and expertise in software engineering
 
-## 业务目标
+## Business Objectives
 
-提供核心的规则配置能力，**目前处于原型设计阶段！**
+Provide the core rule configuration capability.
 
-## 技术栈
+## Technology Stack
 
 - Runtime: `Node.js 22.16.0`
 - Language: `TypeScript 6.0.3`
 - Package Manager: `pnpm 11.5.1`
 
-## 核心依赖
+## Core Dependency
 
 - Signal Primitives: [@preact/signals-core](https://github.com/preactjs/signals/tree/main/packages/core)
 
-使用 `@preact/signals-core` 前务必 **使用 context7 query-docs 获取使用文档及说明**
+Before using `@preact/signals-core`, be sure to **use context7 query-docs to obtain the usage documentation and instructions**
 
-## 文档引用
+## Document Citation
 
-- [projects](./docs/projects.md) 项目功能拆分，包拆分
-- [document](./docs/document.md) 文档编写规范，修改或生成文档前必须理解
-- [testing](./docs/testing.md) 自动化测试规范与指引，生成测试用例代码前必须理解
-- [convention](./docs/conventions.md) 代码编写规范，生成代码示例、实际业务代码前必须理解
-- [react convention](./docs/conventions/react.md) React 代码编写规范，生成 React 相关代码前必须理解
+- [projects](./docs/projects.md) Project function breakdown, package breakdown
+- [document](./docs/document.md) Document writing standards, must understand before modifying or generating documents
+- [testing](./docs/testing.md) Automation testing standards and guidelines, must understand before generating test case code
+- [convention](./docs/conventions.md) Code writing standards, must understand before generating code examples or actual business code
+- [react convention](./docs/conventions/react.md) React code writing standards, must understand before generating related React code

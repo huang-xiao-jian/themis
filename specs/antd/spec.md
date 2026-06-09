@@ -1,35 +1,35 @@
-# @sisyphus/antd
+# `@sisyphus/antd`
 
-## 前置依赖
+## Prerequisites
 
 - [@sisyphus/react](../react/spec.md)
 
-## 设计规范
+## Design Guidelines
 
-- 对于无法从表单组件属性推断的配置（如尺寸策略、`placeholder` 模板等），通过抽象配置对象 `SisyphusAntdConfig` 集中管理，由 `SisyphusAntdProvider` 注入
-- 对于 `antd` 原生支持的配置内容（例如：主题、国际化），不要纳入抽象配置对象管理，由业务方自行负责
+- For configuration that cannot be inferred from form-component properties, such as sizing strategy and `placeholder` templates, centralize it in the abstract configuration object `SisyphusAntdConfig` and inject it through `SisyphusAntdProvider`.
+- For configuration natively supported by `antd` itself, such as theme and internationalization, do not include it in the abstract configuration object; the application should manage it directly.
 
-## 业务指标
+## Business Metric
 
-- 表单控件默认关闭浏览器自动填充
+- Form controls disable browser autofill by default.
 
-## 组件映射
+## Component Mapping
 
-### 表单组件到 antd 组件的映射
+### Form Components to antd Components
 
-| 表单组件         | antd 实现                             | 说明                                               |
-| :--------------- | :------------------------------------ | :------------------------------------------------- |
-| `Input`          | `Input`                               | 单行文本输入                                       |
-| `InputNumber`    | `InputNumber`                         | 数值输入                                           |
-| `TextArea`       | `Input.TextArea`                      | 多行输入                                           |
-| `Switch`         | `Switch`                              | 开关                                               |
-| `Select`         | `Select`                              | 单选                                               |
-| `MultipleSelect` | `Select` (mode="multiple")            | 多选                                               |
-| `Picker`         | `DatePicker` / `TimePicker` 等        | 按 semantic 映射                                   |
-| `RangePicker`    | `DatePicker.RangePicker`              | 区间选择                                           |
-| `RangeInput`     | `Input` (双框) / `InputNumber` (双框) | 区间输入，`dataType='number'` 时使用 `InputNumber` |
+| Form component   | antd implementation                                 | Description                                             |
+| :--------------- | :-------------------------------------------------- | :------------------------------------------------------ |
+| `Input`          | `Input`                                             | Single-line text input                                  |
+| `InputNumber`    | `InputNumber`                                       | Numeric input                                           |
+| `TextArea`       | `Input.TextArea`                                    | Multi-line input                                        |
+| `Switch`         | `Switch`                                            | Toggle                                                  |
+| `Select`         | `Select`                                            | Single select                                           |
+| `MultipleSelect` | `Select` (mode="multiple")                          | Multi select                                            |
+| `Picker`         | `DatePicker` / `TimePicker` etc.                    | Mapped by semantic                                      |
+| `RangePicker`    | `DatePicker.RangePicker`                            | Range selection                                         |
+| `RangeInput`     | `Input` (dual fields) / `InputNumber` (dual fields) | Range input, use `InputNumber` when `dataType='number'` |
 
-### Picker 组件映射（按 semantic）
+### Picker Component Mapping (by semantic)
 
 ```mermaid
 graph TD
@@ -42,220 +42,220 @@ graph TD
     RouteSemantic -- "percentage" --> SliderPickerCase[SliderPicker]
 ```
 
-## 属性映射
+## Property Mapping
 
-### 表单组件属性到 antd 组件属性的映射
+### Form Component Properties to antd Component Properties
 
-组件映射表定义了从抽象表单组件属性（`ThresholdComponentProperties`）到具体 `antd` 组件属性的转换规则。适配器根据表单组件类型注入对应的 `antd` 组件属性。
+The component mapping table defines the conversion rules from abstract form-component properties (`ThresholdComponentProperties`) to concrete `antd` component properties. The adapter injects the corresponding `antd` properties according to the form-component type.
 
 #### Input → Input
 
-| 表单组件属性      | antd 组件属性 |
-| :---------------- | :------------ |
-| `name`            | `name`        |
-| `title`           | `label`       |
-| `constraints.min` | `minLength`   |
-| `constraints.max` | `maxLength`   |
+| Form component property | antd component property |
+| :---------------------- | :---------------------- |
+| `name`                  | `name`                  |
+| `title`                 | `label`                 |
+| `constraints.min`       | `minLength`             |
+| `constraints.max`       | `maxLength`             |
 
-**推断规则**：
+**Inference rule**:
 
-- 仅处理 `dataType='string'` 场景，`maxLength > 100` 时映射为 `TextAreaProperties`
+- Only `dataType='string'` scenarios are handled; when `maxLength > 100`, map to `TextAreaProperties`.
 
-**隐式继承**：`size`, `placeholder`, `allowClear`
+**Implicit inheritance**: `size`, `placeholder`, `allowClear`
 
 #### InputNumber → InputNumber
 
-| 表单组件属性            | antd 组件属性 |
-| :---------------------- | :------------ |
-| `name`                  | `name`        |
-| `title`                 | `label`       |
-| `constraints.min`       | `min`         |
-| `constraints.max`       | `max`         |
-| `constraints.step`      | `step`        |
-| `constraints.precision` | `precision`   |
+| Form component property | antd component property |
+| :---------------------- | :---------------------- |
+| `name`                  | `name`                  |
+| `title`                 | `label`                 |
+| `constraints.min`       | `min`                   |
+| `constraints.max`       | `max`                   |
+| `constraints.step`      | `step`                  |
+| `constraints.precision` | `precision`             |
 
-**推断规则**：
+**Inference rule**:
 
-- `dataType='number'` + `mode='point'` + `quantity='single'` 时推断为 `InputNumber`
+- Infer `InputNumber` when `dataType='number'` + `mode='point'` + `quantity='single'`.
 
-**隐式继承**：`size`, `placeholder`
+**Implicit inheritance**: `size`, `placeholder`
 
 #### TextArea → Input.TextArea
 
-| 表单组件属性      | antd 组件属性 |
-| :---------------- | :------------ |
-| `name`            | `name`        |
-| `title`           | `label`       |
-| `constraints.max` | `maxLength`   |
+| Form component property | antd component property |
+| :---------------------- | :---------------------- |
+| `name`                  | `name`                  |
+| `title`                 | `label`                 |
+| `constraints.max`       | `maxLength`             |
 
-**隐式继承**：`rows: 4`, `placeholder`, `allowClear`
+**Implicit inheritance**: `rows: 4`, `placeholder`, `allowClear`
 
 #### RangeInput → Input / InputNumber
 
-| 表单组件属性 | antd 组件属性 |
-| :----------- | :------------ |
-| `name`       | `name`        |
-| `title`      | `label`       |
-| `dataType`   | 组件选择依据  |
+| Form component property | antd component property   |
+| :---------------------- | :------------------------ |
+| `name`                  | `name`                    |
+| `title`                 | `label`                   |
+| `dataType`              | Component selection basis |
 
-**推断规则**：
+**Inference rule**:
 
-- `dataType='string'` 时渲染为双框 `Input` 组件
-- `dataType='number'` 时渲染为双框 `InputNumber` 组件，约束映射：`min→min`, `max→max`, `step→step`, `precision→precision`
+- Render as a dual-field `Input` component when `dataType='string'`.
+- Render as a dual-field `InputNumber` component when `dataType='number'`, with constraint mapping: `min→min`, `max→max`, `step→step`, `precision→precision`.
 
-**隐式继承**：`placeholder: ['最小值', '最大值']`, `allowClear`
+**Implicit inheritance**: `placeholder: ['Minimum', 'Maximum']`, `allowClear`
 
 #### Switch → Switch
 
-| 表单组件属性 | antd 组件属性 |
-| :----------- | :------------ |
-| `name`       | `name`        |
-| `title`      | `label`       |
+| Form component property | antd component property |
+| :---------------------- | :---------------------- |
+| `name`                  | `name`                  |
+| `title`                 | `label`                 |
 
-**隐式继承**：`checkedChildren: '是'`, `unCheckedChildren: '否'`
+**Implicit inheritance**: `checkedChildren: 'Yes'`, `unCheckedChildren: 'No'`
 
 #### Select → Select
 
-| 表单组件属性 | antd 组件属性 |
-| :----------- | :------------ |
-| `name`       | `name`        |
-| `title`      | `label`       |
-| `resource`   | `options`     |
+| Form component property | antd component property |
+| :---------------------- | :---------------------- |
+| `name`                  | `name`                  |
+| `title`                 | `label`                 |
+| `resource`              | `options`               |
 
-**Resource 类型映射**：
+**Resource type mapping**:
 
-| Resource 类型                        | antd 组件属性                                                         |
-| :----------------------------------- | :-------------------------------------------------------------------- |
-| `StaticResource`                     | `options`（直接读取 `options.value`）                                 |
-| `ElementaryDynamicResource`          | `options`（响应式）+ `loading` + `onRefresh`                          |
-| `PaginatedDynamicResource`           | `options`（响应式）+ `loading` + `pagination` + `onFlip`              |
-| `FilterableDynamicResource`          | `options`（响应式）+ `loading` + `onFilter`                           |
-| `PaginatedFilterableDynamicResource` | `options`（响应式）+ `loading` + `pagination` + `onFilter` + `onFlip` |
+| Resource type                        | antd component property                                                 |
+| :----------------------------------- | :---------------------------------------------------------------------- |
+| `StaticResource`                     | `options` (read directly from `options.value`)                          |
+| `ElementaryDynamicResource`          | `options` (reactive) + `loading` + `onRefresh`                          |
+| `PaginatedDynamicResource`           | `options` (reactive) + `loading` + `pagination` + `onFlip`              |
+| `FilterableDynamicResource`          | `options` (reactive) + `loading` + `onFilter`                           |
+| `PaginatedFilterableDynamicResource` | `options` (reactive) + `loading` + `pagination` + `onFilter` + `onFlip` |
 
-**隐式继承**：`placeholder`, `allowClear`
+**Implicit inheritance**: `placeholder`, `allowClear`
 
 #### MultipleSelect → Select
 
-映射规则与 `Select` 相同，额外配置：
+The mapping is the same as `Select`, with an additional configuration:
 
-| antd 组件属性 | 值           |
-| :------------ | :----------- |
-| `mode`        | `'multiple'` |
+| antd component property | value        |
+| :---------------------- | :----------- |
+| `mode`                  | `'multiple'` |
 
 #### Picker → DatePicker / TimePicker / RatePicker
 
-| 表单组件属性  | antd 组件属性 |
-| :------------ | :------------ |
-| `name`        | `name`        |
-| `title`       | `label`       |
-| `semantic`    | 组件类型映射  |
-| `constraints` | 组件属性      |
+| Form component property | antd component property |
+| :---------------------- | :---------------------- |
+| `name`                  | `name`                  |
+| `title`                 | `label`                 |
+| `semantic`              | Component type mapping  |
+| `constraints`           | Component properties    |
 
-**Semantic 映射规则**：
+**Semantic mapping rules**:
 
-| semantic     | antd 组件    | 额外属性                        |
-| :----------- | :----------- | :------------------------------ |
-| `rate`       | `Select`     | `showSearch: true`              |
-| `date`       | `DatePicker` | -                               |
-| `time`       | `TimePicker` | -                               |
-| `datetime`   | `DatePicker` | `showTime: true`                |
-| `percentage` | `Slider`     | `min: 0`, `max: 100`, `step: 1` |
+| semantic     | antd component | Additional properties           |
+| :----------- | :------------- | :------------------------------ |
+| `rate`       | `Select`       | `showSearch: true`              |
+| `date`       | `DatePicker`   | -                               |
+| `time`       | `TimePicker`   | -                               |
+| `datetime`   | `DatePicker`   | `showTime: true`                |
+| `percentage` | `Slider`       | `min: 0`, `max: 100`, `step: 1` |
 
-**constraints 映射规则**：
+**Constraint mapping rules**:
 
-| semantic            | constraints   | antd 组件属性 |
-| :------------------ | :------------ | :------------ |
-| `date` / `datetime` | `format`      | `format`      |
-| `time`              | `format`      | `format`      |
-| `percentage`        | `min` / `max` | `min` / `max` |
-| `percentage`        | `step`        | `step`        |
+| semantic            | constraints   | antd component property |
+| :------------------ | :------------ | :---------------------- |
+| `date` / `datetime` | `format`      | `format`                |
+| `time`              | `format`      | `format`                |
+| `percentage`        | `min` / `max` | `min` / `max`           |
+| `percentage`        | `step`        | `step`                  |
 
 #### RangePicker → DatePicker.RangePicker
 
-| 表单组件属性 | antd 组件属性 |
-| :----------- | :------------ |
-| `name`       | `name`        |
-| `title`      | `label`       |
-| `semantic`   | 组件类型映射  |
+| Form component property | antd component property |
+| :---------------------- | :---------------------- |
+| `name`                  | `name`                  |
+| `title`                 | `label`                 |
+| `semantic`              | Component type mapping  |
 
-**Semantic 映射规则**：
+**Semantic mapping rules**:
 
-| semantic     | antd 组件                | 额外属性         |
-| :----------- | :----------------------- | :--------------- |
-| `date`       | `DatePicker.RangePicker` | -                |
-| `datetime`   | `DatePicker.RangePicker` | `showTime: true` |
-| `percentage` | `Slider` (range)         | `range: true`    |
+| semantic     | antd component           | Additional properties |
+| :----------- | :----------------------- | :-------------------- |
+| `date`       | `DatePicker.RangePicker` | -                     |
+| `datetime`   | `DatePicker.RangePicker` | `showTime: true`      |
+| `percentage` | `Slider` (range)         | `range: true`         |
 
-#### ListBuilder - 列表构建器（组合组件）
+#### ListBuilder - List Builder (Composite Component)
 
-`ListBuilder` 为逻辑组合组件，由多个基础 antd 组件组合实现。
+`ListBuilder` is a logical composite component implemented by combining multiple base antd components.
 
-| 组合部件   | antd 组件                                     | 说明           |
-| :--------- | :-------------------------------------------- | :------------- |
-| 列表容器   | `Space` + 列表项包装                          | 垂直排列列表项 |
-| 列表项渲染 | 按 `item.type` 映射（见下表）                 | 列表项组件类型 |
-| 添加按钮   | `Button` (type='link', icon='PlusOutlined')   | 追加列表项     |
-| 移除按钮   | `Button` (type='link', icon='DeleteOutlined') | 删除当前列表项 |
+| Composite part      | antd component                                | Description               |
+| :------------------ | :-------------------------------------------- | :------------------------ |
+| List container      | `Space` + list-item wrapper                   | Vertically arranges items |
+| List item rendering | mapped by `item.type` (see table below)       | Item component type       |
+| Add button          | `Button` (type='link', icon='PlusOutlined')   | Append a list item        |
+| Remove button       | `Button` (type='link', icon='DeleteOutlined') | Delete the current item   |
 
-**列表项组件映射**：
+**List item component mapping**:
 
-| item.type       | antd 组件                            | 说明                                     |
-| :-------------- | :----------------------------------- | :--------------------------------------- |
-| `'Input'`       | `Input` / `InputNumber`              | `dataType='number'` 时使用 `InputNumber` |
-| `'InputNumber'` | `InputNumber`                        | 数值输入                                 |
-| `'Picker'`      | 按 `item.semantic` 映射（见 Picker） | 选择器                                   |
+| item.type       | antd component            | Description                                |
+| :-------------- | :------------------------ | :----------------------------------------- |
+| `'Input'`       | `Input` / `InputNumber`   | Use `InputNumber` when `dataType='number'` |
+| `'InputNumber'` | `InputNumber`             | Numeric input                              |
+| `'Picker'`      | Mapped by `item.semantic` | Picker                                     |
 
-**数量约束映射**：
+**Quantity constraint mapping**:
 
-| constraints | 按钮禁用条件                               |
-| :---------- | :----------------------------------------- |
-| `minItems`  | 当前列表项数量 ≤ minItems 时，禁用移除按钮 |
-| `maxItems`  | 当前列表项数量 ≥ maxItems 时，禁用添加按钮 |
+| constraints | Button disabled condition                                    |
+| :---------- | :----------------------------------------------------------- |
+| `minItems`  | Disable remove button when the current item count ≤ minItems |
+| `maxItems`  | Disable add button when the current item count ≥ maxItems    |
 
-#### ListRangeBuilder - 区间列表构建器（组合组件）
+#### ListRangeBuilder - Range List Builder (Composite Component)
 
-映射规则与 `ListBuilder` 相同。
+The mapping rules are the same as `ListBuilder`.
 
-| item.type       | antd 组件                             | 说明                                     |
-| :-------------- | :------------------------------------ | :--------------------------------------- |
-| `'RangeInput'`  | `Input` (双框) / `InputNumber` (双框) | `dataType='number'` 时使用 `InputNumber` |
-| `'RangePicker'` | `DatePicker.RangePicker`              | 区间选择器                               |
+| item.type       | antd component                                      | Description                                |
+| :-------------- | :-------------------------------------------------- | :----------------------------------------- |
+| `'RangeInput'`  | `Input` (dual fields) / `InputNumber` (dual fields) | Use `InputNumber` when `dataType='number'` |
+| `'RangePicker'` | `DatePicker.RangePicker`                            | Range picker                               |
 
-### 抽象配置对象
+### Abstract Configuration Object
 
-对于无法从表单组件属性推断的配置（如全局主题、尺寸策略、placeholder 模板等），通过抽象配置对象 `SisyphusAntdConfig` 集中管理，由 `SisyphusAntdProvider` 注入。
+For configuration that cannot be inferred from form-component properties, such as global theme, sizing strategy, and placeholder templates, centralize it in the abstract configuration object `SisyphusAntdConfig` and inject it through `SisyphusAntdProvider`.
 
 ```ts
-/** antd 适配器配置 */
+/** antd adapter configuration */
 interface SisyphusAntdConfig {
-  /** 尺寸策略，默认 'middle' */
+  /** Size strategy, default 'middle' */
   size?: 'small' | 'middle' | 'large';
-  /** placeholder 模板 */
+  /** Placeholder template */
   placeholderTemplate?: {
     input?: string;
     select?: string;
   };
-  /** Switch 的 checked/unChecked 内容 */
+  /** Checked / unchecked text for Switch */
   switchLabels?: {
     checked?: string;
     unChecked?: string;
   };
-  /** AtomicRule 行布局配置 */
+  /** AtomicRule row layout configuration */
   atomicRuleLayout?: {
-    /** name 列 flex 值，默认 '180px' */
+    /** flex value for the name column, default '180px' */
     name?: string;
-    /** operator 列 flex 值，默认 '140px' */
+    /** flex value for the operator column, default '140px' */
     operator?: string;
-    /** threshold 列 flex 值，默认 'auto' */
+    /** flex value for the threshold column, default 'auto' */
     threshold?: string;
-    /** action 列 flex 值，默认 'none' */
+    /** flex value for the action column, default 'none' */
     action?: string;
-    /** 列间距，默认 8 */
+    /** column gap, default 8 */
     gutter?: number;
   };
 }
 
-/** 提供 antd 配置 */
+/** Provide antd configuration */
 function SisyphusAntdProvider({
   config,
   children,
@@ -265,7 +265,7 @@ function SisyphusAntdProvider({
 }): React.ReactElement;
 ```
 
-**使用示例**：
+**Usage example**:
 
 ```tsx
 import { SisyphusAntdProvider } from '@sisyphus/antd';
@@ -275,7 +275,7 @@ function App() {
     <SisyphusAntdProvider
       config={{
         size: 'large',
-        switchLabels: { checked: '启用', unChecked: '停用' },
+        switchLabels: { checked: 'Enabled', unChecked: 'Disabled' },
         atomicRuleLayout: {
           name: '200px',
           operator: '160px',
@@ -290,7 +290,7 @@ function App() {
 }
 ```
 
-`AtomicRuleView` 使用 `Grid` 布局，沿用 antd `Row` + `Col` 实现。各列的 `flex` 值通过 `SisyphusAntdConfig.atomicRuleLayout` 配置，等效代码如下：
+`AtomicRuleView` uses a `Grid` layout, implemented with antd `Row` + `Col`. The `flex` value for each column is configured through `SisyphusAntdConfig.atomicRuleLayout`, with an equivalent implementation as follows:
 
 ```tsx
 <Row gutter={gutter} align="middle" wrap={false}>
@@ -301,22 +301,22 @@ function App() {
 </Row>
 ```
 
-**说明**：日期/时间格式化等 `antd` 原生支持的配置，由业务方通过 `antd ConfigProvider` 自行配置，不纳入 `SisyphusAntdConfig` 管理。
+**Note**: Native antd-supported configuration such as date/time formatting is managed directly by the application through `antd ConfigProvider` and is not included in `SisyphusAntdConfig`.
 
-## 插件实现
+## Plugin Implementation
 
 ### createAntdPlugin
 
-通过 `createAntdPlugin()` 创建 antd 插件，实现 `SisyphusPlugin` 协议：
+Use `createAntdPlugin()` to create the antd plugin, implementing the `SisyphusPlugin` protocol:
 
 ```ts
 import type { SisyphusPlugin } from '@sisyphus/react';
 
-/** 创建 antd 组件渲染器插件 */
+/** Create the antd component renderer plugin */
 function createAntdPlugin(): SisyphusPlugin;
 ```
 
-**使用方式**：
+**Usage**:
 
 ```ts
 import { createSisyphusScope } from '@sisyphus/react';

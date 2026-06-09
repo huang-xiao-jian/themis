@@ -1,23 +1,24 @@
-# 项目规范
+# Project Specifications
 
-## 功能拆分
+## Function Division
 
-功能拆分为多个子包，前缀统一为：`sisyphus`，例如：`@sisyphus/core`
+The features are divided into multiple packages, with the prefix uniformly set as: `sisyphus`, for example: `@sisyphus/core`
 
 ```shell
 └── packages
     ├── core
     └── react
     └── antd
-└── examples
-    ├── playground
+└── apps
+    ├── polaris
+
 ```
 
-## 包职责划分
+## Division of Responsibilities
 
-| 包                     | 职责                               |
-| :--------------------- | :--------------------------------- |
-| `@sisyphus/core`       | 推断机制、设置器管理               |
-| `@sisyphus/react`      | 定义渲染协议、提供编辑器组件       |
-| `@sisyphus/antd`       | 实现组件渲染协议（注册 antd 组件） |
-| `@sisyphus/playground` | 规则配置可交互案例集合             |
+| Package             | Responsibilities                                                  |
+| :------------------ | :---------------------------------------------------------------- |
+| `@sisyphus/core`    | Inference mechanism, setter management                            |
+| `@sisyphus/react`   | Define rendering protocol, provide editor components              |
+| `@sisyphus/antd`    | Implement component rendering protocol (register antd components) |
+| `@sisyphus/polaris` | Rule configuration for interactive case collection                |

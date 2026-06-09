@@ -1,31 +1,31 @@
-# 代码规范
+# Code Conventions
 
-## 面向对象原则
+## Object-Oriented Principles
 
-- 遵循 `SOLID` 原则
-- 遵循组合优于继承原则
-- 优先使用 `Class` 而非 `Function` 组织业务逻辑
+- Follow the `SOLID` principles
+- Prefer composition over inheritance
+- Prefer using `Class` rather than `Function` to organize business logic
 
-### 命名规范
+### Naming Conventions
 
 - Classes: `PascalCase` (e.g. `UserRepository`)
 - Class members: `Camel Case` (e.g. `findAvailableDiscount`)
-- Private members: use `private` descriptor only, avoid special prefix (.e.g `#` or `_`)
+- Private members: use the `private` modifier only; avoid special prefixes such as `#` or `_`
 - Constant variables: `SCREAMING_SNAKE_CASE` (`MAX_RETRY_COUNT`)
-- Function name: `Camel Case` (e.g. `findDiscountRule`)
-- Interface name: `PascalCase` without `I` prefix
-- Enum name: `PascalCase`
-- Enum key: `SCREAMING_SNAKE_CASE` (`MAX_RETRY_COUNT`)
-- Class Method: 使用 `on` 前缀的方法，用于事件回调绑定，必须使用**箭头函数**方式声明
+- Function names: `Camel Case` (e.g. `findDiscountRule`)
+- Interface names: `PascalCase` without the `I` prefix
+- Enum names: `PascalCase`
+- Enum keys: `SCREAMING_SNAKE_CASE` (`MAX_RETRY_COUNT`)
+- Class methods: methods with an `on` prefix used for event callback binding must be declared as **arrow functions**
 
 ```tsx
-// ❌ 默认方法声明，直接传递方法引用，点击时会报错 this 为 undefined
+// ❌ Default method declaration; passing the method reference directly will cause `this` to be `undefined` on click
 const TriggerView = observer(() => {
-  return <button onClick={counterStore.onIncrement}>点击增加</button>;
+  return <button onClick={counterStore.onIncrement}>Click to increment</button>;
 });
 ```
 
-字符串风格的 `Enum` 声明：
+String-style `Enum` declaration:
 
 ```ts
 enum Colors {
@@ -34,28 +34,28 @@ enum Colors {
 }
 ```
 
-### 组织规范
+### Organization Conventions
 
-- 通过声明接口来定义契约
-- 倾向于编写功能单一的小类，公有方法数量少于 5 个，属性数量少于 10 个
-- `Class` 文件命名使用 `pascal case` (e.g. `UserRepository.ts`)
-- `Function` 文件命名使用 `Camel Case` (e.g. `findDiscountRule.ts`)
+- Define contracts through interface declarations
+- Prefer writing small classes with a single responsibility, fewer than 5 public methods, and fewer than 10 properties
+- `Class` file names should use `pascal case` (e.g. `UserRepository.ts`)
+- `Function` file names should use `Camel Case` (e.g. `findDiscountRule.ts`)
 
-### 导入规范
+### Import Conventions
 
-- 禁止使用命名空间导入（如 `import React from 'react'` 或 `import type React from 'react'`）
-- 必须使用具名导入，按需引入所需的类型或函数
+- Do not use namespace imports (for example `import React from 'react'` or `import type React from 'react'`)
+- Must use named imports and import only the types or functions you need
 
 ```ts
-// ✅ 正确
+// ✅ Correct
 import type { ReactElement, ReactNode, ComponentType } from 'react';
 import { createElement, createContext, useContext } from 'react';
 
-// ❌ 错误
+// ❌ Incorrect
 import React from 'react';
 import type React from 'react';
 ```
 
-### 代码格式
+### Code Formatting
 
-- 代码格式约定参考 [prettier](../.prettierrc) 配置
+- Refer to the [prettier](../.prettierrc) configuration for code formatting conventions

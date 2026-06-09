@@ -1,78 +1,78 @@
-# 规则因子解释器
+# Rule Factor Interpreter
 
-规范解释器的实现机制，明确 `DSL` 从抽象到具体的转换机制
+Defines the implementation mechanism of the interpreter and clarifies how the DSL is transformed from abstract form into concrete runtime entities.
 
-## 前置依赖
+## Prerequisites
 
-- [规则及规则因子描述](./spec.md)
+- [Rule factor specification](./spec.md)
 
-## 术语说明
+## Terminology
 
-- **FactorResource**：DSL 层描述性声明，定义资源的特征和来源（详见 [规则因子描述](./spec.md)）
-- **Resource**：运行时层封装实体，包含 `Signal` 和交互方法
+- **FactorResource**: a DSL-level declarative definition that describes the features and source of a resource. See [Rule factor specification](./spec.md).
+- **Resource**: a runtime encapsulated entity that contains `Signal` state and interaction methods.
 
-## Resource 设计
+## Resource Design
 
-### Resource 设计目标
+### Resource Design Goal
 
-将原始 `FactorResource` 封装为 `Resource` 领域实体，屏蔽原始 `DSL` 定义与 **数据源获取** 等细节
+Encapsulate the original `FactorResource` into a `Resource` domain entity and hide the original DSL definition and data-fetching details.
 
-### Resource 设计规范
+### Resource Design Rules
 
-- 选项采用 `Signal<FieldDataSource>` 响应式数据
-- 交互方法采用 `onXXX` 事件绑定风格
+- Options use reactive `Signal<FieldDataSource>` data.
+- Interaction methods use `onXXX` event-binding style.
 
-### Resource 封装
+### Resource Encapsulation
 
 ```ts
 import { type FieldDataSource } from './spec.md';
 
 /**
- * 静态资源 - 预设选项，无需动态加载
+ * Static resource - preset options, no dynamic loading required
  */
 interface StaticResource<T extends FieldDataSource> {
   /**
-   * 资源标识
+   * Resource identifier
    */
   readonly name: string;
   /**
-   * 数据列表 Signal
+   * Signal holding the option list
    */
   readonly options: Signal<readonly T[]>;
   /**
-   * 根据 value 本地筛选对应的 option
+   * Filter the matching option locally by value
    */
   onFiltrate: (value: string | number) => void;
 }
 
 /**
- * 动态资源 - 不支持分页 + 不支持服务端过滤
+ * Dynamic resource - no pagination, no server-side filtering
  */
 interface ElementaryDynamicResource<T extends FieldDataSource> {
   /**
-   * 资源标识
+   * Resource identifier
    */
   readonly name: string;
   /**
-   * 加载状态 Signal
+   * Loading state signal
    */
   readonly loading: Signal<boolean>;
   /**
-   * 数据列表 Signal
+   * Signal holding the option list
    */
   readonly options: Signal<readonly T[]>;
   /**
-   * 重新加载数据
+   * Reload the data
    */
   onRefresh: () => void;
   /**
-   * 根据 value 本地筛选对应的 option
+   * Filter the matching option locally by value
    */
   onFiltrate: (value: string | number) => void;
 }
 
 /**
- * 动态资源 - 支持分页 + 不支持服务端过滤
+ * Dynamic resource - supports pagination, no server-side filtering
  */
 interface Pagination {
   page: number;
@@ -82,103 +82,103 @@ interface Pagination {
 
 interface PaginatedDynamicResource<T extends FieldDataSource> {
   /**
-   * 资源标识
+   * Resource identifier
    */
   readonly name: string;
   /**
-   * 加载状态 Signal
+   * Loading state signal
    */
   readonly loading: Signal<boolean>;
   /**
-   * 数据列表 Signal
+   * Signal holding the option list
    */
   readonly options: Signal<readonly T[]>;
   /**
-   * 分页状态 Signal
+   * Pagination state signal
    */
   readonly pagination: Signal<Pagination>;
   /**
-   * 翻页操作
+   * Pagination action
    */
   onFlip: (page: number) => void;
   /**
-   * 重新加载数据
+   * Reload the data
    */
   onRefresh: () => void;
 }
 
 /**
- * 动态资源 - 不支持分页 + 支持服务端过滤
+ * Dynamic resource - no pagination, supports server-side filtering
  */
 interface FilterableDynamicResource<T extends FieldDataSource> {
   /**
-   * 资源标识
+   * Resource identifier
    */
   readonly name: string;
   /**
-   * 加载状态 Signal
+   * Loading state signal
    */
   readonly loading: Signal<boolean>;
   /**
-   * 数据列表 Signal
+   * Signal holding the option list
    */
   readonly options: Signal<readonly T[]>;
   /**
-   * 执行过滤搜索
+   * Execute filtering search
    */
   onFilter: (keyword: string) => void;
   /**
-   * 重新加载数据
+   * Reload the data
    */
   onRefresh: () => void;
 }
 
 /**
- * 动态资源 - 支持分页 + 支持服务端过滤
+ * Dynamic resource - supports pagination and server-side filtering
  */
 interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
   /**
-   * 资源标识
+   * Resource identifier
    */
   readonly name: string;
   /**
-   * 加载状态 Signal
+   * Loading state signal
    */
   readonly loading: Signal<boolean>;
   /**
-   * 数据列表 Signal
+   * Signal holding the option list
    */
   readonly options: Signal<readonly T[]>;
   /**
-   * 分页状态 Signal
+   * Pagination state signal
    */
   readonly pagination: Signal<Pagination>;
   /**
-   * 关键词 Signal
+   * Keyword signal
    */
   readonly keyword: Signal<string>;
   /**
-   * 翻页操作
+   * Pagination action
    */
   onFlip: (page: number) => void;
   /**
-   * 执行过滤搜索
+   * Execute filtering search
    */
   onFilter: (keyword: string) => void;
   /**
-   * 重新加载数据
+   * Reload the data
    */
   onRefresh: () => void;
 }
 ```
 
-## 推断规则因子 Operator
+## Inferring Rule Factor Operators
 
-推断逻辑：仅根据 `dataType` 确定“数据域”，再结合 `mode`（点/区间）与 `quantity`（单/多）确定“操作域”，从而锁定可用的 `operator` 列表。`semantic` 作为 `dataType` 的精细化扩充，**当前阶段不参与 `operator` 推断**。
+The inference logic uses only `dataType` to determine the "data domain", then combines `mode` (point / range) and `quantity` (single / multiple) to determine the "operation domain", thereby narrowing the available `operator` list. `semantic` is a refinement of `dataType` and **does not participate in operator inference at the current stage**.
 
-### 数据类型推断 DataType
+### Data Type Inference DataType
 
-| dataType | mode  | quantity | 推断的 Operator 语义                                              |
+| dataType | mode  | quantity | Inferred operator semantics                                       |
 | :------- | :---- | :------- | :---------------------------------------------------------------- |
 | number   | point | single   | `=`, `≠`, `>`, `>=`, `<`, `<=`                                    |
 | number   | point | multiple | `in`, `not in`                                                    |
@@ -188,36 +188,36 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
 | string   | point | multiple | `in`, `not in`                                                    |
 | boolean  | point | single   | `is`                                                              |
 
-## 推断表单组件 Intermediate Representation
+## Inferring Form Components Intermediate Representation
 
-从 `DSL` 推断中间形态的表单组件 + 表单组件属性，便于适配器（框架 + 组件库）进行高效的实现
+Infer the intermediate form component and form component properties from the DSL to help adapters (framework + component library) implement efficiently.
 
 ```mermaid
 graph TD
-    Start(开始) --> CheckFactorResource{资源声明?}
+    Start(Start) --> CheckFactorResource{Resource declared?}
 
-    %% 受限选项
-    CheckFactorResource -- "yes" --> CheckFactorResourceQuantity{关联数量?}
+    %% restricted options
+    CheckFactorResource -- "yes" --> CheckFactorResourceQuantity{Associated quantity?}
     CheckFactorResourceQuantity -- "single" --> SingleResourceCase[Select]
     CheckFactorResourceQuantity -- "multiple" --> MultipleResourceCase[MultipleSelect]
 
-    %% 非受限选项
-    CheckFactorResource -- "no" --> CheckDataType{数据类型?}
+    %% unrestricted options
+    CheckFactorResource -- "no" --> CheckDataType{Data type?}
 
-    %% boolean 类型
+    %% boolean
     CheckDataType -- "boolean" --> SwitchCase[Switch]
 
-    %% string 类型
-    CheckDataType -- "other" --> CheckPromptMode{交互模式?}
+    %% string
+    CheckDataType -- "other" --> CheckPromptMode{Interaction mode?}
 
-    CheckPromptMode -- "manual" --> CheckManualMode{区间模式？}
-    CheckPromptMode -- "auto" --> CheckAutoMode{区间模式？}
+    CheckPromptMode -- "manual" --> CheckManualMode{Range mode?}
+    CheckPromptMode -- "auto" --> CheckAutoMode{Range mode?}
 
-    CheckManualMode -- "point" --> CheckManualPointQuantity{关联数量?}
-    CheckManualMode -- "range" --> CheckManualRangeQuantity{关联数量?}
+    CheckManualMode -- "point" --> CheckManualPointQuantity{Associated quantity?}
+    CheckManualMode -- "range" --> CheckManualRangeQuantity{Associated quantity?}
 
     %% string + point
-    CheckManualPointQuantity -- "single" --> CheckManualPointSingleLength{内容格式?}
+    CheckManualPointQuantity -- "single" --> CheckManualPointSingleLength{Content format?}
     CheckManualPointQuantity -- "multiple" --> ListBuilderCase[ListBuilder]
 
     %% string + point + single
@@ -227,8 +227,8 @@ graph TD
     CheckManualRangeQuantity -- "single" --> RangeInputCase[RangeInput]
     CheckManualRangeQuantity -- "multiple" --> ListRangeBuilderCase[ListRangeBuilder]
 
-    CheckAutoMode -- "point" --> CheckAutoPointQuantity{关联数量?}
-    CheckAutoMode -- "range" --> CheckAutoRangeQuantity{关联数量?}
+    CheckAutoMode -- "point" --> CheckAutoPointQuantity{Associated quantity?}
+    CheckAutoMode -- "range" --> CheckAutoRangeQuantity{Associated quantity?}
 
     %% point
     CheckAutoPointQuantity -- "single" --> PickerCase[Picker]
@@ -238,256 +238,256 @@ graph TD
     CheckAutoRangeQuantity -- "multiple" --> ListRangePickerBuilderCase[ListRangePickerBuilder]
 ```
 
-组件说明：
+Component descriptions:
 
-- `Input`: 单行文本/数字输入
-- `TextArea`: 长文本输入
-- `RangeInput`: 区间输入
-- `Select`: 单选
-- `MultipleSelect`: 多选
-- `Picker`: 数值或日期的选择
-- `RangePicker`: 数值或日期的区间选择
-- `ListBuilder`: 列表构建器
-- `ListRangeBuilder`: 区间列表构建器
+- `Input`: single-line text or numeric input
+- `TextArea`: long-text input
+- `RangeInput`: range input
+- `Select`: single select
+- `MultipleSelect`: multi select
+- `Picker`: numeric or date picker
+- `RangePicker`: numeric or date range picker
+- `ListBuilder`: list builder
+- `ListRangeBuilder`: range list builder
 
-## 表单组件设计
+## Form Component Design
 
-### 表单组件设计目标
+### Form Component Design Goal
 
-明确 **表单组件** 的属性，用于 `ThresholdRenderer` 渲染阈值输入组件，屏蔽原始 `DSL` 定义。
+Define the properties of the **form components** used by `ThresholdRenderer` to render threshold input controls, while hiding the original DSL definition.
 
-### 表单组件设计规范
+### Form Component Design Rules
 
-- 避免框架的细节侵入，统一使用 `Properties` 作为后缀
-- 避免组件的细节侵入，避免出现表单控件的交互属性，约定隐式继承
+- Avoid framework-specific details by using `Properties` as the suffix consistently.
+- Avoid component implementation details. Do not expose interaction properties of form controls unnecessarily; use implicit inheritance where appropriate.
 
-### 表单组件属性声明
+### Form Component Property Definitions
 
-抽象表单组件统一继承 `BaseProperties`，组件特定属性按需扩展，**特别说明：以下属性定义为最终传递给抽象组件的属性，而不是推断过程中的属性**
+Abstract form components all inherit `BaseProperties`. Component-specific properties are extended as needed. **Important: the property definitions below describe the final properties passed to the abstract component, not the properties used during inference.**
 
 ```ts
 import { DataType, Semantic } from './spec.md';
 
 /**
- * 抽象表单组件基础属性
+ * Base properties for abstract form components
  */
 interface BaseProperties {
-  /** 字段标识 */
+  /** Field identifier */
   name: string;
-  /** 字段标题 */
+  /** Field title */
   title: string;
-  /** 数据类型 */
+  /** Data type */
   dataType: DataType;
-  /** 语义化场景 */
+  /** Semantic scenario */
   semantic?: Semantic;
-  /** 数据约束 */
+  /** Data constraints */
   constraints?: FieldConstraints;
 }
 
 /**
- * 约束定义
+ * Constraint definition
  */
 interface FieldConstraints {
-  /** 最小值 / 最小长度 */
+  /** Minimum value / minimum length */
   min?: number | string;
-  /** 最大值 / 最大长度 */
+  /** Maximum value / maximum length */
   max?: number | string;
-  /** 开区间最小值 */
+  /** Exclusive lower bound */
   exclusiveMinimum?: number | string;
-  /** 开区间最大值 */
+  /** Exclusive upper bound */
   exclusiveMaximum?: number | string;
-  /** 步长 */
+  /** Step size */
   step?: number;
-  /** 小数精度 */
+  /** Decimal precision */
   precision?: number;
-  /** 字符串格式 */
+  /** String format */
   format?: string;
-  /** 正则表达式 */
+  /** Regular expression */
   pattern?: string;
-  /** 多值最少数量 */
+  /** Minimum count for multi-value scenarios */
   minItems?: number;
-  /** 多值最大数量 */
+  /** Maximum count for multi-value scenarios */
   maxItems?: number;
 }
 ```
 
-### InputProperties - 单行输入
+### InputProperties - Single-line Input
 
-适用于短文本输入场景（长度 ≤ 100）：
+Suitable for short text input scenarios (length <= 100):
 
 ```ts
 interface InputProperties extends BaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'Input';
 }
 ```
 
-### TextAreaProperties - 多行文本输入
+### TextAreaProperties - Multi-line Text Input
 
-适用于长文本输入场景（长度 > 100）：
+Suitable for long text input scenarios (length > 100):
 
 ```ts
 interface TextAreaProperties extends BaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'TextArea';
 }
 ```
 
-### RangeInputProperties - 区间输入
+### RangeInputProperties - Range Input
 
-适用于区间输入场景：
+Suitable for range input scenarios:
 
 ```ts
 interface RangeInputProperties extends BaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'RangeInput';
 }
 ```
 
-### SwitchProperties - 开关
+### SwitchProperties - Toggle Switch
 
-适用于布尔类型场景：
+Suitable for boolean scenarios:
 
 ```ts
 interface SwitchProperties extends BaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'Switch';
 }
 ```
 
-### SelectProperties - 单选
+### SelectProperties - Single Select
 
-适用于受限单选场景（关联运行时 Resource）：
+Suitable for constrained single-select scenarios (associated with a runtime `Resource`):
 
 ```ts
 interface SelectProperties extends BaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'Select';
-  /** 数据资源（运行时 Resource 封装） */
+  /** Data resource (runtime Resource wrapper) */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
 ```
 
-### MultipleSelectProperties - 多选
+### MultipleSelectProperties - Multi Select
 
-适用于受限多选场景（关联运行时 Resource）：
+Suitable for constrained multi-select scenarios (associated with a runtime `Resource`):
 
 ```ts
 interface MultipleSelectProperties extends BaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'MultipleSelect';
-  /** 数据资源（运行时 Resource 封装） */
+  /** Data resource (runtime Resource wrapper) */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
 ```
 
-### PickerProperties - 选择器
+### PickerProperties - Picker
 
-适用于自动选择场景（如日期选择、数值选择）：
+Suitable for automatic selection scenarios such as date picking or numeric selection:
 
 ```ts
 interface PickerProperties extends BaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'Picker';
 }
 ```
 
-### RangePickerProperties - 区间选择器
+### RangePickerProperties - Range Picker
 
-适用于区间选择场景（如日期范围选择）：
+Suitable for range selection scenarios such as date ranges:
 
 ```ts
 interface RangePickerProperties extends BaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'RangePicker';
 }
 ```
 
-### ListBuilderProperties - 列表构建器
+### ListBuilderProperties - List Builder
 
-适用于多值单点输入场景，用于构建多个单点值：
+Suitable for multi-value point-input scenarios, used to build multiple point values:
 
 ```ts
 import { DataType, Semantic } from './spec.md';
 
-/** 列表项级别属性 */
+/** Item-level properties */
 interface ListBuilderItemProperties {
-  /** 列表项组件类型 */
+  /** Item component type */
   readonly type: 'Input' | 'Picker';
-  /** 列表项数据类型 */
+  /** Item data type */
   readonly dataType: DataType;
-  /** 列表项语义化场景（可选） */
+  /** Item semantic scenario (optional) */
   readonly semantic?: Semantic;
-  /** 列表项数据约束（可选） */
+  /** Item constraints (optional) */
   readonly constraints?: FieldConstraints;
 }
 
-/** 列表级别属性 */
+/** List-level properties */
 interface ListBuilderBaseProperties {
-  /** 字段标识 */
+  /** Field identifier */
   readonly name: string;
-  /** 字段标题 */
+  /** Field title */
   readonly title: string;
-  /** 列表项数量约束 */
+  /** Constraints on list item count */
   readonly constraints?: {
-    /** 最少数量 */
+    /** Minimum count */
     minItems?: number;
-    /** 最多数量 */
+    /** Maximum count */
     maxItems?: number;
   };
 }
 
 interface ListBuilderProperties extends ListBuilderBaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'ListBuilder';
-  /** 列表项属性对象 */
+  /** Item property object */
   readonly item: ListBuilderItemProperties;
 }
 ```
 
-### ListRangeBuilderProperties - 区间列表构建器
+### ListRangeBuilderProperties - Range List Builder
 
-适用于多值区间输入场景，用于构建多个区间值：
+Suitable for multi-value range-input scenarios, used to build multiple range values:
 
 ```ts
 import { DataType, Semantic } from './spec.md';
 
-/** 列表项级别属性 */
+/** Item-level properties */
 interface ListRangeBuilderItemProperties {
-  /** 列表项组件类型 */
+  /** Item component type */
   readonly type: 'RangeInput' | 'RangePicker';
-  /** 列表项数据类型 */
+  /** Item data type */
   readonly dataType: DataType;
-  /** 列表项语义化场景（可选） */
+  /** Item semantic scenario (optional) */
   readonly semantic?: Semantic;
-  /** 列表项数据约束（可选） */
+  /** Item constraints (optional) */
   readonly constraints?: FieldConstraints;
 }
 
-/** 列表级别属性 */
+/** List-level properties */
 interface ListRangeBuilderBaseProperties {
-  /** 字段标识 */
+  /** Field identifier */
   readonly name: string;
-  /** 字段标题 */
+  /** Field title */
   readonly title: string;
-  /** 列表项数量约束 */
+  /** Constraints on list item count */
   readonly constraints?: {
-    /** 最少数量 */
+    /** Minimum count */
     minItems?: number;
-    /** 最多数量 */
+    /** Maximum count */
     maxItems?: number;
   };
 }
 
 interface ListRangeBuilderProperties extends ListRangeBuilderBaseProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'ListRangeBuilder';
-  /** 列表项属性对象 */
+  /** Item property object */
   readonly item: ListRangeBuilderItemProperties;
 }
 ```
 
-### 表单组件属性类型别名
+### Form Component Property Type Alias
 
 ```ts
 type ThresholdComponentProperties =
@@ -503,12 +503,12 @@ type ThresholdComponentProperties =
   | ListRangeBuilderProperties;
 ```
 
-### 表单组件属性解构来源
+### Source of Form Component Properties
 
-| 属性类别      | 来源说明                                             |
-| :------------ | :--------------------------------------------------- |
-| `dataType`    | DSL 直接继承                                         |
-| `semantic`    | DSL 直接继承                                         |
-| `constraints` | DSL `constraints` 解构，按组件类型选取适用的约束字段 |
-| `resource`    | DSL `resource` 字段解释，Select 类组件专属           |
-| `itemType`    | 根据推断规则确定，用于列表构建器组件                 |
+| Property category | Source description                                                   |
+| :---------------- | :------------------------------------------------------------------- |
+| `dataType`        | Directly inherited from the DSL                                      |
+| `semantic`        | Directly inherited from the DSL                                      |
+| `constraints`     | Derived from DSL `constraints`, with component-specific selection    |
+| `resource`        | Interpreted from DSL `resource`; exclusive to Select-like components |
+| `itemType`        | Determined by inference rules for list builder components            |

@@ -1,58 +1,58 @@
-# @sisyphus/react
+# `@sisyphus/react`
 
-作为 **框架适配层**，负责将内核 `@sisyphus/core` 提供的 **封装逻辑** 代理渲染为具体的 `UI` 组件
+As the **framework adapter layer**, it is responsible for proxy-rendering the encapsulated logic provided by `@sisyphus/core` into concrete `UI` components.
 
-## 前置依赖
+## Prerequisites
 
-- [规则及规则因子描述](../spec.md)
-- [规则因子解释器](../interpreter.md)
-- [规则配置内核](../core/spec.md)
+- [Rule factor specification](../spec.md)
+- [Rule factor interpreter](../interpreter.md)
+- [Core spec](../core/spec.md)
 
-## 技术栈
+## Technology Stack
 
 - [react19](https://github.com/facebook/react)
-- [@preact/signals-react](https://github.com/preactjs/signals/tree/main/packages/react) Signal binding
+- [@preact/signals-react](https://github.com/preactjs/signals/tree/main/packages/react) signal binding
 
-## 设计目标
+## Design Goals
 
-- **明确组件库适配协议**：定义框架与组件库适配包之间的契约
-- **明确编辑器组件渲染机制**：通过插件代理机制解耦框架与具体 `UI` 实现
-- **明确分层架构**：区分业务方直接使用的接入层与内部组件实现的应用层
-- **沿用 Composition Pattern**：通过组合而非继承组织编辑器组件层级结构
+- **Clear component-library adaptation protocol**: define the contract between the framework and the component-library adapter package.
+- **Clear editor-component rendering mechanism**: decouple the framework from the concrete `UI` implementation through a plugin proxy mechanism.
+- **Clear layered architecture**: distinguish the access layer used directly by the application from the application layer that implements internal components.
+- **Composition Pattern**: organize the editor-component hierarchy through composition rather than inheritance.
 
-## 设计约定
+## Design Conventions
 
-- 响应式集成基于 `@preact/signals-react`，作为运行时标准，不纳入分层架构范畴，编辑器组件直接消费 `Signal`
-- 编辑器组件与原始 `DSL` 无关联关系，仅消费 `@sisyphus/core` 提供的调度器
-- 编辑器组件通过 `View` 后缀
+- Reactive integration is based on `@preact/signals-react` and is treated as a runtime standard rather than part of the layered architecture. Editor components consume `Signal` directly.
+- Editor components are unrelated to the original `DSL` and consume only the schedulers provided by `@sisyphus/core`.
+- Editor components use the `View` suffix.
 
-### Signal 响应式集成
+### Signal Reactive Integration
 
-编辑器组件通过 `@preact/signals-react` 实现 Signal 到 React 的响应式更新。采用手动 `useSignals()` 方式启用信号追踪：
+Editor components use `@preact/signals-react` to implement reactive updates from Signal to React. They use manual `useSignals()` calls to enable signal tracking:
 
 ```tsx
 import { useSignals } from '@preact/signals-react/runtime';
 
 function EditorComponent({ scheduler }: EditorComponentProps): ReactElement {
-  // 必须在组件顶部调用，启用 Signal 依赖追踪
+  // Must be called at the top of the component to enable Signal dependency tracking
   useSignals();
 
-  // 读取 Signal.value 时，组件会自动订阅变更并重渲染
+  // When Signal.value is read, the component automatically subscribes to changes and re-renders
   const value = scheduler.someSignal.value;
   // ...
 }
 ```
 
-**重要约定**：
+**Important conventions**:
 
-- 所有读取 `Signal.value` 的组件必须在函数体顶部调用 `useSignals()`
-- 不依赖 Babel transform，确保在任何构建工具下均可正常工作
-- `useSignals()` 必须在任何 `Signal.value` 读取之前调用
+- All components that read `Signal.value` must call `useSignals()` at the top of the function body.
+- Do not rely on Babel transforms so that it works in any build tool.
+- `useSignals()` must be called before any `Signal.value` reads.
 
-## 分层架构
+## Layered Architecture
 
-- **接入层**：对外暴露业务方直接使用的组件与 `API`，封装内部编辑器组件的实现细节，简化业务方接入成本
-- **应用层**：定义编辑器组件协议与渲染机制，通过插件协议与组件库适配包协同完成实际渲染
+- **Access layer**: exposes components and `API`s that are directly used by the application, encapsulating the implementation details of internal editor components and reducing integration cost.
+- **Application layer**: defines the editor-component protocol and rendering mechanism, and collaborates with the component-library adapter package through the plugin protocol to complete actual rendering.
 
 ```mermaid
 graph TB
@@ -86,54 +86,54 @@ graph TB
   SisyphusScopeProvider --> ComponentRenderer
 ```
 
-### 应用层
+### Application Layer
 
-应用层负责定义编辑器组件协议与渲染机制，编辑器组件本身不持有具体 `UI` 实现，由组件库适配包通过插件协议注册具体实现。
+The application layer defines the editor-component protocol and rendering mechanism. The editor components themselves do not hold concrete `UI` implementations; the component-library adapter package registers concrete implementations through the plugin protocol.
 
-#### 编辑器组件
+#### Editor Components
 
-编辑器组件作为规则编辑视图层级的最小结构单元，用于插件协议注册的组件和渲染器工厂。
+Editor components are the smallest structural units in the rule-editing view hierarchy and are used as plugin-registered components and renderer factories.
 
-##### AtomicRuleView - 原子规则编辑组件
+##### AtomicRuleView - Atomic Rule Editor Component
 
-整合 `name`、`operator`、`threshold` 的完整原子规则编辑器，作为规则配置的最小编辑单元：
+An atomic-rule editor that combines `name`, `operator`, and `threshold`, serving as the smallest editing unit for rule configuration:
 
 ```ts
 interface AtomicRuleViewProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'AtomicRuleView';
-  /** 业务逻辑实体 */
+  /** Business logic entity */
   readonly scheduler: AtomicRuleScheduler;
 }
 ```
 
-##### AtomicRuleGroupView - 规则组编辑组件
+##### AtomicRuleGroupView - Rule Group Editor Component
 
-管理多个原子规则编辑器，用于组织同一层级的规则集合：
+Manages multiple atomic-rule editors and organizes the rule set at the same level:
 
 ```ts
 interface AtomicRuleGroupViewProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'AtomicRuleGroupView';
-  /** 业务逻辑实体 */
+  /** Business logic entity */
   readonly scheduler: AtomicRuleGroupScheduler;
 }
 ```
 
-##### RuleWorkspaceView - 工作空间编辑组件
+##### RuleWorkspaceView - Workspace Editor Component
 
-管理多个规则组编辑器，作为规则配置的顶层容器：
+Manages multiple rule-group editors and serves as the top-level container for rule configuration:
 
 ```ts
 interface RuleWorkspaceViewProperties {
-  /** 组件类型标识 */
+  /** Component type identifier */
   readonly type: 'RuleWorkspaceView';
-  /** 业务逻辑实体 */
+  /** Business logic entity */
   readonly scheduler: RuleWorkspaceScheduler;
 }
 ```
 
-##### 编辑器组件属性类型别名
+##### Editor Component Property Type Alias
 
 ```ts
 type EditorComponentProperties =
@@ -142,142 +142,142 @@ type EditorComponentProperties =
   | RuleWorkspaceViewProperties;
 ```
 
-#### 渲染机制
+#### Rendering Mechanism
 
-采用组件代理机制：`@sisyphus/react` 仅定义编辑器组件的属性协议与渲染契约，具体的 UI 实现由组件库适配包通过 `SisyphusPlugin` 协议注册。
+The system uses a component-proxy mechanism: `@sisyphus/react` only defines the editor-component property protocol and rendering contract, while the concrete UI implementation is registered through the `SisyphusPlugin` protocol by the component-library adapter package.
 
-##### ComponentRendererRegistry - 渲染器注册表
+##### ComponentRendererRegistry - Renderer Registry
 
 ```ts
-/** 编辑器组件渲染器注册表 */
+/** Editor component renderer registry */
 interface ComponentRendererRegistry {
-  /** 注册 AtomicRuleView 组件 */
+  /** Register AtomicRuleView component */
   registerAtomicRuleView(component: React.ComponentType<AtomicRuleViewProperties>): void;
-  /** 注册 AtomicRuleGroupView 组件 */
+  /** Register AtomicRuleGroupView component */
   registerAtomicRuleGroupView(component: React.ComponentType<AtomicRuleGroupViewProperties>): void;
-  /** 注册 RuleWorkspaceView 组件 */
+  /** Register RuleWorkspaceView component */
   registerRuleWorkspaceView(component: React.ComponentType<RuleWorkspaceViewProperties>): void;
 }
 ```
 
-##### ComponentRenderer - 渲染器协议
+##### ComponentRenderer - Renderer Protocol
 
 ```ts
 interface ComponentRenderer {
-  /** 渲染编辑器组件属性 */
+  /** Render editor-component properties */
   render(props: EditorComponentProperties): React.ReactElement;
 }
 ```
 
-##### SisyphusContext - 插件上下文
+##### SisyphusContext - Plugin Context
 
 ```ts
-/** Sisyphus 上下文（插件可访问） */
+/** Sisyphus context (accessible to plugins) */
 interface SisyphusContext {
-  /** 组件渲染器注册表 */
+  /** Component renderer registry */
   readonly registry: ComponentRendererRegistry;
 }
 ```
 
-##### SisyphusPlugin - 插件协议
+##### SisyphusPlugin - Plugin Protocol
 
-定义框架与组件适配包之间的契约，由组件库适配包（如 `@sisyphus/antd`）实现：
+Defines the contract between the framework and the component adapter package, implemented by component-library adapter packages such as `@sisyphus/antd`:
 
 ```ts
-/** 组件渲染器插件 */
+/** Component renderer plugin */
 interface SisyphusPlugin {
-  /** 插件名称 */
+  /** Plugin name */
   name: string;
-  /** 安装插件 */
+  /** Install the plugin */
   install(context: SisyphusContext): void;
 }
 ```
 
-**组件库适配层职责**：
+**Responsibilities of the component-library adapter layer**:
 
-- 注册编辑器组件实现（`AtomicRuleView`、`AtomicRuleGroupView`、`RuleWorkspaceView`）
-- 实现表单组件渲染（`Thresholder`）
+- Register editor-component implementations (`AtomicRuleView`, `AtomicRuleGroupView`, `RuleWorkspaceView`)
+- Implement form-component rendering (`Thresholder`)
 
-### 接入层
+### Access Layer
 
-接入层封装应用层的实现细节，对业务方暴露最少认知成本的 `API`：业务方仅需感知 `WorkspaceEditor`、`SisyphusScopeProvider` 与 `createSisyphusScope`
+The access layer encapsulates implementation details of the application layer and exposes the smallest possible cognitive surface to the application: the application only needs to know `WorkspaceEditor`, `SisyphusScopeProvider`, and `createSisyphusScope`.
 
-#### createSisyphusScope - 创建应用实例
+#### createSisyphusScope - Create Application Instance
 
-通过 `createSisyphusScope` 工厂函数创建 `SisyphusScope` 实例，业务方通过传入插件列表完成组件库的注册：
+The `createSisyphusScope` factory function creates a `SisyphusScope` instance, and the application registers the component library by passing in a plugin list:
 
 ```ts
-/** Sisyphus 实例化参数 */
+/** Sisyphus instantiation options */
 interface SisyphusScopeOptions {
-  /** 安装组件渲染器插件 */
+  /** Install component-renderer plugins */
   plugins: readonly SisyphusPlugin[];
 }
 
 interface SisyphusScope {
-  /** 获取组件渲染器 */
+  /** Get the component renderer */
   renderer(): ComponentRenderer;
 }
 
-/** 创建 Sisyphus 应用实例 */
+/** Create the Sisyphus application instance */
 function createSisyphusScope(options: SisyphusScopeOptions): SisyphusScope;
 ```
 
-#### SisyphusScopeProvider - 作用域提供者
+#### SisyphusScopeProvider - Scope Provider
 
-将 `SisyphusScope` 注入 `React` 上下文，供内部编辑器组件通过 `Hook` 获取渲染器：
+Injects `SisyphusScope` into the React context so that internal editor components can obtain the renderer through a hook:
 
 ```ts
 interface SisyphusScopeProviderProps {
-  /** Sisyphus 应用实例 */
+  /** Sisyphus application instance */
   scope: SisyphusScope;
-  /** 子元素 */
+  /** Child elements */
   children: React.ReactNode;
 }
 
 function SisyphusScopeProvider(props: SisyphusScopeProviderProps): React.ReactElement;
 ```
 
-#### WorkspaceEditor - 业务方入口组件
+#### WorkspaceEditor - Application Entry Component
 
-`WorkspaceEditor` 是业务方直接使用的顶层组件，封装了内部编辑器组件的实现细节：
+`WorkspaceEditor` is the top-level component used directly by the application and encapsulates the implementation details of the internal editor components:
 
 ```ts
 import { RuleWorkspaceScheduler } from '../core/application.md';
 
 interface WorkspaceEditorProps {
-  /** 工作空间实例 */
+  /** Workspace instance */
   workspace: RuleWorkspaceScheduler;
 }
 
 function WorkspaceEditor(props: WorkspaceEditorProps): React.ReactElement;
 ```
 
-**说明**：`WorkspaceEditor` 内部渲染 `RuleWorkspaceView`，业务方无需感知具体的编辑器组件实现。
+**Note**: `WorkspaceEditor` renders `RuleWorkspaceView` internally, so the application does not need to know the concrete editor-component implementation.
 
-## 技术支持
+## Technical Support
 
-### useSisyphusScope - 获取作用域实例
+### useSisyphusScope - Get Scope Instance
 
-供编辑器组件从 `React` 上下文中获取 `SisyphusScope`，进而取到 `ComponentRenderer` 进行代理渲染：
+Used by editor components to obtain `SisyphusScope` from the React context and then retrieve `ComponentRenderer` for proxy rendering:
 
 ```ts
 function useSisyphusScope(): SisyphusScope;
 ```
 
-## 使用示例
+## Usage Example
 
-业务方仅感知接入层 `API`：通过 `createSisyphusScope` 创建实例、`SisyphusScopeProvider` 注入作用域、`WorkspaceEditor` 渲染顶层编辑器：
+The application only interacts with the access-layer `API`: create an instance through `createSisyphusScope`, inject the scope with `SisyphusScopeProvider`, and render the top-level editor with `WorkspaceEditor`:
 
 ```tsx
 import { SisyphusScopeProvider, WorkspaceEditor, createSisyphusScope } from '@sisyphus/react';
 import { createAntdPlugin } from '@sisyphus/antd';
 
-// 创建应用实例
+// Create the application instance
 const scope = createSisyphusScope({
   plugins: [createAntdPlugin()],
 });
 
-// 业务方仅需关注 WorkspaceEditor，无需感知内部渲染细节
+// The application only needs to care about WorkspaceEditor and does not need to know the internal rendering details
 function App() {
   return (
     <SisyphusScopeProvider scope={scope}>
