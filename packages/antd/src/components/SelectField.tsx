@@ -20,6 +20,7 @@ interface SelectFieldProps {
   readonly allowClear: boolean;
   readonly size?: 'small' | 'middle' | 'large';
   readonly mode?: 'multiple';
+  readonly disabled?: boolean;
 }
 
 /** Select 组件 - 桥接 Resource Signal 到 antd Select */
@@ -31,6 +32,7 @@ export function SelectField({
   allowClear,
   size,
   mode,
+  disabled,
 }: SelectFieldProps): ReactElement {
   useSignals();
   // Cast to unknown to enable duck-typing guards (runtime resource may be any subtype)
@@ -48,6 +50,7 @@ export function SelectField({
         allowClear={allowClear}
         size={size}
         mode={mode}
+        disabled={disabled}
         showSearch
         filterOption={(input, option) =>
           (option?.label as string)?.toLowerCase().includes(input.toLowerCase()) ?? false
@@ -91,6 +94,7 @@ export function SelectField({
         allowClear={allowClear}
         size={size}
         mode={mode}
+        disabled={disabled}
         loading={loading}
         showSearch
         filterOption={false}
@@ -129,6 +133,7 @@ export function SelectField({
         allowClear={allowClear}
         size={size}
         mode={mode}
+        disabled={disabled}
         loading={loading}
         onPopupScroll={onPopupScroll}
         notFoundContent={loading ? <Spin size="small" /> : undefined}
@@ -157,6 +162,7 @@ export function SelectField({
         allowClear={allowClear}
         size={size}
         mode={mode}
+        disabled={disabled}
         loading={loading}
         showSearch
         filterOption={false}
@@ -180,6 +186,7 @@ export function SelectField({
         allowClear={allowClear}
         size={size}
         mode={mode}
+        disabled={disabled}
         loading={loading}
         notFoundContent={loading ? <Spin size="small" /> : undefined}
       />
@@ -196,6 +203,7 @@ export function SelectField({
       allowClear={allowClear}
       size={size}
       mode={mode}
+      disabled={disabled}
     />
   );
 }

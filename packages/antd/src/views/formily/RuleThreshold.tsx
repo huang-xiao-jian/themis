@@ -14,6 +14,7 @@ export const RuleThresholdRenderer: ReactFC<any> = observer((props) => {
   }
 
   const value = field.value;
+  const disabled = field.pattern === 'disabled';
   const onChange = (...args: any[]) => {
     field.onInput(...args);
   };
@@ -25,6 +26,7 @@ export const RuleThresholdRenderer: ReactFC<any> = observer((props) => {
         {...(componentProps as ThresholdRendererProps)}
         value={value}
         onChange={onChange}
+        disabled={disabled}
       />
     );
   }

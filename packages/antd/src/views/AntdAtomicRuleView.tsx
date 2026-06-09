@@ -1,7 +1,7 @@
-import { DeleteOutlined } from '@ant-design/icons';
+import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { AtomicRuleViewProperties } from '@sisyphus/react';
-import { Button, Col, Row } from 'antd';
+import { Button, Col, Flex, Row } from 'antd';
 import type { ReactElement } from 'react';
 import { useSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 import { RuleNameSelect } from './formily/RuleNameSelect';
@@ -13,6 +13,7 @@ export function AntdAtomicRuleView({ scheduler }: AtomicRuleViewProperties): Rea
   useSignals();
   const config = useSisyphusAntdConfig();
   const layout = config.atomicRuleLayout;
+  const editable = scheduler.editable.value;
 
   return (
     <Row gutter={layout.gutter} align="middle" wrap={false}>
@@ -40,7 +41,17 @@ export function AntdAtomicRuleView({ scheduler }: AtomicRuleViewProperties): Rea
         <RuleThresholdRenderer />
       </Col>
       <Col flex={layout.action}>
-        <Button type="text" danger icon={<DeleteOutlined />} />
+        <Flex gap="small">
+          {editable ? (
+            <>
+              <Button type="text" icon={<CheckOutlined />} onClick={scheduler.onOk} />
+              <Button type="text" icon={<CloseOutlined />} onClick={scheduler.onCancel} />
+            </>
+          ) : (
+            <Button type="text" icon={<EditOutlined />} onClick={scheduler.onEdit} />
+          )}
+          <Button type="text" danger icon={<DeleteOutlined />} onClick={scheduler.onRemove} />
+        </Flex>
       </Col>
     </Row>
   );

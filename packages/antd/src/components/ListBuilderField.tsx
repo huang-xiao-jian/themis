@@ -21,6 +21,7 @@ interface ListBuilderFieldProps {
   readonly value: unknown;
   readonly onChange: (value: unknown) => void;
   readonly size?: 'small' | 'middle' | 'large';
+  readonly disabled?: boolean;
 }
 
 /** 渲染列表项组件 */
@@ -28,7 +29,8 @@ function renderListItem(
   item: ListBuilderProperties['item'],
   itemValue: unknown,
   onItemChange: (value: unknown) => void,
-  size?: 'small' | 'middle' | 'large'
+  size?: 'small' | 'middle' | 'large',
+  disabled?: boolean
 ): ReactElement {
   switch (item.type) {
     case 'Input': {
@@ -42,6 +44,7 @@ function renderListItem(
             step={item.constraints?.step}
             precision={item.constraints?.precision}
             size={size}
+            disabled={disabled}
             style={{ width: 160 }}
           />
         );
@@ -52,6 +55,7 @@ function renderListItem(
           onChange={(e) => onItemChange(e.target.value)}
           autoComplete="off"
           size={size}
+          disabled={disabled}
           style={{ width: 160 }}
         />
       );
@@ -67,6 +71,7 @@ function renderListItem(
           precision={item.constraints?.precision}
           autoComplete="off"
           size={size}
+          disabled={disabled}
           style={{ width: 160 }}
         />
       );
@@ -79,6 +84,7 @@ function renderListItem(
             value={toDayjs(itemValue)}
             onChange={(v) => onItemChange(fromDayjs(v))}
             size={size}
+            disabled={disabled}
           />
         );
       }
@@ -88,6 +94,7 @@ function renderListItem(
             value={toDayjs(itemValue)}
             onChange={(v) => onItemChange(fromDayjs(v))}
             size={size}
+            disabled={disabled}
           />
         );
       }
@@ -98,6 +105,7 @@ function renderListItem(
             onChange={(v) => onItemChange(fromDayjs(v))}
             showTime
             size={size}
+            disabled={disabled}
           />
         );
       }
@@ -109,6 +117,7 @@ function renderListItem(
             min={typeof item.constraints?.min === 'number' ? item.constraints.min : 0}
             max={typeof item.constraints?.max === 'number' ? item.constraints.max : 100}
             step={item.constraints?.step ?? 1}
+            disabled={disabled}
             style={{ width: 160 }}
           />
         );
@@ -120,6 +129,7 @@ function renderListItem(
             onChange={onItemChange}
             showSearch
             size={size}
+            disabled={disabled}
             style={{ width: 160 }}
           />
         );
@@ -131,6 +141,7 @@ function renderListItem(
           onChange={(e) => onItemChange(e.target.value)}
           autoComplete="off"
           size={size}
+          disabled={disabled}
           style={{ width: 160 }}
         />
       );
@@ -142,6 +153,7 @@ function renderListItem(
           onChange={(e) => onItemChange(e.target.value)}
           autoComplete="off"
           size={size}
+          disabled={disabled}
         />
       );
   }
@@ -153,6 +165,7 @@ export function ListBuilderField({
   value,
   onChange,
   size,
+  disabled,
 }: ListBuilderFieldProps): ReactElement {
   const listValue = Array.isArray(value) ? value : [];
   const minItems = properties.constraints?.minItems ?? 0;
@@ -185,16 +198,22 @@ export function ListBuilderField({
     <Flex>
       {listValue.map((itemValue: unknown, index: number) => (
         <Flex key={index} align="center">
-          {renderListItem(properties.item, itemValue, (v) => onItemChange(index, v), size)}
+          {renderListItem(
+            properties.item,
+            itemValue,
+            (v) => onItemChange(index, v),
+            size,
+            disabled
+          )}
           <Button
             type="link"
             icon={<DeleteOutlined />}
-            disabled={!canRemove}
+            disabled={disabled || !canRemove}
             onClick={() => onRemove(index)}
           />
         </Flex>
       ))}
-      <Button type="link" icon={<PlusOutlined />} disabled={!canAdd} onClick={onAdd}>
+      <Button type="link" icon={<PlusOutlined />} disabled={disabled || !canAdd} onClick={onAdd}>
         添加
       </Button>
     </Flex>

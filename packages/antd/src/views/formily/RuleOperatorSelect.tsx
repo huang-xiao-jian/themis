@@ -1,3 +1,4 @@
+import { isField } from '@formily/core';
 import { observer, ReactFC, useForm } from '@formily/react';
 import { Select as AntdSelect } from 'antd';
 import { SelectProps } from 'antd/lib/select';
@@ -7,7 +8,34 @@ import { SelectProps } from 'antd/lib/select';
  */
 export const RuleOperatorSelect: ReactFC<SelectProps<any, any>> = observer((props) => {
   const form = useForm();
-  const field = form.getFieldState('operator');
+  const field = form.fields['operator'];
 
-  return <AntdSelect {...props} options={field.dataSource} />;
+  if (!isField(field)) {
+    return null;
+  }
+
+  const value = field.value;
+  const options = field.dataSource;
+  const disabled = field.pattern === 'disabled' || field.pattern === 'readPretty';
+  const onChange = (...args: any[]) => {
+    field.onInput(...args);
+  };
+  const onFocus = (...args: any[]) => {
+    field.onFocus(...args);
+  };
+  const onBlur = (...args: any[]) => {
+    field.onBlur(...args);
+  };
+
+  return (
+    <AntdSelect
+      {...props}
+      value={value}
+      disabled={disabled}
+      options={options}
+      onChange={onChange}
+      onFocus={onFocus}
+      onBlur={onBlur}
+    />
+  );
 });

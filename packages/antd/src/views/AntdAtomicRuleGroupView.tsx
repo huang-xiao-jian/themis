@@ -56,9 +56,14 @@ function AntdAtomicRuleGroupActions({
   return (
     <Flex gap="small">
       {editable ? (
-        <Button type="primary" size="small" onClick={scheduler.onOk}>
-          确认
-        </Button>
+        <>
+          <Button type="primary" size="small" onClick={scheduler.onOk}>
+            确认
+          </Button>
+          <Button size="small" onClick={scheduler.onCancel}>
+            取消
+          </Button>
+        </>
       ) : (
         <Button size="small" onClick={scheduler.onEdit}>
           编辑

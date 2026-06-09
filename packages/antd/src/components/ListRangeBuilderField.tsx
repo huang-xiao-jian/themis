@@ -14,6 +14,7 @@ interface ListRangeBuilderFieldProps {
   readonly value: unknown;
   readonly onChange: (value: unknown) => void;
   readonly size?: 'small' | 'middle' | 'large';
+  readonly disabled?: boolean;
 }
 
 /** 渲染区间列表项组件 */
@@ -21,7 +22,8 @@ function renderRangeListItem(
   item: ListRangeBuilderProperties['item'],
   itemValue: unknown,
   onItemChange: (value: unknown) => void,
-  size?: 'small' | 'middle' | 'large'
+  size?: 'small' | 'middle' | 'large',
+  disabled?: boolean
 ): ReactElement {
   switch (item.type) {
     case 'RangeInput': {
@@ -39,6 +41,7 @@ function renderRangeListItem(
               step={item.constraints?.step}
               precision={item.constraints?.precision}
               size={size}
+              disabled={disabled}
               style={{ width: 100 }}
             />
             <span>~</span>
@@ -51,6 +54,7 @@ function renderRangeListItem(
               step={item.constraints?.step}
               precision={item.constraints?.precision}
               size={size}
+              disabled={disabled}
               style={{ width: 100 }}
             />
           </Space>
@@ -64,6 +68,7 @@ function renderRangeListItem(
             placeholder="最小值"
             autoComplete="off"
             size={size}
+            disabled={disabled}
             style={{ width: 100 }}
           />
           <span>~</span>
@@ -73,6 +78,7 @@ function renderRangeListItem(
             placeholder="最大值"
             autoComplete="off"
             size={size}
+            disabled={disabled}
             style={{ width: 100 }}
           />
         </Space>
@@ -90,6 +96,7 @@ function renderRangeListItem(
             min={typeof item.constraints?.min === 'number' ? item.constraints.min : 0}
             max={typeof item.constraints?.max === 'number' ? item.constraints.max : 100}
             step={item.constraints?.step ?? 1}
+            disabled={disabled}
             style={{ width: 200 }}
           />
         );
@@ -101,6 +108,7 @@ function renderRangeListItem(
           onChange={(v) => onItemChange(fromDayjsRange(v))}
           showTime={semantic === Semantic.DATETIME}
           size={size}
+          disabled={disabled}
         />
       );
     }
@@ -111,6 +119,7 @@ function renderRangeListItem(
           onChange={(e) => onItemChange(e.target.value)}
           autoComplete="off"
           size={size}
+          disabled={disabled}
         />
       );
   }
@@ -122,6 +131,7 @@ export function ListRangeBuilderField({
   value,
   onChange,
   size,
+  disabled,
 }: ListRangeBuilderFieldProps): ReactElement {
   const listValue = Array.isArray(value) ? value : [];
   const minItems = properties.constraints?.minItems ?? 0;
@@ -159,16 +169,22 @@ export function ListRangeBuilderField({
     <Flex>
       {listValue.map((itemValue: unknown, index: number) => (
         <Flex key={index} align="center">
-          {renderRangeListItem(properties.item, itemValue, (v) => onItemChange(index, v), size)}
+          {renderRangeListItem(
+            properties.item,
+            itemValue,
+            (v) => onItemChange(index, v),
+            size,
+            disabled
+          )}
           <Button
             type="link"
             icon={<DeleteOutlined />}
-            disabled={!canRemove}
+            disabled={disabled || !canRemove}
             onClick={() => onRemove(index)}
           />
         </Flex>
       ))}
-      <Button type="link" icon={<PlusOutlined />} disabled={!canAdd} onClick={onAdd}>
+      <Button type="link" icon={<PlusOutlined />} disabled={disabled || !canAdd} onClick={onAdd}>
         添加
       </Button>
     </Flex>

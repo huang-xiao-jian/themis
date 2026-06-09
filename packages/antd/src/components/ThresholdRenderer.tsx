@@ -22,6 +22,7 @@ export interface ThresholdRendererProps {
   readonly properties: ThresholdComponentProperties;
   readonly value: unknown;
   readonly onChange: (value: unknown) => void;
+  readonly disabled?: boolean;
 }
 
 const propsMapper = new ThresholdPropsMapper();
@@ -32,6 +33,7 @@ export function ThresholdRenderer({
   properties,
   value,
   onChange,
+  disabled,
 }: ThresholdRendererProps): ReactElement {
   const config = useSisyphusAntdConfig();
   const result = propsMapper.mapToProps(properties, config, value, onChange);
@@ -50,6 +52,7 @@ export function ThresholdRenderer({
           size={result.props.size}
           minLength={result.props.minLength}
           maxLength={result.props.maxLength}
+          disabled={disabled}
           style={{ width: '100%' }}
         />
       );
@@ -67,6 +70,7 @@ export function ThresholdRenderer({
           step={result.props.step}
           precision={result.props.precision}
           size={result.props.size}
+          disabled={disabled}
           style={{ width: '100%' }}
         />
       );
@@ -83,12 +87,13 @@ export function ThresholdRenderer({
           autoComplete="off"
           maxLength={result.props.maxLength}
           size={result.props.size}
+          disabled={disabled}
           style={{ width: '100%' }}
         />
       );
 
     case 'RangeInput':
-      return <RangeInputField mapping={result.props} />;
+      return <RangeInputField mapping={result.props} disabled={disabled} />;
 
     case 'Switch':
       return (
@@ -98,6 +103,7 @@ export function ThresholdRenderer({
           checkedChildren={result.props.checkedChildren}
           unCheckedChildren={result.props.unCheckedChildren}
           size={result.props.size}
+          disabled={disabled}
         />
       );
 
@@ -110,6 +116,7 @@ export function ThresholdRenderer({
           placeholder={result.props.placeholder}
           allowClear={result.props.allowClear}
           size={result.props.size}
+          disabled={disabled}
         />
       );
 
@@ -123,14 +130,15 @@ export function ThresholdRenderer({
           allowClear={result.props.allowClear}
           size={result.props.size}
           mode="multiple"
+          disabled={disabled}
         />
       );
 
     case 'Picker':
-      return <PickerField mapping={result.result} />;
+      return <PickerField mapping={result.result} disabled={disabled} />;
 
     case 'RangePicker':
-      return <RangePickerField mapping={result.result} />;
+      return <RangePickerField mapping={result.result} disabled={disabled} />;
 
     case 'ListBuilder':
       return (
@@ -139,6 +147,7 @@ export function ThresholdRenderer({
           value={value}
           onChange={onChange}
           size={config.size}
+          disabled={disabled}
         />
       );
 
@@ -149,6 +158,7 @@ export function ThresholdRenderer({
           value={value}
           onChange={onChange}
           size={config.size}
+          disabled={disabled}
         />
       );
 

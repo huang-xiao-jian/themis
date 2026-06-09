@@ -44,12 +44,21 @@ function AntdRuleGroupList({ scheduler }: { scheduler: RuleWorkspaceScheduler })
 
 /** 添加规则组按钮 */
 function AntdRuleGroupActions({ scheduler }: { scheduler: RuleWorkspaceScheduler }): ReactElement {
+  useSignals();
+  const canAddGroup = scheduler.canAddGroup.value;
+
   const onAddGroup = useCallback(() => {
     scheduler.addGroup();
   }, [scheduler]);
 
   return (
-    <Button type="dashed" icon={<PlusOutlined />} block onClick={onAddGroup}>
+    <Button
+      type="dashed"
+      icon={<PlusOutlined />}
+      block
+      disabled={!canAddGroup}
+      onClick={onAddGroup}
+    >
       添加规则组
     </Button>
   );

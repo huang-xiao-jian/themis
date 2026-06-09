@@ -5,10 +5,11 @@ import type { RangeInputMappingResult } from '../mappers/RangeInputPropsMapper';
 /** RangeInput 属性 */
 interface RangeInputFieldProps {
   readonly mapping: RangeInputMappingResult;
+  readonly disabled?: boolean;
 }
 
 /** 区间输入组件 - 双框 antd Input / InputNumber */
-export function RangeInputField({ mapping }: RangeInputFieldProps): ReactElement {
+export function RangeInputField({ mapping, disabled }: RangeInputFieldProps): ReactElement {
   if (mapping.isNumber) {
     return (
       <Space>
@@ -21,6 +22,7 @@ export function RangeInputField({ mapping }: RangeInputFieldProps): ReactElement
           step={mapping.step}
           precision={mapping.precision}
           size={mapping.size}
+          disabled={disabled}
           style={{ width: 120 }}
         />
         <span>~</span>
@@ -33,6 +35,7 @@ export function RangeInputField({ mapping }: RangeInputFieldProps): ReactElement
           step={mapping.step}
           precision={mapping.precision}
           size={mapping.size}
+          disabled={disabled}
           style={{ width: 120 }}
         />
       </Space>
@@ -48,6 +51,7 @@ export function RangeInputField({ mapping }: RangeInputFieldProps): ReactElement
         allowClear={mapping.allowClear}
         autoComplete="off"
         size={mapping.size}
+        disabled={disabled}
         style={{ width: 120 }}
       />
       <span>~</span>
@@ -58,6 +62,7 @@ export function RangeInputField({ mapping }: RangeInputFieldProps): ReactElement
         allowClear={mapping.allowClear}
         autoComplete="off"
         size={mapping.size}
+        disabled={disabled}
         style={{ width: 120 }}
       />
     </Space>
