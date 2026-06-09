@@ -1,13 +1,6 @@
-import {
-  CheckOutlined,
-  CloseOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { FormProvider } from '@formily/react';
 import { useSignals } from '@preact/signals-react/runtime';
-import { Show } from '@preact/signals-react/utils';
 import type { AtomicRuleGroupScheduler } from '@sisyphus/core';
 import type { AtomicRuleGroupViewProperties } from '@sisyphus/react';
 import { Button, Flex } from 'antd';
@@ -48,30 +41,6 @@ function AntdAtomicRuleActions({
     <Button type="dashed" icon={<PlusOutlined />} block disabled={!canAddRule} onClick={onAddRule}>
       添加规则
     </Button>
-  );
-}
-
-interface AntdAtomicRuleGroupActionsProps {
-  scheduler: AtomicRuleGroupScheduler;
-}
-
-/** 规则组状态转换按钮，独立追踪 editable 信号 */
-export function AntdAtomicRuleGroupActions(props: AntdAtomicRuleGroupActionsProps): ReactElement {
-  useSignals();
-
-  const { scheduler } = props;
-
-  return (
-    <Flex gap="small">
-      <Show
-        when={scheduler.editable}
-        fallback={<Button type="text" icon={<EditOutlined />} onClick={scheduler.onEdit} />}
-      >
-        <Button type="text" icon={<CheckOutlined />} onClick={scheduler.onOk} />
-        <Button type="text" icon={<CloseOutlined />} onClick={scheduler.onCancel} />
-      </Show>
-      <Button type="text" danger icon={<DeleteOutlined />} onClick={() => scheduler.onRemove()} />
-    </Flex>
   );
 }
 

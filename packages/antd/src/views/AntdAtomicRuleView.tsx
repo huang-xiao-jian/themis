@@ -14,7 +14,6 @@ export function AntdAtomicRuleView({ scheduler }: AtomicRuleViewProperties): Rea
   useSignals();
   const config = useSisyphusAntdConfig();
   const layout = config.atomicRuleLayout;
-  const editable = scheduler.editable.value;
 
   return (
     <Row gutter={layout.gutter} align="middle" wrap={false}>
@@ -42,18 +41,16 @@ export function AntdAtomicRuleView({ scheduler }: AtomicRuleViewProperties): Rea
         <RuleThresholdRenderer />
       </Col>
       <Col flex={layout.action}>
-        <Show when={scheduler.interactive}>
-          <Flex gap="small">
-            <Show
-              when={scheduler.editable}
-              fallback={<Button type="text" icon={<EditOutlined />} onClick={scheduler.onEdit} />}
-            >
-              <Button type="text" icon={<CheckOutlined />} onClick={scheduler.onOk} />
-              <Button type="text" icon={<CloseOutlined />} onClick={scheduler.onCancel} />
-            </Show>
-            <Button type="text" danger icon={<DeleteOutlined />} onClick={scheduler.onRemove} />
-          </Flex>
-        </Show>
+        <Flex gap="small">
+          <Show
+            when={scheduler.editable}
+            fallback={<Button type="text" icon={<EditOutlined />} onClick={scheduler.onEdit} />}
+          >
+            <Button type="text" icon={<CheckOutlined />} onClick={scheduler.onOk} />
+            <Button type="text" icon={<CloseOutlined />} onClick={scheduler.onCancel} />
+          </Show>
+          <Button type="text" danger icon={<DeleteOutlined />} onClick={scheduler.onRemove} />
+        </Flex>
       </Col>
     </Row>
   );

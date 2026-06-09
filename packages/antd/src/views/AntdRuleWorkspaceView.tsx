@@ -1,23 +1,16 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { RuleWorkspaceScheduler } from '@sisyphus/core';
 import type { RuleWorkspaceViewProperties } from '@sisyphus/react';
 import { Button, Card, Flex } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
-import { AntdAtomicRuleGroupActions, AntdAtomicRuleGroupView } from './AntdAtomicRuleGroupView';
+import { AntdAtomicRuleGroupView } from './AntdAtomicRuleGroupView';
 
 /** 规则组列表，独立追踪 groups 信号变化 */
 function AntdRuleGroupList({ scheduler }: { scheduler: RuleWorkspaceScheduler }): ReactElement {
   useSignals();
   const groups = scheduler.groups.value;
-
-  const onRemoveGroup = useCallback(
-    (groupId: string) => {
-      scheduler.removeGroup(groupId);
-    },
-    [scheduler]
-  );
 
   return (
     <Flex vertical gap="medium">
@@ -26,7 +19,7 @@ function AntdRuleGroupList({ scheduler }: { scheduler: RuleWorkspaceScheduler })
           key={group.id}
           size="small"
           title="规则组"
-          extra={<AntdAtomicRuleGroupActions scheduler={group} />}
+          extra={<Button type="text" danger icon={<DeleteOutlined />} onClick={group.onRemove} />}
         >
           <AntdAtomicRuleGroupView type="AtomicRuleGroupView" scheduler={group} />
         </Card>
