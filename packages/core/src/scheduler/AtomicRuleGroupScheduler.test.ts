@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS } from '../__fixtures__/factors';
 import { SAMPLE_GROUP } from '../__fixtures__/rules';
 import { SchedulerState } from '../dsl/SchedulerState';
-import { TransitionEventType } from '../dsl/TransitionEventType';
+import { WorkspaceCoordinationEventType } from '../dsl/WorkspaceCoordinationEventType';
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory';
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
@@ -92,8 +92,15 @@ describe('AtomicRuleGroupScheduler - addRule', () => {
     const group = makeGroup('group-1');
     const rule1 = group.addRule()!;
     expect(group.coordination.editingRuleId.value).toBe(rule1.id);
-    // Lock rule1 via transitionState first to allow second addRule
-    group.transitionState(rule1.id, SchedulerState.LOCKED);
+    // Lock rule1 via onOk first to allow second addRule
+    rule1.form.setValues({ name: 'is_active' });
+    rule1.form.setFieldState('operator', (s) => {
+      s.value = 'is';
+    });
+    rule1.form.setFieldState('threshold', (s) => {
+      s.value = true;
+    });
+    rule1.onOk();
     const rule2 = group.addRule()!;
     expect(group.coordination.editingRuleId.value).toBe(rule2.id);
     expect(rule1.state.value).toBe(SchedulerState.LOCKED);
@@ -115,46 +122,43 @@ describe('AtomicRuleGroupScheduler - canAddRule', () => {
   it('canAddRule is true after locking the editing rule', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
-    group.transitionState(rule.id, SchedulerState.LOCKED);
+    rule.onCancel();
     expect(group.canAddRule.value).toBe(true);
   });
 });
 
-describe('AtomicRuleGroupScheduler - transitionState', () => {
-  it('transitionState to EDITING sets editingRuleId', () => {
+describe('AtomicRuleGroupScheduler - event handling', () => {
+  it('Rule onEdit sets editingRuleId', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
-    group.transitionState(rule.id, SchedulerState.LOCKED);
-    group.transitionState(rule.id, SchedulerState.EDITING);
+    rule.onCancel(); // lock first
+    rule.onEdit();
     expect(group.coordination.editingRuleId.value).toBe(rule.id);
     expect(rule.state.value).toBe(SchedulerState.EDITING);
   });
 
-  it('transitionState to LOCKED clears editingRuleId', () => {
+  it('Rule onCancel clears editingRuleId', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
-    group.transitionState(rule.id, SchedulerState.LOCKED);
+    rule.onCancel();
     expect(group.coordination.editingRuleId.value).toBeNull();
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 
-  it('transitionState mutex: switching to EDITING auto-locks previous', () => {
+  it('Rule onEdit mutex: switching to EDITING auto-locks previous', () => {
     const group = makeGroup('group-1');
     const rule1 = group.addRule()!;
-    group.transitionState(rule1.id, SchedulerState.LOCKED);
+    rule1.onCancel(); // lock rule1
     const rule2 = group.addRule()!;
-    group.transitionState(rule2.id, SchedulerState.LOCKED);
+    rule2.onCancel(); // lock rule2
     // Now both locked, switch rule1 to editing
-    group.transitionState(rule1.id, SchedulerState.EDITING);
+    rule1.onEdit();
     expect(rule1.state.value).toBe(SchedulerState.EDITING);
     // Switch rule2 to editing → rule1 auto-locks
-    group.transitionState(rule2.id, SchedulerState.EDITING);
+    rule2.onEdit();
     expect(rule1.state.value).toBe(SchedulerState.LOCKED);
     expect(rule2.state.value).toBe(SchedulerState.EDITING);
   });
-});
-
-describe('AtomicRuleGroupScheduler - event handling', () => {
   it('Rule onOk locks the editing rule', () => {
     const group = makeGroup('group-1');
     const rule = group.addRule()!;
@@ -183,7 +187,7 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
     workspaceCoordination.editingGroupId.value = 'group-1';
     const group = makeGroupWithCoordination(workspaceCoordination);
     const handler = vi.fn();
-    workspaceCoordination.bus.on(TransitionEventType.OK, handler);
+    workspaceCoordination.bus.on(WorkspaceCoordinationEventType.OK, handler);
     // Add and confirm a rule
     const rule = group.addRule()!;
     rule.form.setValues({ name: 'is_active' });
@@ -196,9 +200,42 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
     rule.onOk();
     group.onOk();
     expect(handler).toHaveBeenCalledWith({
-      type: TransitionEventType.OK,
+      type: WorkspaceCoordinationEventType.OK,
       sourceId: 'group-1',
     });
+  });
+
+  it('Group onCancel clears editingGroupId', () => {
+    const workspaceCoordination = createWorkspaceCoordination(ALL_FACTORS);
+    workspaceCoordination.editingGroupId.value = 'group-1';
+    const group = makeGroupWithCoordination(workspaceCoordination);
+    const handler = vi.fn();
+    workspaceCoordination.bus.on(WorkspaceCoordinationEventType.CANCEL, handler);
+    group.onCancel();
+    expect(handler).toHaveBeenCalledWith({
+      type: WorkspaceCoordinationEventType.CANCEL,
+      sourceId: 'group-1',
+    });
+  });
+
+  it('Group onRemove emits REMOVE event', () => {
+    const workspaceCoordination = createWorkspaceCoordination(ALL_FACTORS);
+    workspaceCoordination.editingGroupId.value = 'group-1';
+    const group = makeGroupWithCoordination(workspaceCoordination);
+    const handler = vi.fn();
+    workspaceCoordination.bus.on(WorkspaceCoordinationEventType.REMOVE, handler);
+    group.onRemove();
+    expect(handler).toHaveBeenCalledWith({
+      type: WorkspaceCoordinationEventType.REMOVE,
+      sourceId: 'group-1',
+    });
+  });
+
+  it('Rule onRemove triggers removeRule in parent group', () => {
+    const group = makeGroup('group-1');
+    const rule = group.addRule()!;
+    rule.onRemove();
+    expect(group.rules.value).toEqual([]);
   });
 });
 

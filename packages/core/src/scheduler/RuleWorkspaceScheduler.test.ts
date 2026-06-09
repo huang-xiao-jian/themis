@@ -88,8 +88,8 @@ describe('RuleWorkspaceScheduler - canAddGroup', () => {
   it('canAddGroup is false when empty-rule group exists', () => {
     const workspace = makeWorkspace();
     const group = workspace.addGroup()!;
-    // Lock the group but it has no rules
-    workspace.transitionState(group.id, SchedulerState.LOCKED);
+    // Lock the group via onCancel but it has no rules
+    group.onCancel();
     expect(workspace.canAddGroup.value).toBe(false);
   });
 
@@ -99,31 +99,24 @@ describe('RuleWorkspaceScheduler - canAddGroup', () => {
   });
 });
 
-describe('RuleWorkspaceScheduler - transitionState', () => {
-  it('transitionState to EDITING sets editingGroupId', () => {
+describe('RuleWorkspaceScheduler - event handling', () => {
+  it('Group onEdit sets editingGroupId', () => {
     const workspace = makeWorkspace([SAMPLE_GROUP]);
-    workspace.transitionState('group-1', SchedulerState.EDITING);
+    const group = workspace.groups.value[0];
+    group.onEdit();
     expect(workspace.coordination.editingGroupId.value).toBe('group-1');
-    expect(workspace.groups.value[0].state.value).toBe(SchedulerState.EDITING);
+    expect(group.state.value).toBe(SchedulerState.EDITING);
   });
 
-  it('transitionState to LOCKED clears editingGroupId and cascades', () => {
+  it('Group onCancel clears editingGroupId', () => {
     const workspace = makeWorkspace();
     const group = workspace.addGroup()!;
-    const rule = group.addRule()!;
-    // Both in editing
-    expect(group.state.value).toBe(SchedulerState.EDITING);
-    expect(rule.state.value).toBe(SchedulerState.EDITING);
-    // Lock the group
-    workspace.transitionState(group.id, SchedulerState.LOCKED);
+    expect(workspace.coordination.editingGroupId.value).toBe(group.id);
+    group.onCancel();
     expect(workspace.coordination.editingGroupId.value).toBeNull();
     expect(group.state.value).toBe(SchedulerState.LOCKED);
-    expect(group.coordination.editingRuleId.value).toBeNull();
-    expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
-});
 
-describe('RuleWorkspaceScheduler - event handling', () => {
   it('Group onOk locks the editing group and cascades', () => {
     const workspace = makeWorkspace();
     const group = workspace.addGroup()!;
@@ -145,12 +138,11 @@ describe('RuleWorkspaceScheduler - event handling', () => {
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 
-  it('Group onEdit sets editingGroupId', () => {
-    const workspace = makeWorkspace([SAMPLE_GROUP]);
-    const group = workspace.groups.value[0];
-    group.onEdit();
-    expect(workspace.coordination.editingGroupId.value).toBe('group-1');
-    expect(group.state.value).toBe(SchedulerState.EDITING);
+  it('Group onRemove triggers removeGroup in workspace', () => {
+    const workspace = makeWorkspace();
+    const group = workspace.addGroup()!;
+    group.onRemove();
+    expect(workspace.groups.value).toEqual([]);
   });
 });
 

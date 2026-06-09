@@ -3,8 +3,8 @@ import { assert, describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS, BOOLEAN_FACTOR } from '../__fixtures__/factors';
 import { SAMPLE_RULE_1 } from '../__fixtures__/rules';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
+import { GroupCoordinationEventType } from '../dsl/GroupCoordinationEventType';
 import { SchedulerState } from '../dsl/SchedulerState';
-import { TransitionEventType } from '../dsl/TransitionEventType';
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory';
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
@@ -110,7 +110,7 @@ describe('AtomicRuleScheduler - onOk', () => {
     const coordination = makeCoordination('rule-1');
     const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    coordination.bus.on(TransitionEventType.OK, handler);
+    coordination.bus.on(GroupCoordinationEventType.OK, handler);
 
     scheduler.form.setValues({ name: 'is_active' });
     scheduler.form.setFieldState('operator', (s) => {
@@ -129,7 +129,7 @@ describe('AtomicRuleScheduler - onOk', () => {
       threshold: true,
     });
     expect(handler).toHaveBeenCalledWith({
-      type: TransitionEventType.OK,
+      type: GroupCoordinationEventType.OK,
       sourceId: 'rule-1',
     });
   });
@@ -155,7 +155,7 @@ describe('AtomicRuleScheduler - onOk', () => {
     const coordination = makeCoordination('rule-1');
     const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    coordination.bus.on(TransitionEventType.OK, handler);
+    coordination.bus.on(GroupCoordinationEventType.OK, handler);
 
     scheduler.onOk(); // form is empty
 
@@ -169,12 +169,12 @@ describe('AtomicRuleScheduler - onEdit', () => {
     const coordination = makeCoordination();
     const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    coordination.bus.on(TransitionEventType.EDIT, handler);
+    coordination.bus.on(GroupCoordinationEventType.EDIT, handler);
 
     scheduler.onEdit();
 
     expect(handler).toHaveBeenCalledWith({
-      type: TransitionEventType.EDIT,
+      type: GroupCoordinationEventType.EDIT,
       sourceId: 'rule-1',
     });
   });
@@ -185,12 +185,28 @@ describe('AtomicRuleScheduler - onCancel', () => {
     const coordination = makeCoordination('rule-1');
     const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    coordination.bus.on(TransitionEventType.CANCEL, handler);
+    coordination.bus.on(GroupCoordinationEventType.CANCEL, handler);
 
     scheduler.onCancel();
 
     expect(handler).toHaveBeenCalledWith({
-      type: TransitionEventType.CANCEL,
+      type: GroupCoordinationEventType.CANCEL,
+      sourceId: 'rule-1',
+    });
+  });
+});
+
+describe('AtomicRuleScheduler - onRemove', () => {
+  it('emits REMOVE event', () => {
+    const coordination = makeCoordination('rule-1');
+    const scheduler = makeScheduler(coordination);
+    const handler = vi.fn();
+    coordination.bus.on(GroupCoordinationEventType.REMOVE, handler);
+
+    scheduler.onRemove();
+
+    expect(handler).toHaveBeenCalledWith({
+      type: GroupCoordinationEventType.REMOVE,
       sourceId: 'rule-1',
     });
   });
@@ -259,7 +275,7 @@ describe('AtomicRuleScheduler - destroy', () => {
     const coordination = makeCoordination();
     const scheduler = makeScheduler(coordination);
     const handler = vi.fn();
-    coordination.bus.on(TransitionEventType.OK, handler);
+    coordination.bus.on(GroupCoordinationEventType.OK, handler);
     scheduler.destroy();
     scheduler.onOk();
     expect(handler).not.toHaveBeenCalled();

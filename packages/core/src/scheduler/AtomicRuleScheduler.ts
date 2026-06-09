@@ -1,7 +1,7 @@
 import { computed, effect, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
 import type { AtomicRule } from '../dsl/AtomicRule';
+import { GroupCoordinationEventType } from '../dsl/GroupCoordinationEventType';
 import { SchedulerState } from '../dsl/SchedulerState';
-import { TransitionEventType } from '../dsl/TransitionEventType';
 import { createAtomicRuleForm, type AtomicRuleForm, type Inferrers } from './AtomicRuleForm';
 import type { GroupCoordination } from './Coordination';
 
@@ -98,8 +98,8 @@ export class AtomicRuleScheduler {
       operator: this.form.values.operator as string,
       threshold: this.form.values.threshold,
     };
-    this.coordination.bus.emit(TransitionEventType.OK, {
-      type: TransitionEventType.OK,
+    this.coordination.bus.emit(GroupCoordinationEventType.OK, {
+      type: GroupCoordinationEventType.OK,
       sourceId: this.id,
     });
   };
@@ -111,8 +111,8 @@ export class AtomicRuleScheduler {
    */
   onEdit = (): void => {
     if (this.destroyed) return;
-    this.coordination.bus.emit(TransitionEventType.EDIT, {
-      type: TransitionEventType.EDIT,
+    this.coordination.bus.emit(GroupCoordinationEventType.EDIT, {
+      type: GroupCoordinationEventType.EDIT,
       sourceId: this.id,
     });
   };
@@ -124,8 +124,21 @@ export class AtomicRuleScheduler {
    */
   onCancel = (): void => {
     if (this.destroyed) return;
-    this.coordination.bus.emit(TransitionEventType.CANCEL, {
-      type: TransitionEventType.CANCEL,
+    this.coordination.bus.emit(GroupCoordinationEventType.CANCEL, {
+      type: GroupCoordinationEventType.CANCEL,
+      sourceId: this.id,
+    });
+  };
+
+  /**
+   * 请求移除自身（用户行为驱动）
+   *
+   * 发射 REMOVE 事件，父级负责实际移除并清理事件订阅
+   */
+  onRemove = (): void => {
+    if (this.destroyed) return;
+    this.coordination.bus.emit(GroupCoordinationEventType.REMOVE, {
+      type: GroupCoordinationEventType.REMOVE,
       sourceId: this.id,
     });
   };

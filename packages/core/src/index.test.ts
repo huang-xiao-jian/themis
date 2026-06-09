@@ -141,20 +141,20 @@ describe('End-to-end: edit scenario', () => {
     expect(group.rules.value[0].rule.value).toEqual(editGroups[0].rules[0]);
   });
 
-  it('transitionState allows editing, then onOk locks back', () => {
+  it('onEdit allows editing, then onOk locks back', () => {
     const workspace = new RuleWorkspaceBuilder()
       .withFactors(factors)
       .withFetchers(fetchers)
       .withRuleGroups(editGroups)
       .build();
 
-    // transitionState to EDITING
-    workspace.transitionState('group-1', SchedulerState.EDITING);
+    // onEdit to enter EDITING
     const group = workspace.groups.value[0];
+    group.onEdit();
     expect(group.state.value).toBe(SchedulerState.EDITING);
 
-    group.transitionState('rule-1', SchedulerState.EDITING);
     const rule = group.rules.value[0];
+    rule.onEdit();
     expect(rule.state.value).toBe(SchedulerState.EDITING);
     expect(rule.form.pattern).toBe('editable');
 
@@ -201,17 +201,17 @@ describe('End-to-end: mutual exclusion', () => {
       ],
     });
 
-    workspace.transitionState('group-1', SchedulerState.EDITING);
     const group = workspace.groups.value[0];
+    group.onEdit();
 
     // Edit rule-1
-    group.transitionState('rule-1', SchedulerState.EDITING);
     const rule1 = group.rules.value[0];
+    rule1.onEdit();
     expect(rule1.state.value).toBe(SchedulerState.EDITING);
 
     // Switch to rule-2 → rule-1 auto-locks
-    group.transitionState('rule-2', SchedulerState.EDITING);
     const rule2 = group.rules.value[1];
+    rule2.onEdit();
     expect(rule1.state.value).toBe(SchedulerState.LOCKED);
     expect(rule2.state.value).toBe(SchedulerState.EDITING);
     expect(group.canAddRule.value).toBe(false);
@@ -229,15 +229,15 @@ describe('End-to-end: mutual exclusion', () => {
       ],
     });
 
-    // addGroup should fail because an editing group could be created
-    // First add a second group via transitionState
-    workspace.transitionState('group-1', SchedulerState.EDITING);
+    // editingGroupId is set by snapshot loading, but canAddGroup should be false when editing
+    const group = workspace.groups.value[0];
+    group.onEdit();
     expect(workspace.canAddGroup.value).toBe(false);
   });
 });
 
 describe('End-to-end: cascade lock', () => {
-  it('workspace transitionState LOCKED cascades to group and rule', () => {
+  it('workspace Group onOk cascades to group and rule', () => {
     const workspace = createRuleWorkspace({ factors, fetchers });
     const group = workspace.addGroup()!;
     const rule = group.addRule()!;
@@ -245,7 +245,7 @@ describe('End-to-end: cascade lock', () => {
     expect(group.state.value).toBe(SchedulerState.EDITING);
     expect(rule.state.value).toBe(SchedulerState.EDITING);
 
-    workspace.transitionState(group.id, SchedulerState.LOCKED);
+    group.onCancel();
     expect(group.state.value).toBe(SchedulerState.LOCKED);
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });

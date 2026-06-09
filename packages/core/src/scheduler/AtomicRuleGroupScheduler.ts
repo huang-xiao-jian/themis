@@ -2,8 +2,9 @@ import { computed, effect, signal, type ReadonlySignal, type Signal } from '@pre
 import { nanoid } from 'nanoid';
 import type { AtomicRule, AtomicRuleGroup } from '../dsl/AtomicRule';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
+import { GroupCoordinationEventType } from '../dsl/GroupCoordinationEventType';
 import { SchedulerState } from '../dsl/SchedulerState';
-import { TransitionEventType } from '../dsl/TransitionEventType';
+import { WorkspaceCoordinationEventType } from '../dsl/WorkspaceCoordinationEventType';
 import { FactorOptionsInferrer } from '../inferrer/FactorOptionsInferrer';
 import type { Inferrers } from './AtomicRuleForm';
 import { AtomicRuleScheduler } from './AtomicRuleScheduler';
@@ -43,7 +44,7 @@ export class AtomicRuleGroupScheduler {
    * 封装供子级 Rule 派生状态的共享信号：
    * - coordination.editingRuleId：当前处于编辑态的 Rule ID（null 表示无编辑中的 Rule）
    * - coordination.factors：可用规则因子集合（组内已用因子标记 disabled）
-   * - coordination.bus：Rule 上行事件总线（OK | EDIT | CANCEL）
+   * - coordination.bus：Rule 上行事件总线（OK | EDIT | CANCEL | REMOVE）
    */
   readonly coordination: GroupCoordination;
 
@@ -189,20 +190,6 @@ export class AtomicRuleGroupScheduler {
     this.rules.value = [...this.rules.value, scheduler];
   }
 
-  /**
-   * 切换指定规则的状态（内部更新 GroupCoordination.editingRuleId Signal）
-   */
-  transitionState(ruleId: string, state: SchedulerState): void {
-    if (this.destroyed) return;
-    if (state === SchedulerState.EDITING) {
-      // 互斥：更新 editingRuleId，前一个编辑中的 Rule 通过 computed 自动锁定
-      this.coordination.editingRuleId.value = ruleId;
-    } else {
-      // LOCKED
-      this.coordination.editingRuleId.value = null;
-    }
-  }
-
   /** 验证所有原子规则 */
   validate(): boolean {
     if (this.rules.value.length === 0) return false;
@@ -235,8 +222,8 @@ export class AtomicRuleGroupScheduler {
   onOk = (): void => {
     if (this.destroyed) return;
     if (!this.validate()) return;
-    this.workspaceCoordination.bus.emit(TransitionEventType.OK, {
-      type: TransitionEventType.OK,
+    this.workspaceCoordination.bus.emit(WorkspaceCoordinationEventType.OK, {
+      type: WorkspaceCoordinationEventType.OK,
       sourceId: this.id,
     });
   };
@@ -248,8 +235,34 @@ export class AtomicRuleGroupScheduler {
    */
   onEdit = (): void => {
     if (this.destroyed) return;
-    this.workspaceCoordination.bus.emit(TransitionEventType.EDIT, {
-      type: TransitionEventType.EDIT,
+    this.workspaceCoordination.bus.emit(WorkspaceCoordinationEventType.EDIT, {
+      type: WorkspaceCoordinationEventType.EDIT,
+      sourceId: this.id,
+    });
+  };
+
+  /**
+   * 取消配置编辑（用户行为驱动）
+   *
+   * 发射 CANCEL 事件（上行到 Workspace 的 bus）
+   */
+  onCancel = (): void => {
+    if (this.destroyed) return;
+    this.workspaceCoordination.bus.emit(WorkspaceCoordinationEventType.CANCEL, {
+      type: WorkspaceCoordinationEventType.CANCEL,
+      sourceId: this.id,
+    });
+  };
+
+  /**
+   * 请求移除自身（用户行为驱动）
+   *
+   * 发射 REMOVE 事件（上行到 Workspace 的 bus），父级负责实际移除并清理事件订阅
+   */
+  onRemove = (): void => {
+    if (this.destroyed) return;
+    this.workspaceCoordination.bus.emit(WorkspaceCoordinationEventType.REMOVE, {
+      type: WorkspaceCoordinationEventType.REMOVE,
       sourceId: this.id,
     });
   };
@@ -280,23 +293,30 @@ export class AtomicRuleGroupScheduler {
     const unsubs: (() => void)[] = [];
 
     unsubs.push(
-      this.coordination.bus.on(TransitionEventType.OK, (e) => {
+      this.coordination.bus.on(GroupCoordinationEventType.OK, (e) => {
         if (e.sourceId !== scheduler.id) return;
         this.coordination.editingRuleId.value = null;
       })
     );
 
     unsubs.push(
-      this.coordination.bus.on(TransitionEventType.EDIT, (e) => {
+      this.coordination.bus.on(GroupCoordinationEventType.EDIT, (e) => {
         if (e.sourceId !== scheduler.id) return;
         this.coordination.editingRuleId.value = scheduler.id;
       })
     );
 
     unsubs.push(
-      this.coordination.bus.on(TransitionEventType.CANCEL, (e) => {
+      this.coordination.bus.on(GroupCoordinationEventType.CANCEL, (e) => {
         if (e.sourceId !== scheduler.id) return;
         this.coordination.editingRuleId.value = null;
+      })
+    );
+
+    unsubs.push(
+      this.coordination.bus.on(GroupCoordinationEventType.REMOVE, (e) => {
+        if (e.sourceId !== scheduler.id) return;
+        this.removeRule(scheduler.id);
       })
     );
 

@@ -1,9 +1,11 @@
 import { signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
 import { createNanoEvents, type Emitter, type EventsMap } from 'nanoevents';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
+import type { GroupCoordinationEvent } from '../dsl/GroupCoordinationEvent';
+import { GroupCoordinationEventType } from '../dsl/GroupCoordinationEventType';
 import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
-import type { TransitionEvent } from '../dsl/TransitionEvent';
-import { TransitionEventType } from '../dsl/TransitionEventType';
+import type { WorkspaceCoordinationEvent } from '../dsl/WorkspaceCoordinationEvent';
+import { WorkspaceCoordinationEventType } from '../dsl/WorkspaceCoordinationEventType';
 
 /**
  * 事件总线（基于 nanoevents Emitter）
@@ -12,31 +14,34 @@ import { TransitionEventType } from '../dsl/TransitionEventType';
  */
 export type EventBus<Events extends EventsMap> = Emitter<Events>;
 
-/** Workspace 级事件映射（Group → Workspace，OK | EDIT） */
-interface WorkspaceTransitionEvents {
-  [TransitionEventType.OK]: (e: TransitionEvent) => void;
-  [TransitionEventType.EDIT]: (e: TransitionEvent) => void;
+/** Workspace 级事件映射（Group → Workspace，OK | EDIT | CANCEL | REMOVE） */
+interface WorkspaceCoordinationEvents {
+  [WorkspaceCoordinationEventType.OK]: (e: WorkspaceCoordinationEvent) => void;
+  [WorkspaceCoordinationEventType.EDIT]: (e: WorkspaceCoordinationEvent) => void;
+  [WorkspaceCoordinationEventType.CANCEL]: (e: WorkspaceCoordinationEvent) => void;
+  [WorkspaceCoordinationEventType.REMOVE]: (e: WorkspaceCoordinationEvent) => void;
 }
 
-/** Group 级事件映射（Rule → Group，OK | EDIT | CANCEL） */
-interface GroupTransitionEvents {
-  [TransitionEventType.OK]: (e: TransitionEvent) => void;
-  [TransitionEventType.EDIT]: (e: TransitionEvent) => void;
-  [TransitionEventType.CANCEL]: (e: TransitionEvent) => void;
+/** Group 级事件映射（Rule → Group，OK | EDIT | CANCEL | REMOVE） */
+interface GroupCoordinationEvents {
+  [GroupCoordinationEventType.OK]: (e: GroupCoordinationEvent) => void;
+  [GroupCoordinationEventType.EDIT]: (e: GroupCoordinationEvent) => void;
+  [GroupCoordinationEventType.CANCEL]: (e: GroupCoordinationEvent) => void;
+  [GroupCoordinationEventType.REMOVE]: (e: GroupCoordinationEvent) => void;
 }
 
 /**
  * Workspace 级协调实体（Workspace → Group 协议）
  *
- * 事件总线（上行）：Group → Workspace，有效事件类型 OK | EDIT
+ * 事件总线（上行）：Group → Workspace，有效事件类型 OK | EDIT | CANCEL | REMOVE
  * 信号通道（下行）：Workspace → Group
  * - 子级 AtomicRuleGroupScheduler 通过 computed 从 editingGroupId 派生 state
  * - 子级通过 allFactors 共享规则因子定义
  */
 export interface WorkspaceCoordination {
   // ── 事件总线（上行：Group → Workspace）────────────
-  /** 事件总线，有效事件类型：OK | EDIT */
-  readonly bus: EventBus<WorkspaceTransitionEvents>;
+  /** 事件总线，有效事件类型：OK | EDIT | CANCEL | REMOVE */
+  readonly bus: EventBus<WorkspaceCoordinationEvents>;
 
   // ── 信号通道（下行：Workspace → Group）────────────
   /** 当前处于编辑态的 Group ID（null 表示无编辑中的 Group） */
@@ -48,15 +53,15 @@ export interface WorkspaceCoordination {
 /**
  * Group 级协调实体（Group → Rule 协议）
  *
- * 事件总线（上行）：Rule → Group，有效事件类型 OK | EDIT | CANCEL
+ * 事件总线（上行）：Rule → Group，有效事件类型 OK | EDIT | CANCEL | REMOVE
  * 信号通道（下行）：Group → Rule
  * - 子级 AtomicRuleScheduler 通过 computed 从 editingRuleId 派生 state
  * - 子级通过 factors 获取可用规则因子（组内已用因子标记 disabled，确保因子仅配置一次）
  */
 export interface GroupCoordination {
   // ── 事件总线（上行：Rule → Group）────────────
-  /** 事件总线，有效事件类型：OK | EDIT | CANCEL */
-  readonly bus: EventBus<GroupTransitionEvents>;
+  /** 事件总线，有效事件类型：OK | EDIT | CANCEL | REMOVE */
+  readonly bus: EventBus<GroupCoordinationEvents>;
   // ── 信号通道（下行：Group → Rule）────────────
   /** 当前处于编辑态的 Rule ID（null 表示无编辑中的 Rule） */
   readonly editingRuleId: Signal<string | null>;
@@ -73,7 +78,7 @@ export function createWorkspaceCoordination(
   factors: readonly RuleFactorDefinition[]
 ): WorkspaceCoordination {
   return {
-    bus: createNanoEvents<WorkspaceTransitionEvents>(),
+    bus: createNanoEvents<WorkspaceCoordinationEvents>(),
     editingGroupId: signal<string | null>(null),
     allFactors: signal<readonly RuleFactorDefinition[]>([...factors]),
   };
@@ -88,7 +93,7 @@ export function createGroupCoordination(
   factors: ReadonlySignal<readonly FieldDataSource[]>
 ): GroupCoordination {
   return {
-    bus: createNanoEvents<GroupTransitionEvents>(),
+    bus: createNanoEvents<GroupCoordinationEvents>(),
     editingRuleId: signal<string | null>(null),
     factors,
   };
