@@ -22,7 +22,6 @@ import {
 import type { CaseTabItem } from './types.ts';
 
 const CASES: readonly CaseTabItem[] = [
-  { key: 'all-factors', label: 'AllFactors', children: <AllFactorsCase /> },
   { key: 'edit-boolean-switch', label: 'BooleanSwitch', children: <EditBooleanSwitchCase /> },
   {
     key: 'edit-string-text-input',
@@ -67,6 +66,7 @@ const CASES: readonly CaseTabItem[] = [
     label: 'DynamicMultipleSelect',
     children: <EditDynamicMultipleSelectCase />,
   },
+  { key: 'all-factors', label: 'AllFactors', children: <AllFactorsCase /> },
 ];
 
 export function FactorShowcasePanel(): ReactElement {

@@ -1,4 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
+import { FormProvider } from '@formily/react';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { AtomicRuleGroupScheduler } from '@sisyphus/core';
 import type { AtomicRuleGroupViewProperties } from '@sisyphus/react';
@@ -11,25 +12,13 @@ import { AntdAtomicRuleView } from './AntdAtomicRuleView';
 function AntdAtomicRules({ scheduler }: { scheduler: AtomicRuleGroupScheduler }): ReactElement {
   useSignals();
   const rules = scheduler.rules.value;
-  const factors = scheduler.coordination.factors.value;
-
-  const onRemoveRule = useCallback(
-    (ruleId: string) => {
-      scheduler.removeRule(ruleId);
-    },
-    [scheduler]
-  );
 
   return (
     <Flex vertical gap="medium">
       {rules.map((rule) => (
-        <AntdAtomicRuleView
-          key={rule.id}
-          type="AtomicRuleView"
-          scheduler={rule}
-          factors={factors}
-          onDelete={() => onRemoveRule(rule.id)}
-        />
+        <FormProvider key={rule.id} form={rule.form}>
+          <AntdAtomicRuleView key={rule.id} type="AtomicRuleView" scheduler={rule} />
+        </FormProvider>
       ))}
     </Flex>
   );
@@ -55,6 +44,30 @@ function AntdAtomicRuleActions({
   );
 }
 
+/** 规则组状态转换按钮，独立追踪 editable 信号 */
+function AntdAtomicRuleGroupActions({
+  scheduler,
+}: {
+  scheduler: AtomicRuleGroupScheduler;
+}): ReactElement {
+  useSignals();
+  const editable = scheduler.editable.value;
+
+  return (
+    <Flex gap="small">
+      {editable ? (
+        <Button type="primary" size="small" onClick={scheduler.onOk}>
+          确认
+        </Button>
+      ) : (
+        <Button size="small" onClick={scheduler.onEdit}>
+          编辑
+        </Button>
+      )}
+    </Flex>
+  );
+}
+
 /** antd 规则组编辑器视图 */
 export function AntdAtomicRuleGroupView({
   scheduler,
@@ -63,6 +76,7 @@ export function AntdAtomicRuleGroupView({
     <Flex vertical gap="medium">
       <AntdAtomicRules scheduler={scheduler} />
       <AntdAtomicRuleActions scheduler={scheduler} />
+      <AntdAtomicRuleGroupActions scheduler={scheduler} />
     </Flex>
   );
 }

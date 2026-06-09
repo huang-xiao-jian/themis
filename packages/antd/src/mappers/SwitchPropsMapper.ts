@@ -1,14 +1,12 @@
 import type { SwitchProperties } from '@sisyphus/core';
+import { SwitchProps } from 'antd';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 
 /** antd Switch 组件属性 */
-export interface AntdSwitchProps {
-  readonly checked: boolean;
-  readonly onChange: (checked: boolean) => void;
-  readonly checkedChildren: string;
-  readonly unCheckedChildren: string;
-  readonly size?: 'small' | 'default';
-}
+export type AntdSwitchProps = Pick<
+  SwitchProps,
+  'checked' | 'onChange' | 'checkedChildren' | 'unCheckedChildren' | 'size'
+>;
 
 /** Switch → antd Switch 属性映射器 */
 export class SwitchPropsMapper {
@@ -23,7 +21,7 @@ export class SwitchPropsMapper {
       onChange: (checked: boolean) => onChange(checked),
       checkedChildren: config.switchLabels.checked,
       unCheckedChildren: config.switchLabels.unChecked,
-      size: config.size === 'small' ? 'small' : 'default',
+      size: config.size === 'small' ? 'small' : 'medium',
     };
   }
 }

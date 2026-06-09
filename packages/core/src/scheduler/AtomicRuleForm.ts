@@ -1,8 +1,18 @@
-import { createForm, onFieldValueChange, onFormReact, type Form } from '@formily/core';
+import {
+  createForm,
+  isField,
+  onFieldValueChange,
+  onFormMount,
+  onFormReact,
+  onFormUnmount,
+  type Form,
+} from '@formily/core';
+import { effect } from '@preact/signals-core';
 import { AtomicRule } from '../dsl';
 import { FactorInferrer } from '../inferrer';
 import type { OperatorInferrer } from '../inferrer/OperatorInferrer';
 import type { ThresholderInferrer } from '../inferrer/ThresholderInferrer';
+import { GroupCoordination } from './Coordination';
 
 /**
  * 原子规则表单 = Formily Form
@@ -36,6 +46,8 @@ export interface Inferrers {
 export interface CreateAtomicRuleFormOptions {
   /** 推断器（operator + thresholder） */
   readonly inferrers: Inferrers;
+  /** 组协调器 */
+  readonly coordination: GroupCoordination;
   /** 编辑场景初始值（直接传入 createForm，字段创建时自动消费） */
   readonly initialValues?: Partial<AtomicRule>;
 }
@@ -53,6 +65,24 @@ export function createAtomicRuleForm(options: CreateAtomicRuleFormOptions): Atom
   const form = createForm<AtomicRule>({
     initialValues,
     effects() {
+      const disposers: (() => void)[] = [];
+
+      onFormMount((form) => {
+        disposers.push(
+          effect(() => {
+            const $name = form.query('name').take();
+
+            if (isField($name)) {
+              $name.setDataSource(Array.from(options.coordination.factors.value));
+            }
+          })
+        );
+      });
+
+      onFormUnmount(() => {
+        disposers.forEach((disposer) => disposer());
+      });
+
       // name 变化时推断 operators / thresholder
       onFormReact((form: Form<AtomicRule>) => {
         const name = form.values.name;

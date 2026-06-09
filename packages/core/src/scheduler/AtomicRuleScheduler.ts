@@ -45,6 +45,7 @@ export class AtomicRuleScheduler {
     this.form = createAtomicRuleForm({
       initialValues: snapshot,
       inferrers,
+      coordination,
     });
 
     // 状态：从 GroupCoordination 的 editingRuleId computed 派生

@@ -18,7 +18,7 @@ import { SelectField } from './SelectField';
 const { TextArea } = Input;
 
 /** ThresholdRenderer 属性 */
-interface ThresholdRendererProps {
+export interface ThresholdRendererProps {
   readonly properties: ThresholdComponentProperties;
   readonly value: unknown;
   readonly onChange: (value: unknown) => void;

@@ -221,9 +221,12 @@ importers:
       '@ant-design/icons':
         specifier: '>=6.0.0'
         version: 6.2.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@formily/core':
+        specifier: ^2.3.7
+        version: 2.3.7
       '@formily/react':
         specifier: ^2.3.7
-        version: 2.3.7(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react-is@18.3.1)(react@19.2.7)(typescript@6.0.3)
+        version: 2.3.7(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7)(react-is@18.3.1)(typescript@6.0.3)
       '@sisyphus/core':
         specifier: workspace:*
         version: link:../core
@@ -5471,16 +5474,15 @@ snapshots:
 
   '@formily/path@2.3.7': {}
 
-  '@formily/react@2.3.7(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react-is@18.3.1)(react@19.2.7)(typescript@6.0.3)':
+  '@formily/react@2.3.7(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7)(react-is@18.3.1)(typescript@6.0.3)':
     dependencies:
       '@formily/core': 2.3.7
       '@formily/json-schema': 2.3.7(typescript@6.0.3)
       '@formily/reactive': 2.3.7
-      '@formily/reactive-react': 2.3.7(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react-is@18.3.1)(react@19.2.7)
+      '@formily/reactive-react': 2.3.7(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7)(react-is@18.3.1)
       '@formily/shared': 2.3.7
       '@formily/validator': 2.3.7
       hoist-non-react-statics: 3.3.2
-      react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
       react-is: 18.3.1
     optionalDependencies:
@@ -5489,11 +5491,10 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@formily/reactive-react@2.3.7(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react-is@18.3.1)(react@19.2.7)':
+  '@formily/reactive-react@2.3.7(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7)(react-is@18.3.1)':
     dependencies:
       '@formily/reactive': 2.3.7
       hoist-non-react-statics: 3.3.2
-      react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
       react-is: 18.3.1
     optionalDependencies:
