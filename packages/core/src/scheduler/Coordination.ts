@@ -67,6 +67,8 @@ export interface GroupCoordination {
   readonly editingRuleId: Signal<string | null>;
   /** 可用规则因子集合（源自 WorkspaceCoordination.allFactors，组内已使用的因子标记 disabled） */
   readonly factors: ReadonlySignal<readonly FieldDataSource[]>;
+  /** AtomicRuleScheduler 是否处于交互态，受限于 Group 的状态 */
+  readonly interactive: ReadonlySignal<boolean>;
 }
 
 /**
@@ -90,11 +92,13 @@ export function createWorkspaceCoordination(
  * 由 AtomicRuleGroupScheduler 持有，供 AtomicRuleScheduler 消费
  */
 export function createGroupCoordination(
-  factors: ReadonlySignal<readonly FieldDataSource[]>
+  factors: ReadonlySignal<readonly FieldDataSource[]>,
+  interactive: ReadonlySignal<boolean>
 ): GroupCoordination {
   return {
     bus: createNanoEvents<GroupCoordinationEvents>(),
     editingRuleId: signal<string | null>(null),
     factors,
+    interactive,
   };
 }

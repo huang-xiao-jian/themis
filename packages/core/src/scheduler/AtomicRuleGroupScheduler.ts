@@ -100,7 +100,9 @@ export class AtomicRuleGroupScheduler {
           workspaceCoordination.allFactors.value,
           this.usedFactors.value
         )
-      )
+      ),
+      // editable 传递 Group 级编辑态，Rule 级状态以此为前置约束
+      this.editable
     );
 
     // 从 snapshot 构造初始 rule scheduler
