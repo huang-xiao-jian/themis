@@ -1,4 +1,4 @@
-import { Tabs } from 'antd';
+import { Col, Row, Tabs } from 'antd';
 import type { ReactElement } from 'react';
 import { EmptyWorkspaceCase, MultiGroupsCase } from './WorkspaceEditorShowcase.tsx';
 import type { CaseTabItem } from './types.ts';
@@ -12,10 +12,17 @@ export function WorkspaceEditorPanel(): ReactElement {
   return (
     <Tabs
       type="card"
+      tabPlacement="start"
       items={CASES.map(({ key, label, children }) => ({
         key,
         label,
-        children: <div style={{ padding: '16px 0' }}>{children}</div>,
+        children: (
+          <Row gutter={16} align="middle" wrap={false}>
+            <Col lg={16} md={24}>
+              {children}
+            </Col>
+          </Row>
+        ),
       }))}
     />
   );

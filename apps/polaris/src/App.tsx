@@ -1,5 +1,5 @@
 import { StyleProvider } from '@ant-design/cssinjs';
-import { ConfigProvider, Flex, Tabs, Typography } from 'antd';
+import { ConfigProvider as AntdConfigProvider, Flex, Tabs, Typography } from 'antd';
 import { type ReactElement } from 'react';
 import { FactorShowcasePanel } from './components/FactorShowcasePanel.tsx';
 import { WorkspaceEditorPanel } from './components/WorkspaceEditorPanel.tsx';
@@ -7,7 +7,7 @@ import { WorkspaceEditorPanel } from './components/WorkspaceEditorPanel.tsx';
 function App(): ReactElement {
   return (
     <StyleProvider layer>
-      <ConfigProvider>
+      <AntdConfigProvider>
         <Flex vertical gap="small" className="px-4 py-8">
           <Typography.Title level={2}>案例展示</Typography.Title>
           <Tabs
@@ -26,7 +26,7 @@ function App(): ReactElement {
             ]}
           />
         </Flex>
-      </ConfigProvider>
+      </AntdConfigProvider>
     </StyleProvider>
   );
 }
