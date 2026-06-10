@@ -64,6 +64,7 @@ const group = workspace.addGroup();
 // 5. Create an atomic rule (a newly created Rule enters editing state by default)
 const rule = group.addRule();
 // rule.state.value === SchedulerState.EDITING
+// rule.rule.value === null // draft: no confirmed snapshot yet
 
 // 6. Drive form interactions through Formily Form (Formily effects handle inference linkage automatically)
 // rule.form.name.value = 'employee'
@@ -71,28 +72,41 @@ const rule = group.addRule();
 // rule.form.threshold.value = 100
 // Formily effects automatically complete the factor switch -> operators / thresholder inference
 
-// 7. Confirm the rule configuration and enter locked state (the Rule receives the confirmation command, and the Group writes state after internal validation passes)
-rule.onOk();
-// rule.state.value === SchedulerState.LOCKED
+// 7. Cancelling the first draft removes it directly instead of locking it
+// rule.onCancel();
+// group.pickRule(rule.id) === undefined
 
-// 8. Validate and build (business validation runs during build)
+// 8. Re-create the rule and confirm it to enter locked state
+const confirmedRule = group.addRule();
+// confirmedRule.state.value === SchedulerState.EDITING
+// confirmedRule.form.name.value = 'employee'
+// confirmedRule.form.operator.value = 'eq'
+// confirmedRule.form.threshold.value = 100
 
-// 9. Validate and build (business validation runs during build)
+// 9. Confirm the rule configuration and enter locked state (the Rule receives the confirmation command, and the Group writes state after internal validation passes)
+confirmedRule.onOk();
+// confirmedRule.state.value === SchedulerState.LOCKED
+
+// 10. Validate and build (business validation runs during build)
+
+// 11. Validate and build (business validation runs during build)
 if (workspace.validate()) {
   const result = workspace.build();
   // Validation: at least 1 configured rule group, and each rule group contains at least 1 configured atomic rule
   // result: readonly AtomicRuleGroup[]
 }
 
-// 10. Edit an existing configuration (switch to editing state through onEdit)
-rule.onEdit();
-// Drive form changes through rule.form (Formily Form)
-rule.onOk();
+// 12. Edit an existing configuration (switch to editing state through onEdit)
+confirmedRule.onEdit();
+// Drive form changes through confirmedRule.form (Formily Form)
+// confirmedRule.onCancel(); // reverts to the last confirmed snapshot and exits editing
+confirmedRule.onEdit();
+confirmedRule.onOk();
 
-// 11. Rules can still be deleted in locked state
-group.removeRule(rule.id); // deletion is not restricted by the locked state
+// 13. Rules can still be deleted in locked state
+group.removeRule(confirmedRule.id); // deletion is not restricted by the locked state
 
-// 12. Destroy the workspace and release subscriptions and caches
+// 14. Destroy the workspace and release subscriptions and caches
 workspace.destroy();
 ```
 

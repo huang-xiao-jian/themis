@@ -79,12 +79,12 @@ Owned by `AtomicRuleGroup` and consumed by `AtomicRuleScheduler`.
 
 **Event bus (upstream: Rule → Group)**:
 
-| Event type | Trigger entry point              | Parent handling logic                                                        |
-| ---------- | -------------------------------- | ---------------------------------------------------------------------------- |
-| `OK`       | `AtomicRuleScheduler.onOk()`     | After validation passes, update `editingRuleId.value = null`                 |
-| `EDIT`     | `AtomicRuleScheduler.onEdit()`   | Apply mutual-exclusion constraints and update `editingRuleId.value = ruleId` |
-| `CANCEL`   | `AtomicRuleScheduler.onCancel()` | Update `editingRuleId.value = null`                                          |
-| `REMOVE`   | `AtomicRuleScheduler.onRemove()` | Remove the Rule instance and clean up subscriptions                          |
+| Event type | Trigger entry point              | Parent handling logic                                                                                                                 |
+| ---------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `OK`       | `AtomicRuleScheduler.onOk()`     | After validation passes, update `editingRuleId.value = null`                                                                          |
+| `EDIT`     | `AtomicRuleScheduler.onEdit()`   | Apply mutual-exclusion constraints and update `editingRuleId.value = ruleId`                                                          |
+| `CANCEL`   | `AtomicRuleScheduler.onCancel()` | If the Rule has a confirmed snapshot, update `editingRuleId.value = null`; otherwise remove the draft Rule and clean up subscriptions |
+| `REMOVE`   | `AtomicRuleScheduler.onRemove()` | Remove the Rule instance and clean up subscriptions                                                                                   |
 
 **Signal channel (downstream: Group → Rule)**:
 
@@ -187,7 +187,8 @@ stateDiagram-v2
 
   LOCKED --> EDITING : REQUEST_EDIT
   EDITING --> LOCKED : CONFIRMED
-  EDITING --> LOCKED : CANCELLED
+  EDITING --> LOCKED : CANCELLED (confirmed snapshot exists)
+  EDITING --> [*] : CANCELLED (draft only)
 
   EDITING --> [*] : DELETED
   LOCKED --> [*] : DELETED
@@ -260,7 +261,11 @@ interface AtomicRuleScheduler {
   /**
    * Cancel rule configuration (user-driven)
    *
-   * No internal logic; directly emits `GroupCoordinationEventType.CANCEL`
+   * Emits `GroupCoordinationEventType.CANCEL`.
+   *
+   * Parent handling is snapshot-aware:
+   * - if `rule.value !== null`, revert the form to the last confirmed snapshot and exit editing state
+   * - if `rule.value === null`, treat the scheduler as a draft and remove it directly
    */
   onCancel(): void;
 
@@ -416,6 +421,7 @@ interface AtomicRuleGroup {
    * Create an atomic rule scheduler (new scenario)
    *
    * **Mutual exclusion behavior**: a newly created Rule enters editing state by default, and the currently editing Rule (if any) is automatically locked
+   * **Draft behavior**: before the first successful `onOk()`, the new Rule is considered a draft (`rule.value === null`); calling `onCancel()` removes the draft instead of locking it
    * **Precondition**: returns undefined silently when canAddRule=false
    */
   addRule(): AtomicRuleScheduler | undefined;

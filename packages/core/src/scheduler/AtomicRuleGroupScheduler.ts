@@ -245,6 +245,10 @@ export class AtomicRuleGroupScheduler {
     unsubs.push(
       this.coordination.bus.on(GroupCoordinationEventType.CANCEL, (e) => {
         if (e.sourceId !== scheduler.id) return;
+        if (scheduler.rule.value === null) {
+          this.removeRule(scheduler.id);
+          return;
+        }
         this.coordination.editingRuleId.value = null;
       })
     );

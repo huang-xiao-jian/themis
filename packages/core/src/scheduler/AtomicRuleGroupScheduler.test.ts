@@ -111,26 +111,48 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
   it('Rule onEdit sets editingRuleId', () => {
     const group = makeGroup();
     const rule = group.addRule()!;
-    rule.onCancel(); // lock first
+    rule.form.setValues({ name: 'is_active' });
+    rule.form.setFieldState('operator', (s) => {
+      s.value = 'is';
+    });
+    rule.form.setFieldState('threshold', (s) => {
+      s.value = true;
+    });
+    rule.onOk();
     rule.onEdit();
     expect(group.coordination.editingRuleId.value).toBe(rule.id);
     expect(rule.state.value).toBe(SchedulerState.EDITING);
   });
 
-  it('Rule onCancel clears editingRuleId', () => {
+  it('Rule onCancel removes a draft rule instead of locking it', () => {
     const group = makeGroup();
     const rule = group.addRule()!;
     rule.onCancel();
     expect(group.coordination.editingRuleId.value).toBeNull();
-    expect(rule.state.value).toBe(SchedulerState.LOCKED);
+    expect(group.rules.value).toEqual([]);
+    expect(group.pickRule(rule.id)).toBeUndefined();
   });
 
   it('Rule onEdit mutex: switching to EDITING auto-locks previous', () => {
     const group = makeGroup();
     const rule1 = group.addRule()!;
-    rule1.onCancel(); // lock rule1
+    rule1.form.setValues({ name: 'is_active' });
+    rule1.form.setFieldState('operator', (s) => {
+      s.value = 'is';
+    });
+    rule1.form.setFieldState('threshold', (s) => {
+      s.value = true;
+    });
+    rule1.onOk();
     const rule2 = group.addRule()!;
-    rule2.onCancel(); // lock rule2
+    rule2.form.setValues({ name: 'employee' });
+    rule2.form.setFieldState('operator', (s) => {
+      s.value = 'eq';
+    });
+    rule2.form.setFieldState('threshold', (s) => {
+      s.value = 100;
+    });
+    rule2.onOk();
     // Now both locked, switch rule1 to editing
     rule1.onEdit();
     expect(rule1.state.value).toBe(SchedulerState.EDITING);
@@ -155,11 +177,24 @@ describe('AtomicRuleGroupScheduler - event handling', () => {
     expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 
-  it('Rule onCancel locks the editing rule', () => {
+  it('Rule onCancel keeps a confirmed rule and exits editing state', () => {
     const group = makeGroup();
     const rule = group.addRule()!;
+
+    rule.form.setValues({ name: 'is_active' });
+    rule.form.setFieldState('operator', (s) => {
+      s.value = 'is';
+    });
+    rule.form.setFieldState('threshold', (s) => {
+      s.value = true;
+    });
+    rule.onOk();
+    rule.onEdit();
     rule.onCancel();
+
     expect(group.coordination.editingRuleId.value).toBeNull();
+    expect(group.pickRule(rule.id)).toBe(rule);
+    expect(rule.state.value).toBe(SchedulerState.LOCKED);
   });
 
   it('Group onRemove emits REMOVE event', () => {
