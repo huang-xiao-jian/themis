@@ -12,7 +12,6 @@
   "dependencies": {
     "@ant-design/cssinjs": "^2.1.2",
     "@ant-design/icons": "^6.2.5",
-    "@preact/signals-react": "^3.10.1",
     "@sisyphus/antd": "workspace:*",
     "@sisyphus/core": "workspace:*",
     "@sisyphus/react": "workspace:*",

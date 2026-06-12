@@ -1,5 +1,5 @@
-import { useSignals } from '@preact/signals-react/runtime';
 import type { MultipleSelectProperties, SelectProperties } from '@sisyphus/core';
+import { observer } from '@unsignal/react';
 import { Select, Spin } from 'antd';
 import type { ReactElement, UIEvent } from 'react';
 import { useCallback } from 'react';
@@ -24,7 +24,7 @@ interface SelectFieldProps {
 }
 
 /** Select 组件 - 桥接 Resource Signal 到 antd Select */
-export function SelectField({
+export const SelectField = observer(function SelectField({
   properties,
   value,
   onChange,
@@ -34,7 +34,6 @@ export function SelectField({
   mode,
   disabled,
 }: SelectFieldProps): ReactElement {
-  useSignals();
   // Cast to unknown to enable duck-typing guards (runtime resource may be any subtype)
   const resource = properties.resource as unknown;
 
@@ -206,4 +205,4 @@ export function SelectField({
       disabled={disabled}
     />
   );
-}
+});

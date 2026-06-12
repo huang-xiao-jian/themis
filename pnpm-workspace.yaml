@@ -3,3 +3,6 @@ packages:
   - 'apps/*'
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  - '@unsignal/core@1.0.1'
+  - '@unsignal/react@1.0.1'

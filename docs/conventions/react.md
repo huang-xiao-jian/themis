@@ -2,7 +2,7 @@
 
 ## Technical Stack
 
-- Use `@unsignal/react` for `Signal` support instead of `@preact/signals-react`
+- Use `@unsignal/react` for `Signal` reactive integration
 
 **TIPS**: The document for `@unsignal/react` is `https://www.npmjs.com/package/@unsignal/react`
 
@@ -97,6 +97,7 @@ export const Modal = (props: ModalProps) => { ... };
 ## 6. Reactive State Integration Rules
 
 - **Explicit Reactive Wrapper**: All components must be wrapped with the `observer` function from `@unsignal/react` to enable automatic `Signal` support and `Consistency`. This ensures the component properly subscribes to signal changes and triggers re-renders when the underlying reactive state updates.
+- **Limited Exceptions**: Specific tech stacks like `formily` have their own `Reactive System`, the component should follow their own practice
 
 ```tsx
 import { signal } from '@preact/signals-core';

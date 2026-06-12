@@ -27,12 +27,6 @@
     "react-dom": "^19.2.7"
   },
   "peerDependencies": {
-    "@preact/signals-react": ">=3.0.0",
     "react": "^19.2.7"
-  },
-  "peerDependenciesMeta": {
-    "@preact/signals-react": {
-      "optional": true
-    }
   }
 }

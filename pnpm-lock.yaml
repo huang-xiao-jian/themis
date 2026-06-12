@@ -56,9 +56,6 @@ importers:
       '@ant-design/icons':
         specifier: ^6.2.5
         version: 6.2.5(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      '@preact/signals-react':
-        specifier: ^3.10.1
-        version: 3.10.1(react@19.2.7)
       '@sisyphus/antd':
         specifier: workspace:*
         version: link:../../packages/antd
@@ -141,6 +138,9 @@ importers:
       '@sisyphus/react':
         specifier: workspace:*
         version: link:../react
+      '@unsignal/react':
+        specifier: ^1.0.1
+        version: 1.0.1(@preact/signals-core@1.14.2)(immer@11.1.8)(react@19.2.7)
       antd:
         specifier: '>=6.0.0'
         version: 6.4.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -148,9 +148,6 @@ importers:
         specifier: ^19.2.7
         version: 19.2.7
     devDependencies:
-      '@preact/signals-react':
-        specifier: ^3.10.1
-        version: 3.10.1(react@19.2.7)
       '@testing-library/react':
         specifier: ^16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -188,9 +185,6 @@ importers:
 
   packages/react:
     dependencies:
-      '@preact/signals-react':
-        specifier: '>=3.0.0'
-        version: 3.10.1(react@19.2.7)
       '@sisyphus/core':
         specifier: workspace:*
         version: link:../core
@@ -855,11 +849,6 @@ packages:
   '@preact/signals-core@1.14.2':
     resolution: {integrity: sha512-RZHdBj9ZF4n40Rp4jS052EHHjBWf96P9oNdXPfhQTovCuWY9iQn3Gq+gOTJSgBO9A/JBuPfMOWsSX/lIU9Pc/A==}
 
-  '@preact/signals-react@3.10.1':
-    resolution: {integrity: sha512-42/ESNbLT2dpK/IElwo9YG0kFmFKz+pUQoAKLf59BVjSXdWMeUIm4WaVYTnC01ROuF2UDU+H3uX5fq8WreamSg==}
-    peerDependencies:
-      react: ^16.14.0 || 17.x || 18.x || 19.x
-
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
 
@@ -1493,6 +1482,18 @@ packages:
     resolution: {integrity: sha512-EbGRQg4FhrmwLodl+t3JNAnXHWVr9Vp+Zl1QBZVPY4ByfkzIT8cX3K6QWODHtkIZqqJVEWvhHSx3v5PDHsaQag==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
+  '@unsignal/core@1.0.1':
+    resolution: {integrity: sha512-eC5STTmk0zElMMpiqN2zqBqdjxtB2rIozFoqhjezeYu2FQlmRol/HUYLc+oco1vGyW+fE/uHcU7coYeeiHFWjA==}
+    peerDependencies:
+      '@preact/signals-core': ^1.14.2
+
+  '@unsignal/react@1.0.1':
+    resolution: {integrity: sha512-dfzLj4YeHTut+AFH048cBMSgqNLRUQ70izn+OYAaj7hycD/RMVMijmPwZ6BgpbTX7ChzsFCU9EuY8eWBe2HZ4w==}
+    peerDependencies:
+      '@preact/signals-core': ^1.14.2
+      immer: ^11.0.0
+      react: ^19.0.0
+
   '@vitejs/plugin-react@6.0.2':
     resolution: {integrity: sha512-DlSMqo4WhThw4vB8Mpn0Woe9J+Jfq1geJ61AKW0QEgLzGMNwtIMdxbDUzLxcun8W7NbJO0e2Jg/Nxm3cCSVzzg==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -1962,6 +1963,9 @@ packages:
   ignore@7.0.5:
     resolution: {integrity: sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==}
     engines: {node: '>= 4'}
+
+  immer@11.1.8:
+    resolution: {integrity: sha512-/tbkHMW7y10Lx6i1crLjD4/OhNkRG+Fo7byZHtah0547nIeXYcpIXaUh0IAQY6gO5459qpGGYapcEOHtFXkIuA==}
 
   import-without-cache@0.4.0:
     resolution: {integrity: sha512-NkJQA7oZ4YHQhd2+H3BoRFKF3d/XNsiKpHZCQEMH9pDX27hQQLsTyOocyRgaIVtf8gHX3Nt3LPkR4e5EdtPAGQ==}
@@ -2637,11 +2641,6 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
-
-  use-sync-external-store@1.2.0:
-    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
   vite@8.0.16:
     resolution: {integrity: sha512-h9bXPmJichP5fLmVQo3PyaGSDE2n3aPuomeAlVRm0JLmt4rY6zmPKd59HYI4LNW8oTK7tlTsuC7l/m7awx9Jcw==}
@@ -3361,12 +3360,6 @@ snapshots:
 
   '@preact/signals-core@1.14.2': {}
 
-  '@preact/signals-react@3.10.1(react@19.2.7)':
-    dependencies:
-      '@preact/signals-core': 1.14.2
-      react: 19.2.7
-      use-sync-external-store: 1.2.0(react@19.2.7)
-
   '@quansync/fs@1.0.0':
     dependencies:
       quansync: 1.0.0
@@ -4009,6 +4002,17 @@ snapshots:
       '@typescript-eslint/types': 8.60.1
       eslint-visitor-keys: 5.0.1
 
+  '@unsignal/core@1.0.1(@preact/signals-core@1.14.2)':
+    dependencies:
+      '@preact/signals-core': 1.14.2
+
+  '@unsignal/react@1.0.1(@preact/signals-core@1.14.2)(immer@11.1.8)(react@19.2.7)':
+    dependencies:
+      '@preact/signals-core': 1.14.2
+      '@unsignal/core': 1.0.1(@preact/signals-core@1.14.2)
+      immer: 11.1.8
+      react: 19.2.7
+
   '@vitejs/plugin-react@6.0.2(vite@8.0.16(@types/node@25.9.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
     dependencies:
       '@rolldown/pluginutils': 1.0.1
@@ -4522,6 +4526,8 @@ snapshots:
   ignore@5.3.2: {}
 
   ignore@7.0.5: {}
+
+  immer@11.1.8: {}
 
   import-without-cache@0.4.0: {}
 
@@ -5154,10 +5160,6 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
-
-  use-sync-external-store@1.2.0(react@19.2.7):
-    dependencies:
-      react: 19.2.7
 
   vite@8.0.16(@types/node@25.9.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0):
     dependencies:

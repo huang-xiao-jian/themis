@@ -11,7 +11,7 @@
 ## Technology Stack
 
 - [React 19](https://github.com/facebook/react)
-- [@preact/signals-react](https://github.com/preactjs/signals/tree/main/packages/react) signal binding
+- [@unsignal/react](https://www.npmjs.com/package/@unsignal/react) reactive binding
 
 ## Design Goals
 
@@ -29,24 +29,22 @@
 
 ## Signal Integration
 
-Reactive updates are handled by `@preact/signals-react` at runtime. Editor components call `useSignals()` before reading signal values.
+Reactive updates are handled by `@unsignal/react` at runtime. Editor components are wrapped with `observer` to automatically subscribe to signal changes.
 
 ```tsx
-import { useSignals } from '@preact/signals-react/runtime';
+import { observer } from '@unsignal/react';
 
-function ExampleView({ scheduler }: ExampleViewProps): ReactElement {
-  useSignals();
-
-  const canAdd = scheduler.canAdd.value;
+const ExampleView = observer(function ExampleView(props: ExampleViewProps): ReactElement {
+  const canAdd = props.scheduler.canAdd.value;
 
   return <button disabled={!canAdd}>Add</button>;
-}
+});
 ```
 
 ### Conventions
 
-- Any component that reads `Signal.value` must call `useSignals()` at the top of the function body.
-- Do not rely on Babel transforms; the runtime API must work with any build tool.
+- Any component that reads `Signal.value` must be wrapped with `observer` from `@unsignal/react`.
+- Do not rely on Babel transforms; the `observer` wrapper works with any build tool.
 
 ## Architecture
 

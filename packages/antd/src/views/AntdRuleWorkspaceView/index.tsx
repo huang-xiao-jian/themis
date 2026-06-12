@@ -1,0 +1,1 @@
+export { AntdRuleWorkspaceView } from './AntdRuleWorkspaceView';
