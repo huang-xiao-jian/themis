@@ -24,12 +24,12 @@ Before using `@preact/signals-core`, be sure to **use context7 query-docs to obt
 
 The features are divided into multiple packages, with the prefix uniformly set as: `sisyphus`, for example: `@sisyphus/core`
 
-| Package             | Responsibilities                                                  |
-| :------------------ | :---------------------------------------------------------------- |
-| `@sisyphus/core`    | Inference mechanism, setter management                            |
-| `@sisyphus/react`   | Define rendering protocol, provide editor components              |
-| `@sisyphus/antd`    | Implement component rendering protocol (register antd components) |
-| `@sisyphus/polaris` | Rule configuration for interactive case collection                |
+| Package             | Responsibilities                                             |
+| :------------------ | :----------------------------------------------------------- |
+| `@sisyphus/core`    | Inference mechanism, setter management                       |
+| `@sisyphus/react`   | Provide React context and hooks to access the core scheduler |
+| `@sisyphus/antd`    | Implement the rule workspace editor UI with antd components  |
+| `@sisyphus/polaris` | Rule configuration for interactive case collection           |
 
 ```mermaid
 graph TD

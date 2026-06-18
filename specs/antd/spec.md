@@ -303,26 +303,30 @@ function App() {
 
 **Note**: Native antd-supported configuration such as date/time formatting is managed directly by the application through `antd ConfigProvider` and is not included in `SisyphusAntdConfig`.
 
-## Plugin Implementation
+## Workspace Editor
 
-### createAntdPlugin
-
-Use `createAntdPlugin()` to create the antd plugin, implementing the `SisyphusPlugin` protocol:
+`@sisyphus/antd` provides `RuleWorkspaceEditor` as the top-level component for the rule configuration workspace. It reads the `RuleWorkspaceScheduler` from `@sisyphus/react` context via `useSisyphusScheduler` and renders the complete workspace UI using antd components.
 
 ```ts
-import type { SisyphusPlugin } from '@sisyphus/react';
-
-/** Create the antd component renderer plugin */
-function createAntdPlugin(): SisyphusPlugin;
+/** Rule workspace editor component */
+function RuleWorkspaceEditor(): React.ReactElement;
 ```
 
-**Usage**:
+`RuleWorkspaceEditor` must be rendered within a `SisyphusProvider` that holds the scheduler:
 
-```ts
-import { createSisyphusScope } from '@sisyphus/react';
-import { createAntdPlugin } from '@sisyphus/antd';
+```tsx
+import { SisyphusProvider } from '@sisyphus/react';
+import { RuleWorkspaceEditor, SisyphusAntdProvider } from '@sisyphus/antd';
 
-const scope = createSisyphusScope({
-  plugins: [createAntdPlugin()],
-});
+function App() {
+  const scheduler = createRuleWorkspaceScheduler(/* ... */);
+
+  return (
+    <SisyphusProvider scheduler={scheduler}>
+      <SisyphusAntdProvider config={{ size: 'large' }}>
+        <RuleWorkspaceEditor />
+      </SisyphusAntdProvider>
+    </SisyphusProvider>
+  );
+}
 ```
