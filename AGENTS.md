@@ -20,9 +20,49 @@ Provide the core rule configuration capability.
 
 Before using `@preact/signals-core`, be sure to **use context7 query-docs to obtain the usage documentation and instructions**
 
+## Function Division
+
+The features are divided into multiple packages, with the prefix uniformly set as: `sisyphus`, for example: `@sisyphus/core`
+
+| Package             | Responsibilities                                                  |
+| :------------------ | :---------------------------------------------------------------- |
+| `@sisyphus/core`    | Inference mechanism, setter management                            |
+| `@sisyphus/react`   | Define rendering protocol, provide editor components              |
+| `@sisyphus/antd`    | Implement component rendering protocol (register antd components) |
+| `@sisyphus/polaris` | Rule configuration for interactive case collection                |
+
+```mermaid
+graph TD
+    core["@sisyphus/core"]
+    react["@sisyphus/react"]
+    antd["@sisyphus/antd"]
+    polaris["@sisyphus/polaris"]
+
+    react --> core
+    antd --> react
+    antd --> core
+    polaris --> core
+    polaris --> react
+    polaris --> antd
+```
+
+The packages and specs follow similar structure:
+
+```shell
+└── packages
+    ├── core
+    └── react
+    └── antd
+└── specs
+    ├── core
+    └── react
+    └── antd
+└── apps
+    ├── polaris
+```
+
 ## Document Citation
 
-- [projects](./docs/projects.md) Project function breakdown, package breakdown
 - [document](./docs/document.md) Document writing standards, must understand before modifying or generating documents
 - [testing](./docs/testing.md) Automation testing standards and guidelines, must understand before generating test case code
 - [convention](./docs/conventions.md) Code writing standards, must understand before generating code examples or actual business code
