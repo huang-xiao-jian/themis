@@ -1,4 +1,4 @@
-import { createAntdPlugin } from '@sisyphus/antd';
+import { RuleWorkspaceEditor, SisyphusAntdProvider } from '@sisyphus/antd';
 import type { AtomicRule, AtomicRuleGroup, RuleFactorDefinition } from '@sisyphus/core';
 import {
   createRuleWorkspace,
@@ -8,7 +8,7 @@ import {
   Quantity,
   Semantic,
 } from '@sisyphus/core';
-import { createSisyphusScope, SisyphusScopeProvider, WorkspaceEditor } from '@sisyphus/react';
+import { SisyphusProvider } from '@sisyphus/react';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
@@ -215,7 +215,6 @@ const ALL_FACTORS: readonly RuleFactorDefinition[] = [
 /** 创建单因子编辑模式的组件工厂 */
 function createEditCase(factor: RuleFactorDefinition, rule: AtomicRule): () => ReactElement {
   return function EditCase(): ReactElement {
-    const scope = useMemo(() => createSisyphusScope({ plugins: [createAntdPlugin()] }), []);
     const workspace = useMemo(
       () =>
         createRuleWorkspace({
@@ -227,9 +226,11 @@ function createEditCase(factor: RuleFactorDefinition, rule: AtomicRule): () => R
     );
 
     return (
-      <SisyphusScopeProvider scope={scope}>
-        <WorkspaceEditor workspace={workspace} />
-      </SisyphusScopeProvider>
+      <SisyphusProvider scheduler={workspace}>
+        <SisyphusAntdProvider>
+          <RuleWorkspaceEditor />
+        </SisyphusAntdProvider>
+      </SisyphusProvider>
     );
   };
 }
@@ -242,16 +243,17 @@ function createEditCase(factor: RuleFactorDefinition, rule: AtomicRule): () => R
  * 覆盖 ThresholderInferrer 决策树所有 16 种分支
  */
 export function AllFactorsCase(): ReactElement {
-  const scope = useMemo(() => createSisyphusScope({ plugins: [createAntdPlugin()] }), []);
   const workspace = useMemo(
     () => createRuleWorkspace({ factors: ALL_FACTORS, fetchers: MOCK_FETCHERS }),
     []
   );
 
   return (
-    <SisyphusScopeProvider scope={scope}>
-      <WorkspaceEditor workspace={workspace} />
-    </SisyphusScopeProvider>
+    <SisyphusProvider scheduler={workspace}>
+      <SisyphusAntdProvider>
+        <RuleWorkspaceEditor />
+      </SisyphusAntdProvider>
+    </SisyphusProvider>
   );
 }
 

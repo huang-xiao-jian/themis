@@ -1,1 +1,1 @@
-export { AntdRuleWorkspaceView } from './AntdRuleWorkspaceView';
+export { RuleWorkspaceEditor } from './AntdRuleWorkspaceView';

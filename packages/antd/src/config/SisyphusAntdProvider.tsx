@@ -3,16 +3,16 @@ import type { SisyphusAntdConfig } from './SisyphusAntdConfig';
 import { SisyphusAntdContext } from './SisyphusAntdContext';
 
 /** SisyphusAntdProvider 属性 */
-interface SisyphusAntdProviderProps {
+export interface SisyphusAntdProviderProps {
   /** antd 适配器配置 */
-  readonly config: SisyphusAntdConfig;
+  readonly config?: SisyphusAntdConfig;
   /** 子元素 */
   readonly children: ReactNode;
 }
 
 /** 提供 antd 配置 */
 export function SisyphusAntdProvider({
-  config,
+  config = {},
   children,
 }: SisyphusAntdProviderProps): ReactElement {
   return <SisyphusAntdContext.Provider value={config}>{children}</SisyphusAntdContext.Provider>;
