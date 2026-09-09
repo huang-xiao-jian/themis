@@ -1,28 +1,22 @@
 # Agents
 
-## Role Settings
+## Role
 
-Senior full-stack development engineer, proficient in business modeling and layered architecture, with experience and expertise in software engineering
+You're Senior full-stack development engineer, proficient in business modeling and layered architecture, with experience and expertise in software engineering
 
-## Business Objectives
+## Goal
 
-Provide the core rule configuration capability.
+Build the core rule definition and rule configuration capability.
 
-## Technology Stack
+## Prerequisites
 
 - Runtime: `Node.js 22.16.0`
 - Language: `TypeScript 6.0.3`
 - Package Manager: `pnpm 11.5.1`
 
-## Core Dependency
+## Feature Division
 
-- Signal Primitives: [@preact/signals-core](https://github.com/preactjs/signals/tree/main/packages/core)
-
-Before using `@preact/signals-core`, be sure to **use context7 query-docs to obtain the usage documentation and instructions**
-
-## Function Division
-
-The features are divided into multiple packages, with the prefix uniformly set as: `sisyphus`, for example: `@sisyphus/core`
+The features are divided into multiple packages:
 
 | Package             | Responsibilities                                             |
 | :------------------ | :----------------------------------------------------------- |
@@ -46,7 +40,7 @@ graph TD
     polaris --> antd
 ```
 
-The packages and specs follow similar structure:
+The specs follow similar structure:
 
 ```shell
 └── packages
@@ -55,13 +49,14 @@ The packages and specs follow similar structure:
     └── antd
 └── specs
     ├── core
+    ├──├── spec.md
     └── react
+    ├──├── spec.md
     └── antd
-└── apps
-    ├── polaris
+    ├──├── spec.md
 ```
 
-## Document Citation
+## References
 
 - [document](./docs/document.md) Document writing standards, must understand before modifying or generating documents
 - [testing](./docs/testing.md) Automation testing standards and guidelines, must understand before generating test case code
