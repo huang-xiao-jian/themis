@@ -1,4 +1,4 @@
-import type { AtomicRuleGroupScheduler } from '@sisyphus/core';
+import type { AtomicRuleGroupScheduler } from '@thesis/core';
 import { observer } from '@unsignal/react';
 import { Flex } from 'antd';
 import type { ReactElement } from 'react';

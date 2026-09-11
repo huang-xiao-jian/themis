@@ -1,7 +1,7 @@
-import { RuleWorkspaceEditor, SisyphusAntdProvider } from '@sisyphus/antd';
-import type { AtomicRuleGroup, RuleFactorDefinition } from '@sisyphus/core';
-import { createRuleWorkspace, DataType } from '@sisyphus/core';
-import { SisyphusProvider } from '@sisyphus/react';
+import { RuleWorkspaceEditor, SisyphusAntdProvider } from '@thesis/antd';
+import type { AtomicRuleGroup, RuleFactorDefinition } from '@thesis/core';
+import { createRuleWorkspace, DataType } from '@thesis/core';
+import { SisyphusProvider } from '@thesis/react';
 import { Col, Row } from 'antd';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';

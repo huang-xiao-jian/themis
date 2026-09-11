@@ -1,4 +1,4 @@
-import type { ThresholdComponentProperties } from '@sisyphus/core';
+import type { ThresholdComponentProperties } from '@thesis/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 import type { AntdInputNumberProps } from './InputNumberPropsMapper';
 import { InputNumberPropsMapper } from './InputNumberPropsMapper';

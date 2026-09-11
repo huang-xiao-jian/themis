@@ -2,7 +2,7 @@ import type {
   MultipleSelectProperties,
   SelectProperties,
   ThresholdComponentProperties,
-} from '@sisyphus/core';
+} from '@thesis/core';
 import { Input, InputNumber, Switch } from 'antd';
 import type { ReactElement } from 'react';
 import { useSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';

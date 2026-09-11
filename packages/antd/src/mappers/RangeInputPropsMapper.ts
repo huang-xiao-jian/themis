@@ -1,5 +1,5 @@
-import type { RangeInputProperties } from '@sisyphus/core';
-import { DataType } from '@sisyphus/core';
+import type { RangeInputProperties } from '@thesis/core';
+import { DataType } from '@thesis/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 
 /** 区间输入映射结果 */

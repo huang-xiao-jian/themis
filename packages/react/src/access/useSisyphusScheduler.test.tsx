@@ -1,4 +1,4 @@
-import type { RuleWorkspaceScheduler } from '@sisyphus/core';
+import type { RuleWorkspaceScheduler } from '@thesis/core';
 import { renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';

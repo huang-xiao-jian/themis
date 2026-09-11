@@ -1,4 +1,4 @@
-import type { RuleWorkspaceScheduler } from '@sisyphus/core';
+import type { RuleWorkspaceScheduler } from '@thesis/core';
 import { createContext, useContext } from 'react';
 
 export const SisyphusSchedulerContext = createContext<RuleWorkspaceScheduler | null>(null);

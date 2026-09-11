@@ -10,27 +10,27 @@ Build the core rule definition and rule configuration capability.
 
 ## Prerequisites
 
-- Runtime: `Node.js 22.16.0`
+- Runtime: `Node.js 24.21.0`
 - Language: `TypeScript 6.0.3`
-- Package Manager: `pnpm 11.5.1`
+- Package Manager: `pnpm 11.26.0`
 
 ## Feature Division
 
 The features are divided into multiple packages:
 
-| Package             | Responsibilities                                             |
-| :------------------ | :----------------------------------------------------------- |
-| `@sisyphus/core`    | Inference mechanism, setter management                       |
-| `@sisyphus/react`   | Provide React context and hooks to access the core scheduler |
-| `@sisyphus/antd`    | Implement the rule workspace editor UI with antd components  |
-| `@sisyphus/polaris` | Rule configuration for interactive case collection           |
+| Package           | Responsibilities                                             |
+| :---------------- | :----------------------------------------------------------- |
+| `@thesis/core`    | Inference mechanism, setter management                       |
+| `@thesis/react`   | Provide React context and hooks to access the core scheduler |
+| `@thesis/antd`    | Implement the rule workspace editor UI with antd components  |
+| `@thesis/polaris` | Rule configuration for interactive case collection           |
 
 ```mermaid
 graph TD
-    core["@sisyphus/core"]
-    react["@sisyphus/react"]
-    antd["@sisyphus/antd"]
-    polaris["@sisyphus/polaris"]
+    core["@thesis/core"]
+    react["@thesis/react"]
+    antd["@thesis/antd"]
+    polaris["@thesis/polaris"]
 
     react --> core
     antd --> react

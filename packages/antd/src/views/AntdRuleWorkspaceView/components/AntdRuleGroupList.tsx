@@ -1,4 +1,4 @@
-import type { RuleWorkspaceScheduler } from '@sisyphus/core';
+import type { RuleWorkspaceScheduler } from '@thesis/core';
 import { observer } from '@unsignal/react';
 import { Flex } from 'antd';
 import type { ReactElement } from 'react';

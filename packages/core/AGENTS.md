@@ -1,4 +1,4 @@
-# @sisyphus/core
+# @thesis/core
 
 ## Tech Stack
 

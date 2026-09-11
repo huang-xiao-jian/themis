@@ -1,4 +1,4 @@
-import type { TextAreaProperties } from '@sisyphus/core';
+import type { TextAreaProperties } from '@thesis/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 
 /** antd Input.TextArea 组件属性 */

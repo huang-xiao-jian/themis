@@ -1,4 +1,4 @@
-# `@sisyphus/core`
+# `@thesis/core`
 
 The core of rule configuration, responsible for inferring `Intermediate Representation`, inferring matching `Operator`s, inferring available rule factors, and encapsulating the rule configuration logic.
 

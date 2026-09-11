@@ -1,6 +1,6 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import type { ListBuilderProperties } from '@sisyphus/core';
-import { DataType, Semantic } from '@sisyphus/core';
+import type { ListBuilderProperties } from '@thesis/core';
+import { DataType, Semantic } from '@thesis/core';
 import {
   Select as AntdSelect,
   Button,

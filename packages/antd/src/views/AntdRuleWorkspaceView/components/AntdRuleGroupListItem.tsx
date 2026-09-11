@@ -1,5 +1,5 @@
 import { DeleteOutlined } from '@ant-design/icons';
-import type { AtomicRuleGroupScheduler } from '@sisyphus/core';
+import type { AtomicRuleGroupScheduler } from '@thesis/core';
 import { observer } from '@unsignal/react';
 import { Button, Card } from 'antd';
 import type { ReactElement } from 'react';

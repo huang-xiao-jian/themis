@@ -1,5 +1,5 @@
 {
-  "name": "@sisyphus/antd",
+  "name": "@thesis/antd",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -20,21 +20,21 @@
   "dependencies": {
     "@formily/core": "^2.3.7",
     "@formily/react": "^2.3.7",
-    "@sisyphus/core": "workspace:*",
-    "@sisyphus/react": "workspace:*",
-    "@unsignal/react": "^1.0.1"
+    "@thesis/core": "workspace:*",
+    "@thesis/react": "workspace:*",
+    "@unsignal/react": "^1.0.2"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.2",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.16",
-    "dayjs": "^1.11.21",
-    "react-dom": "^19.2.7"
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "dayjs": "^1.11.23",
+    "react-dom": "^19.3.0"
   },
   "peerDependencies": {
     "@ant-design/icons": ">=6.0.0",
     "antd": ">=6.0.0",
     "dayjs": ">=1.11.0",
-    "react": "^19.2.7"
+    "react": "^19.3.0"
   }
 }

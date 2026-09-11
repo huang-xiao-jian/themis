@@ -1,5 +1,5 @@
 import { CheckOutlined, CloseOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import type { AtomicRuleScheduler } from '@sisyphus/core';
+import type { AtomicRuleScheduler } from '@thesis/core';
 import { observer, Show } from '@unsignal/react';
 import { Button, Col, Flex, Row } from 'antd';
 import type { ReactElement } from 'react';

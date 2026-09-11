@@ -1,4 +1,4 @@
-import type { MultipleSelectProperties, SelectProperties } from '@sisyphus/core';
+import type { MultipleSelectProperties, SelectProperties } from '@thesis/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 
 /** Select antd 映射基础属性 */

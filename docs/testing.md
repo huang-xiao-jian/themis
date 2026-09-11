@@ -61,5 +61,5 @@ pnpm vitest run -t "should return single point"
 pnpm vitest run "Inferer"
 
 # Run the test case files of a specific package
-pnpm vitest run --project @sisyphus/core
+pnpm vitest run --project @thesis/core
 ```

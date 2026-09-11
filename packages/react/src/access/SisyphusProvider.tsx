@@ -1,4 +1,4 @@
-import type { RuleWorkspaceScheduler } from '@sisyphus/core';
+import type { RuleWorkspaceScheduler } from '@thesis/core';
 import type { ReactElement, ReactNode } from 'react';
 import { SisyphusSchedulerContext } from './useSisyphusScheduler';
 

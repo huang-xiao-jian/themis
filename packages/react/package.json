@@ -1,5 +1,5 @@
 {
-  "name": "@sisyphus/react",
+  "name": "@thesis/react",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -18,15 +18,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sisyphus/core": "workspace:*"
+    "@thesis/core": "workspace:*"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.3.2",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.16",
-    "react-dom": "^19.2.7"
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.5.1",
+    "@types/react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "peerDependencies": {
-    "react": "^19.2.7"
+    "react": "^19.3.0"
   }
 }

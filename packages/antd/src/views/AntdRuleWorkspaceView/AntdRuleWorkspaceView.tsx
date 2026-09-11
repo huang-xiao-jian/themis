@@ -1,4 +1,4 @@
-import { useSisyphusScheduler } from '@sisyphus/react';
+import { useSisyphusScheduler } from '@thesis/react';
 import { observer } from '@unsignal/react';
 import { Flex } from 'antd';
 import type { ReactElement } from 'react';

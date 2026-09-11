@@ -1,10 +1,10 @@
-import { createRuleWorkspace, DataType } from '@sisyphus/core';
-import { SisyphusProvider } from '@sisyphus/react';
+import { createRuleWorkspace, DataType } from '@thesis/core';
+import { SisyphusProvider } from '@thesis/react';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { RuleWorkspaceEditor, SisyphusAntdProvider } from './index';
 
-describe('@sisyphus/antd public API', () => {
+describe('@thesis/antd public API', () => {
   window.matchMedia =
     window.matchMedia ||
     ((query: string): MediaQueryList =>

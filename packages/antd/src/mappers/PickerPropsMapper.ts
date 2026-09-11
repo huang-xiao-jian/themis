@@ -1,5 +1,5 @@
-import type { PickerProperties } from '@sisyphus/core';
-import { Semantic } from '@sisyphus/core';
+import type { PickerProperties } from '@thesis/core';
+import { Semantic } from '@thesis/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 import { fromDayjs, toDayjs } from '../utils/dayjsValue';
 

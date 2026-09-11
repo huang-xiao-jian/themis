@@ -1,6 +1,6 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import type { ListRangeBuilderProperties } from '@sisyphus/core';
-import { DataType, Semantic } from '@sisyphus/core';
+import type { ListRangeBuilderProperties } from '@thesis/core';
+import { DataType, Semantic } from '@thesis/core';
 import { Button, DatePicker, Flex, Input, InputNumber, Slider, Space } from 'antd';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';

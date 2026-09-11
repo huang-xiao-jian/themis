@@ -1,4 +1,4 @@
-import type { InputNumberProperties } from '@sisyphus/core';
+import type { InputNumberProperties } from '@thesis/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 
 /** antd InputNumber 组件属性 */

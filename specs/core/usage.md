@@ -3,8 +3,8 @@
 ## New Scenario
 
 ```ts
-import { DataType, Mode, Quantity, SchedulerState } from '@sisyphus/core';
-import { RuleWorkspaceBuilder, providePaginatedFilterableFetcher } from '@sisyphus/core';
+import { DataType, Mode, Quantity, SchedulerState } from '@thesis/core';
+import { RuleWorkspaceBuilder, providePaginatedFilterableFetcher } from '@thesis/core';
 
 // 1. Define the DSL
 // Multiple factors can share the same Fetcher for the same feature combination

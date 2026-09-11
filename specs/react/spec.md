@@ -1,6 +1,6 @@
-# `@sisyphus/react`
+# `@thesis/react`
 
-`@sisyphus/react` is the thin React binding for `@sisyphus/core`. It provides a context provider and a hook to access the `RuleWorkspaceScheduler`. It does not render any UI — all rendering is owned by concrete component-library adapters such as `@sisyphus/antd`.
+`@thesis/react` is the thin React binding for `@thesis/core`. It provides a context provider and a hook to access the `RuleWorkspaceScheduler`. It does not render any UI — all rendering is owned by concrete component-library adapters such as `@thesis/antd`.
 
 ## Prerequisites
 
@@ -15,13 +15,13 @@
 
 - Provide a minimal React context and hook to access the core scheduler.
 - Stay free of any component-library or rendering assumptions.
-- Let concrete adapter packages (e.g. `@sisyphus/antd`) own all rendering responsibilities.
+- Let concrete adapter packages (e.g. `@thesis/antd`) own all rendering responsibilities.
 
 ## Design Principles
 
-- `@sisyphus/core` provides the business schedulers and remains framework free.
-- `@sisyphus/react` provides the React context and hook to access the scheduler, but does not depend on any specific component library and does not render any UI.
-- Component-library adapter packages, such as `@sisyphus/antd`, implement the concrete UI and consume the scheduler directly from context or props.
+- `@thesis/core` provides the business schedulers and remains framework free.
+- `@thesis/react` provides the React context and hook to access the scheduler, but does not depend on any specific component library and does not render any UI.
+- Component-library adapter packages, such as `@thesis/antd`, implement the concrete UI and consume the scheduler directly from context or props.
 
 ## Signal Integration
 
@@ -44,7 +44,7 @@ const ExampleView = observer(function ExampleView(props: ExampleViewProps): Reac
 
 ## Architecture
 
-`@sisyphus/react` has a single layer — the **Access Layer** — that exposes a context provider and a hook for the core scheduler.
+`@thesis/react` has a single layer — the **Access Layer** — that exposes a context provider and a hook for the core scheduler.
 
 ```mermaid
 graph TB
@@ -56,7 +56,7 @@ graph TB
   SisyphusProvider --> useSisyphusScheduler
 ```
 
-There is no view registry, no plugin protocol, and no renderer. The application creates the scheduler via `@sisyphus/core`, provides it through `SisyphusProvider`, and concrete adapter components read it through `useSisyphusScheduler` or receive it as a prop.
+There is no view registry, no plugin protocol, and no renderer. The application creates the scheduler via `@thesis/core`, provides it through `SisyphusProvider`, and concrete adapter components read it through `useSisyphusScheduler` or receive it as a prop.
 
 ## Access Layer
 
@@ -85,11 +85,11 @@ If the hook is used outside `SisyphusProvider`, it throws a framework error.
 
 ## Usage Example
 
-The application creates the scheduler via `@sisyphus/core`, provides it through `SisyphusProvider`, and renders the adapter component:
+The application creates the scheduler via `@thesis/core`, provides it through `SisyphusProvider`, and renders the adapter component:
 
 ```tsx
-import { SisyphusProvider } from '@sisyphus/react';
-import { RuleWorkspaceEditor } from '@sisyphus/antd';
+import { SisyphusProvider } from '@thesis/react';
+import { RuleWorkspaceEditor } from '@thesis/antd';
 
 function App() {
   const scheduler = createRuleWorkspaceScheduler(/* ... */);
@@ -105,7 +105,7 @@ function App() {
 Adapter components can access the scheduler from context:
 
 ```tsx
-import { useSisyphusScheduler } from '@sisyphus/react';
+import { useSisyphusScheduler } from '@thesis/react';
 import { observer } from '@unsignal/react';
 
 const RuleWorkspaceEditor = observer(function RuleWorkspaceEditor(): ReactElement {
@@ -116,7 +116,7 @@ const RuleWorkspaceEditor = observer(function RuleWorkspaceEditor(): ReactElemen
 
 ## Public API Boundaries
 
-The intended public surface of `@sisyphus/react` is:
+The intended public surface of `@thesis/react` is:
 
 - `SisyphusProvider`
 - `SisyphusProviderProps`

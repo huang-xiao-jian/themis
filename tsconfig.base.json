@@ -5,9 +5,9 @@
     "moduleResolution": "bundler",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "paths": {
-      "@sisyphus/antd": ["./packages/antd/src/index.ts"],
-      "@sisyphus/core": ["./packages/core/src/index.ts"],
-      "@sisyphus/react": ["./packages/react/src/index.ts"]
+      "@thesis/antd": ["./packages/antd/src/index.ts"],
+      "@thesis/core": ["./packages/core/src/index.ts"],
+      "@thesis/react": ["./packages/react/src/index.ts"]
     },
     "strict": true,
     "noEmit": true,

@@ -1,5 +1,5 @@
-import { RuleWorkspaceEditor, SisyphusAntdProvider } from '@sisyphus/antd';
-import type { AtomicRule, AtomicRuleGroup, RuleFactorDefinition } from '@sisyphus/core';
+import { RuleWorkspaceEditor, SisyphusAntdProvider } from '@thesis/antd';
+import type { AtomicRule, AtomicRuleGroup, RuleFactorDefinition } from '@thesis/core';
 import {
   createRuleWorkspace,
   DataType,
@@ -7,8 +7,8 @@ import {
   providePaginatedFilterableFetcher,
   Quantity,
   Semantic,
-} from '@sisyphus/core';
-import { SisyphusProvider } from '@sisyphus/react';
+} from '@thesis/core';
+import { SisyphusProvider } from '@thesis/react';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 

@@ -1,4 +1,4 @@
-import type { MultipleSelectProperties, SelectProperties } from '@sisyphus/core';
+import type { MultipleSelectProperties, SelectProperties } from '@thesis/core';
 import { observer } from '@unsignal/react';
 import { Select, Spin } from 'antd';
 import type { ReactElement, UIEvent } from 'react';

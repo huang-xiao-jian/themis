@@ -1,5 +1,5 @@
-import type { RangePickerProperties } from '@sisyphus/core';
-import { Semantic } from '@sisyphus/core';
+import type { RangePickerProperties } from '@thesis/core';
+import { Semantic } from '@thesis/core';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 import { fromDayjsRange, toDayjsRange } from '../utils/dayjsValue';
 

@@ -1,8 +1,8 @@
-# `@sisyphus/antd`
+# `@thesis/antd`
 
 ## Prerequisites
 
-- [@sisyphus/react](../react/spec.md)
+- [@thesis/react](../react/spec.md)
 
 ## Design Guidelines
 
@@ -268,7 +268,7 @@ function SisyphusAntdProvider({
 **Usage example**:
 
 ```tsx
-import { SisyphusAntdProvider } from '@sisyphus/antd';
+import { SisyphusAntdProvider } from '@thesis/antd';
 
 function App() {
   return (
@@ -305,7 +305,7 @@ function App() {
 
 ## Workspace Editor
 
-`@sisyphus/antd` provides `RuleWorkspaceEditor` as the top-level component for the rule configuration workspace. It reads the `RuleWorkspaceScheduler` from `@sisyphus/react` context via `useSisyphusScheduler` and renders the complete workspace UI using antd components.
+`@thesis/antd` provides `RuleWorkspaceEditor` as the top-level component for the rule configuration workspace. It reads the `RuleWorkspaceScheduler` from `@thesis/react` context via `useSisyphusScheduler` and renders the complete workspace UI using antd components.
 
 ```ts
 /** Rule workspace editor component */
@@ -315,8 +315,8 @@ function RuleWorkspaceEditor(): React.ReactElement;
 `RuleWorkspaceEditor` must be rendered within a `SisyphusProvider` that holds the scheduler:
 
 ```tsx
-import { SisyphusProvider } from '@sisyphus/react';
-import { RuleWorkspaceEditor, SisyphusAntdProvider } from '@sisyphus/antd';
+import { SisyphusProvider } from '@thesis/react';
+import { RuleWorkspaceEditor, SisyphusAntdProvider } from '@thesis/antd';
 
 function App() {
   const scheduler = createRuleWorkspaceScheduler(/* ... */);

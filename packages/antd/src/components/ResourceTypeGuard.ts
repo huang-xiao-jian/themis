@@ -5,7 +5,7 @@ import type {
   PaginatedDynamicResource,
   PaginatedFilterableDynamicResource,
   StaticResource,
-} from '@sisyphus/core';
+} from '@thesis/core';
 
 /**
  * Resource 鸭子类型守卫
@@ -13,7 +13,7 @@ import type {
  * 通过运行时属性特征判定 Resource 亚型，
  * 便于 Select 组件按亚型映射 antd 属性。
  *
- * 类型定义由 @sisyphus/core 内核负责，此处仅做运行时判定
+ * 类型定义由 @thesis/core 内核负责，此处仅做运行时判定
  */
 
 /** 静态资源守卫 */

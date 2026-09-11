@@ -11,9 +11,9 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      '@sisyphus/core': resolve(PACKAGES_DIR, 'core/src/index.ts'),
-      '@sisyphus/react': resolve(PACKAGES_DIR, 'react/src/index.ts'),
-      '@sisyphus/antd': resolve(PACKAGES_DIR, 'antd/src/index.ts'),
+      '@thesis/core': resolve(PACKAGES_DIR, 'core/src/index.ts'),
+      '@thesis/react': resolve(PACKAGES_DIR, 'react/src/index.ts'),
+      '@thesis/antd': resolve(PACKAGES_DIR, 'antd/src/index.ts'),
     },
     dedupe: ['react', 'react-dom'],
   },

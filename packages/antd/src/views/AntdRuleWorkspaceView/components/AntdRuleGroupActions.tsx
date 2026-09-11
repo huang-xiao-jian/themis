@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import type { RuleWorkspaceScheduler } from '@sisyphus/core';
+import type { RuleWorkspaceScheduler } from '@thesis/core';
 import { observer } from '@unsignal/react';
 import { Button } from 'antd';
 import type { ReactElement } from 'react';

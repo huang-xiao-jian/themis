@@ -1,4 +1,4 @@
-import type { SwitchProperties } from '@sisyphus/core';
+import type { SwitchProperties } from '@thesis/core';
 import { SwitchProps } from 'antd';
 import type { ResolvedSisyphusAntdConfig } from '../config/useSisyphusAntdConfig';
 

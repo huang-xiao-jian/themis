@@ -1,5 +1,5 @@
 import { FormProvider } from '@formily/react';
-import type { AtomicRuleScheduler } from '@sisyphus/core';
+import type { AtomicRuleScheduler } from '@thesis/core';
 import { observer } from '@unsignal/react';
 import type { ReactElement } from 'react';
 import { AntdAtomicRuleView } from '../../AntdAtomicRuleView';

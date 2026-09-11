@@ -1,5 +1,5 @@
 {
-  "name": "@sisyphus/core",
+  "name": "@thesis/core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -18,12 +18,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@formily/core": "^2.3.3",
-    "@preact/signals-core": "^1.14.2",
-    "nanoevents": "^9.1.0",
-    "nanoid": "^5.1.11"
+    "@formily/core": "^2.3.7",
+    "@preact/signals-core": "^1.14.4",
+    "nanoevents": "^10.0.0",
+    "nanoid": "^6.0.1"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1"
+    "@types/node": "^26.5.1"
   }
 }
