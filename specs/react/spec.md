@@ -1,31 +1,20 @@
-# `@thesis/react`
+# @thesis/react
 
-`@thesis/react` is the thin React binding for `@thesis/core`. It provides a context provider and a hook to access the `RuleWorkspaceScheduler`. It does not render any UI — all rendering is owned by concrete component-library adapters such as `@thesis/antd`.
+`@thesis/react` is the thin React binding for `@thesis/core`.
 
-## Prerequisites
+## Goal
 
-- [Core spec](../core/spec.md)
+- Provide a minimal React context and hook to access the core scheduler.
+- Stay free of any component-library or rendering assumptions, leave the rendering responsibilities to the concrete adapter.
 
-## Technology Stack
+## Tech Stack
 
 - [React 19](https://github.com/facebook/react)
 - [@unsignal/react](https://www.npmjs.com/package/@unsignal/react) reactive binding
 
-## Design Goals
+## Tech Conventions
 
-- Provide a minimal React context and hook to access the core scheduler.
-- Stay free of any component-library or rendering assumptions.
-- Let concrete adapter packages (e.g. `@thesis/antd`) own all rendering responsibilities.
-
-## Design Principles
-
-- `@thesis/core` provides the business schedulers and remains framework free.
-- `@thesis/react` provides the React context and hook to access the scheduler, but does not depend on any specific component library and does not render any UI.
-- Component-library adapter packages, such as `@thesis/antd`, implement the concrete UI and consume the scheduler directly from context or props.
-
-## Signal Integration
-
-Reactive updates are handled by `@unsignal/react` at runtime. Components that read `Signal.value` must be wrapped with `observer` to automatically subscribe to signal changes.
+- Any component that reads `Signal.value` must be wrapped with `observer` from `@unsignal/react`.
 
 ```tsx
 import { observer } from '@unsignal/react';
@@ -37,28 +26,13 @@ const ExampleView = observer(function ExampleView(props: ExampleViewProps): Reac
 });
 ```
 
-### Conventions
+## API References
 
-- Any component that reads `Signal.value` must be wrapped with `observer` from `@unsignal/react`.
-- Do not rely on Babel transforms; the `observer` wrapper works with any build tool.
+The intended public surface:
 
-## Architecture
-
-`@thesis/react` has a single layer — the **Access Layer** — that exposes a context provider and a hook for the core scheduler.
-
-```mermaid
-graph TB
-  subgraph AccessLayer[Access Layer]
-    SisyphusProvider
-    useSisyphusScheduler
-  end
-
-  SisyphusProvider --> useSisyphusScheduler
-```
-
-There is no view registry, no plugin protocol, and no renderer. The application creates the scheduler via `@thesis/core`, provides it through `SisyphusProvider`, and concrete adapter components read it through `useSisyphusScheduler` or receive it as a prop.
-
-## Access Layer
+- `SisyphusProvider`
+- `SisyphusProviderProps`
+- `useSisyphusScheduler`
 
 ### `SisyphusProvider`
 
@@ -113,15 +87,3 @@ const RuleWorkspaceEditor = observer(function RuleWorkspaceEditor(): ReactElemen
   // render the workspace UI using the scheduler
 });
 ```
-
-## Public API Boundaries
-
-The intended public surface of `@thesis/react` is:
-
-- `SisyphusProvider`
-- `SisyphusProviderProps`
-- `useSisyphusScheduler`
-
-The following are internal implementation details and should not be treated as stable public API:
-
-- context implementation details

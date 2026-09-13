@@ -1,70 +1,10 @@
-# Infrastructure Layer
+# Infrastructure
 
-Converts the raw `RuleFactorResource` into `Resource` entities and defines the `Fetcher` abstraction for dynamic resource loading, relying on `Fetcher` implementations supplied by the application.
-
-## Prerequisites
-
-- [Core spec](./spec.md)
-- [Rule factor interpreter](../interpreter.md)
-
-**Important**: The concrete protocol for the `Resource` entity is defined in [interpreter.md](../interpreter.md). `StaticResource` is a static resource and does not require dynamic loading for preset options.
+Converts the raw `RuleFactorResource` into `Resource` entities and defines the `Fetcher` abstraction for dynamic resource
 
 ## Fetcher Port
 
-The application provides `Fetcher` implementations based on scenario, as concrete implementation details.
-
-**Important design convention**: `Fetcher` is related only to the `features` of a `Resource`, not to a specific `Resource.name`.
-`Resource.name` is passed as the first argument to `fetch()` at call time, which allows **one `Fetcher` to be reused by multiple `Resource`s**. This makes it easy for the application to reuse the same data-fetching implementation for a given feature combination (for example, multiple resources may use the same pagination/filtering API).
-The semantics of `Resource.name` are the **business key / route parameter** for the data query. It is determined by `RuleFactorDefinition.resource.name` in the DSL rather than by the fetcher side.
-
-```ts
-// Basic dynamic resource fetcher - no pagination, no filtering
-interface ElementaryFetcher<T = FieldDataSource> {
-  /**
-   * @param resourceName Resource name, from DSL `RuleFactorDefinition.resource.name`
-   */
-  fetch(resourceName: string): Promise<T[]>;
-}
-
-// Paginated dynamic resource fetcher
-interface PaginatedFetcher<T = FieldDataSource> {
-  /**
-   * @param resourceName Resource name, from DSL `RuleFactorDefinition.resource.name`
-   * @param page Current page number (starting from 1)
-   * @param pageSize Items per page
-   */
-  fetch(resourceName: string, page: number, pageSize: number): Promise<PaginatedResult<T>>;
-}
-
-// Filterable dynamic resource fetcher
-interface FilterableFetcher<T = FieldDataSource> {
-  /**
-   * @param resourceName Resource name, from DSL `RuleFactorDefinition.resource.name`
-   * @param keyword Filter keyword
-   */
-  fetch(resourceName: string, keyword: string): Promise<T[]>;
-}
-
-// Paginated + filterable dynamic resource fetcher
-interface PaginatedFilterableFetcher<T = FieldDataSource> {
-  /**
-   * @param resourceName Resource name, from DSL `RuleFactorDefinition.resource.name`
-   * @param keyword Filter keyword
-   * @param page Current page number (starting from 1)
-   * @param pageSize Items per page
-   */
-  fetch(
-    resourceName: string,
-    keyword: string,
-    page: number,
-    pageSize: number
-  ): Promise<PaginatedResult<T>>;
-}
-```
-
-## Fetcher Type Enum
-
-`FetcherProvider` uses the `type` field to distinguish subtypes. The enum centralizes the possible `type` values:
+**Important**: `Fetcher` is related only to the `features` of a `Resource`, not to a specific `Resource.name`.
 
 ```ts
 /**
@@ -83,6 +23,49 @@ enum FetcherType {
   FILTERABLE = 'filterable',
   /** Paginated + filterable dynamic resource - supports pagination and server-side filtering */
   PAGINATED_FILTERABLE = 'paginatedFilterable',
+}
+
+// Basic dynamic resource fetcher - no pagination, no filtering
+interface ElementaryFetcher<T = FieldDataSource> {
+  /**
+   * @param resourceName Resource name, comes from `RuleFactorDefinition.resource.name`
+   */
+  fetch(resourceName: string): Promise<T[]>;
+}
+
+// Paginated dynamic resource fetcher
+interface PaginatedFetcher<T = FieldDataSource> {
+  /**
+   * @param resourceName Resource name, comes from `RuleFactorDefinition.resource.name`
+   * @param pageIndex Current page number (starting from 1)
+   * @param pageSize Items per page
+   */
+  fetch(resourceName: string, pageIndex: number, pageSize: number): Promise<PaginatedResult<T>>;
+}
+
+// Filterable dynamic resource fetcher
+interface FilterableFetcher<T = FieldDataSource> {
+  /**
+   * @param resourceName Resource name, comes from `RuleFactorDefinition.resource.name`
+   * @param keyword Filter keyword
+   */
+  fetch(resourceName: string, keyword: string): Promise<T[]>;
+}
+
+// Paginated + filterable dynamic resource fetcher
+interface PaginatedFilterableFetcher<T = FieldDataSource> {
+  /**
+   * @param resourceName Resource name, comes from `RuleFactorDefinition.resource.name`
+   * @param keyword Filter keyword
+   * @param pageIndex Current page number (starting from 1)
+   * @param pageSize Items per page
+   */
+  fetch(
+    resourceName: string,
+    keyword: string,
+    pageIndex: number,
+    pageSize: number
+  ): Promise<PaginatedResult<T>>;
 }
 ```
 

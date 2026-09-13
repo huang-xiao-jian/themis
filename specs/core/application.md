@@ -2,12 +2,6 @@
 
 Orchestrates domain logic and encapsulates rule-configuration data and behavior.
 
-## Prerequisites
-
-- [Core spec](./spec.md)
-- [Domain layer](./domain.md)
-- [Rule factor interpreter](../interpreter.md)
-
 ## Layer-to-Layer Protocol
 
 The three schedulers (`RuleWorkspaceScheduler` → `AtomicRuleGroup` → `AtomicRuleScheduler`) collaborate through two channels:

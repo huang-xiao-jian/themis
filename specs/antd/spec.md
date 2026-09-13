@@ -1,17 +1,9 @@
-# `@thesis/antd`
-
-## Prerequisites
-
-- [@thesis/react](../react/spec.md)
+# @thesis/antd
 
 ## Design Guidelines
 
 - For configuration that cannot be inferred from form-component properties, such as sizing strategy and `placeholder` templates, centralize it in the abstract configuration object `SisyphusAntdConfig` and inject it through `SisyphusAntdProvider`.
 - For configuration natively supported by `antd` itself, such as theme and internationalization, do not include it in the abstract configuration object; the application should manage it directly.
-
-## Business Metric
-
-- Form controls disable browser autofill by default.
 
 ## Component Mapping
 
@@ -223,8 +215,6 @@ The mapping rules are the same as `ListBuilder`.
 
 ### Abstract Configuration Object
 
-For configuration that cannot be inferred from form-component properties, such as global theme, sizing strategy, and placeholder templates, centralize it in the abstract configuration object `SisyphusAntdConfig` and inject it through `SisyphusAntdProvider`.
-
 ```ts
 /** antd adapter configuration */
 interface SisyphusAntdConfig {
@@ -303,16 +293,20 @@ function App() {
 
 **Note**: Native antd-supported configuration such as date/time formatting is managed directly by the application through `antd ConfigProvider` and is not included in `SisyphusAntdConfig`.
 
-## Workspace Editor
+## Extra Metric
 
-`@thesis/antd` provides `RuleWorkspaceEditor` as the top-level component for the rule configuration workspace. It reads the `RuleWorkspaceScheduler` from `@thesis/react` context via `useSisyphusScheduler` and renders the complete workspace UI using antd components.
+- Form controls disable browser autofill by default.
+
+## API References
+
+The intended public surface:
+
+- `RuleWorkspaceEditor`
 
 ```ts
 /** Rule workspace editor component */
 function RuleWorkspaceEditor(): React.ReactElement;
 ```
-
-`RuleWorkspaceEditor` must be rendered within a `SisyphusProvider` that holds the scheduler:
 
 ```tsx
 import { SisyphusProvider } from '@thesis/react';

@@ -1,21 +1,14 @@
 # Rule Factor Interpreter
 
-Defines the implementation mechanism of the interpreter and clarifies how the DSL is transformed from abstract form into concrete runtime entities.
-
-## Prerequisites
-
-- [Rule factor specification](./spec.md)
+Defines the mechanism of the interpreter, clarifies how the **RuleFactorDefinition** transformed from abstract into concrete runtime.
 
 ## Terminology
 
-- **FactorResource**: a DSL-level declarative definition that describes the features and source of a resource. See [Rule factor specification](./spec.md).
-- **Resource**: a runtime encapsulated entity that contains `Signal` state and interaction methods.
+- **Resource**: A runtime encapsulated entity for abstract **RuleFactorResource**.
 
 ## Resource Design
 
-### Resource Design Goal
-
-Encapsulate the original `FactorResource` into a `Resource` domain entity and hide the original DSL definition and data-fetching details.
+Interpret the abstract `RuleFactorResource` into concrete `Resource` domain entity
 
 ### Resource Design Rules
 
@@ -25,7 +18,7 @@ Encapsulate the original `FactorResource` into a `Resource` domain entity and hi
 ### Resource Encapsulation
 
 ```ts
-import { type FieldDataSource } from './spec.md';
+import { type FieldDataSource } from './rule-factor';
 
 /**
  * Static resource - preset options, no dynamic loading required
@@ -172,11 +165,11 @@ interface PaginatedFilterableDynamicResource<T extends FieldDataSource> {
 }
 ```
 
-## Inferring Rule Factor Operators
+## Inferring Rule Operators
 
 The inference logic uses only `dataType` to determine the "data domain", then combines `mode` (point / range) and `quantity` (single / multiple) to determine the "operation domain", thereby narrowing the available `operator` list. `semantic` is a refinement of `dataType` and **does not participate in operator inference at the current stage**.
 
-### Data Type Inference DataType
+### Data Type Inference
 
 | dataType | mode  | quantity | Inferred operator semantics                                       |
 | :------- | :---- | :------- | :---------------------------------------------------------------- |
@@ -190,7 +183,7 @@ The inference logic uses only `dataType` to determine the "data domain", then co
 
 ## Inferring Form Components Intermediate Representation
 
-Infer the intermediate form component and form component properties from the DSL to help adapters (framework + component library) implement efficiently.
+Infer the intermediate form component and form component properties from the **RuleFactorDefinition** to support multiple adapters (framework + component library) efficiently.
 
 ```mermaid
 graph TD
@@ -252,11 +245,9 @@ Component descriptions:
 
 ## Form Component Design
 
-### Form Component Design Goal
+Define the properties of the **form components** used by `ThresholdRenderer` to render threshold input controls.
 
-Define the properties of the **form components** used by `ThresholdRenderer` to render threshold input controls, while hiding the original DSL definition.
-
-### Form Component Design Rules
+### Form Component Design Guidelien
 
 - Avoid framework-specific details by using `Properties` as the suffix consistently.
 - Avoid component implementation details. Do not expose interaction properties of form controls unnecessarily; use implicit inheritance where appropriate.
@@ -266,26 +257,8 @@ Define the properties of the **form components** used by `ThresholdRenderer` to 
 Abstract form components all inherit `BaseProperties`. Component-specific properties are extended as needed. **Important: the property definitions below describe the final properties passed to the abstract component, not the properties used during inference.**
 
 ```ts
-import { DataType, Semantic } from './spec.md';
-
 /**
- * Base properties for abstract form components
- */
-interface BaseProperties {
-  /** Field identifier */
-  name: string;
-  /** Field title */
-  title: string;
-  /** Data type */
-  dataType: DataType;
-  /** Semantic scenario */
-  semantic?: Semantic;
-  /** Data constraints */
-  constraints?: FieldConstraints;
-}
-
-/**
- * Constraint definition
+ * Constraint definition, derived from the RuleFactor
  */
 interface FieldConstraints {
   /** Minimum value / minimum length */
@@ -308,6 +281,22 @@ interface FieldConstraints {
   minItems?: number;
   /** Maximum count for multi-value scenarios */
   maxItems?: number;
+}
+
+/**
+ * Base properties for abstract form components
+ */
+interface BaseProperties {
+  /** Field identifier */
+  name: string;
+  /** Field title */
+  title: string;
+  /** inherited from the RuleFactor */
+  dataType: RuleFactorDataType;
+  /** inherited from the RuleFactor */
+  semantic?: RuleFactorSemantic;
+  /** Data constraints */
+  constraints?: FieldConstraints;
 }
 ```
 
@@ -363,7 +352,7 @@ Suitable for constrained single-select scenarios (associated with a runtime `Res
 interface SelectProperties extends BaseProperties {
   /** Component type identifier */
   readonly type: 'Select';
-  /** Data resource (runtime Resource wrapper) */
+  /** Data resource, interpreted from the RuleFactorDefinition's resource attribute */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
 ```
@@ -376,7 +365,7 @@ Suitable for constrained multi-select scenarios (associated with a runtime `Reso
 interface MultipleSelectProperties extends BaseProperties {
   /** Component type identifier */
   readonly type: 'MultipleSelect';
-  /** Data resource (runtime Resource wrapper) */
+  /** Data resource, interpreted from the RuleFactorDefinition's resource attribute */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
 ```
@@ -408,16 +397,14 @@ interface RangePickerProperties extends BaseProperties {
 Suitable for multi-value point-input scenarios, used to build multiple point values:
 
 ```ts
-import { DataType, Semantic } from './spec.md';
-
 /** Item-level properties */
 interface ListBuilderItemProperties {
   /** Item component type */
   readonly type: 'Input' | 'Picker';
   /** Item data type */
-  readonly dataType: DataType;
+  readonly dataType: RuleFactorDataType;
   /** Item semantic scenario (optional) */
-  readonly semantic?: Semantic;
+  readonly semantic?: RuleFactorSemantic;
   /** Item constraints (optional) */
   readonly constraints?: FieldConstraints;
 }
@@ -450,16 +437,14 @@ interface ListBuilderProperties extends ListBuilderBaseProperties {
 Suitable for multi-value range-input scenarios, used to build multiple range values:
 
 ```ts
-import { DataType, Semantic } from './spec.md';
-
 /** Item-level properties */
 interface ListRangeBuilderItemProperties {
   /** Item component type */
   readonly type: 'RangeInput' | 'RangePicker';
   /** Item data type */
-  readonly dataType: DataType;
+  readonly dataType: RuleFactorDataType;
   /** Item semantic scenario (optional) */
-  readonly semantic?: Semantic;
+  readonly semantic?: RuleFactorSemantic;
   /** Item constraints (optional) */
   readonly constraints?: FieldConstraints;
 }
@@ -502,13 +487,3 @@ type ThresholdComponentProperties =
   | ListBuilderProperties
   | ListRangeBuilderProperties;
 ```
-
-### Source of Form Component Properties
-
-| Property category | Source description                                                   |
-| :---------------- | :------------------------------------------------------------------- |
-| `dataType`        | Directly inherited from the DSL                                      |
-| `semantic`        | Directly inherited from the DSL                                      |
-| `constraints`     | Derived from DSL `constraints`, with component-specific selection    |
-| `resource`        | Interpreted from DSL `resource`; exclusive to Select-like components |
-| `itemType`        | Determined by inference rules for list builder components            |
