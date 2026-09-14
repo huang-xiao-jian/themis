@@ -1,13 +1,13 @@
 # @thesis/antd
 
-## Design Guidelines
+## Guidelines
 
 - For configuration that cannot be inferred from form-component properties, such as sizing strategy and `placeholder` templates, centralize it in the abstract configuration object `SisyphusAntdConfig` and inject it through `SisyphusAntdProvider`.
 - For configuration natively supported by `antd` itself, such as theme and internationalization, do not include it in the abstract configuration object; the application should manage it directly.
 
 ## Component Mapping
 
-### Form Components to antd Components
+### Form Components Mapping
 
 | Form component   | antd implementation                                 | Description                                             |
 | :--------------- | :-------------------------------------------------- | :------------------------------------------------------ |
@@ -36,11 +36,9 @@ graph TD
 
 ## Property Mapping
 
-### Form Component Properties to antd Component Properties
+The table defines the conversion rules from abstract form-component properties (`ThresholdComponentProperties`) to concrete `antd` component properties. The adapter injects the corresponding `antd` properties according to the form-component type.
 
-The component mapping table defines the conversion rules from abstract form-component properties (`ThresholdComponentProperties`) to concrete `antd` component properties. The adapter injects the corresponding `antd` properties according to the form-component type.
-
-#### Input → Input
+### Input → Input
 
 | Form component property | antd component property |
 | :---------------------- | :---------------------- |
@@ -55,7 +53,7 @@ The component mapping table defines the conversion rules from abstract form-comp
 
 **Implicit inheritance**: `size`, `placeholder`, `allowClear`
 
-#### InputNumber → InputNumber
+### InputNumber → InputNumber
 
 | Form component property | antd component property |
 | :---------------------- | :---------------------- |
@@ -72,7 +70,7 @@ The component mapping table defines the conversion rules from abstract form-comp
 
 **Implicit inheritance**: `size`, `placeholder`
 
-#### TextArea → Input.TextArea
+### TextArea → Input.TextArea
 
 | Form component property | antd component property |
 | :---------------------- | :---------------------- |
@@ -82,7 +80,7 @@ The component mapping table defines the conversion rules from abstract form-comp
 
 **Implicit inheritance**: `rows: 4`, `placeholder`, `allowClear`
 
-#### RangeInput → Input / InputNumber
+### RangeInput → Input / InputNumber
 
 | Form component property | antd component property   |
 | :---------------------- | :------------------------ |
@@ -97,7 +95,7 @@ The component mapping table defines the conversion rules from abstract form-comp
 
 **Implicit inheritance**: `placeholder: ['Minimum', 'Maximum']`, `allowClear`
 
-#### Switch → Switch
+### Switch → Switch
 
 | Form component property | antd component property |
 | :---------------------- | :---------------------- |
@@ -106,7 +104,7 @@ The component mapping table defines the conversion rules from abstract form-comp
 
 **Implicit inheritance**: `checkedChildren: 'Yes'`, `unCheckedChildren: 'No'`
 
-#### Select → Select
+### Select → Select
 
 | Form component property | antd component property |
 | :---------------------- | :---------------------- |
@@ -126,7 +124,7 @@ The component mapping table defines the conversion rules from abstract form-comp
 
 **Implicit inheritance**: `placeholder`, `allowClear`
 
-#### MultipleSelect → Select
+### MultipleSelect → Select
 
 The mapping is the same as `Select`, with an additional configuration:
 
@@ -134,7 +132,7 @@ The mapping is the same as `Select`, with an additional configuration:
 | :---------------------- | :----------- |
 | `mode`                  | `'multiple'` |
 
-#### Picker → DatePicker / TimePicker / RatePicker
+### Picker → DatePicker / TimePicker / RatePicker
 
 | Form component property | antd component property |
 | :---------------------- | :---------------------- |
@@ -162,7 +160,7 @@ The mapping is the same as `Select`, with an additional configuration:
 | `percentage`        | `min` / `max` | `min` / `max`           |
 | `percentage`        | `step`        | `step`                  |
 
-#### RangePicker → DatePicker.RangePicker
+### RangePicker → DatePicker.RangePicker
 
 | Form component property | antd component property |
 | :---------------------- | :---------------------- |
@@ -178,7 +176,7 @@ The mapping is the same as `Select`, with an additional configuration:
 | `datetime`   | `DatePicker.RangePicker` | `showTime: true`      |
 | `percentage` | `Slider` (range)         | `range: true`         |
 
-#### ListBuilder - List Builder (Composite Component)
+### ListBuilder - List Builder (Composite Component)
 
 `ListBuilder` is a logical composite component implemented by combining multiple base antd components.
 
@@ -204,7 +202,7 @@ The mapping is the same as `Select`, with an additional configuration:
 | `minItems`  | Disable remove button when the current item count ≤ minItems |
 | `maxItems`  | Disable add button when the current item count ≥ maxItems    |
 
-#### ListRangeBuilder - Range List Builder (Composite Component)
+### ListRangeBuilder - Range List Builder (Composite Component)
 
 The mapping rules are the same as `ListBuilder`.
 
@@ -213,7 +211,14 @@ The mapping rules are the same as `ListBuilder`.
 | `'RangeInput'`  | `Input` (dual fields) / `InputNumber` (dual fields) | Use `InputNumber` when `dataType='number'` |
 | `'RangePicker'` | `DatePicker.RangePicker`                            | Range picker                               |
 
-### Abstract Configuration Object
+## API References
+
+The intended public surface:
+
+- `RuleWorkspaceEditor`
+- `SisyphusAntdProvider`
+
+### SisyphusAntdProvider
 
 ```ts
 /** antd adapter configuration */
@@ -291,17 +296,7 @@ function App() {
 </Row>
 ```
 
-**Note**: Native antd-supported configuration such as date/time formatting is managed directly by the application through `antd ConfigProvider` and is not included in `SisyphusAntdConfig`.
-
-## Extra Metric
-
-- Form controls disable browser autofill by default.
-
-## API References
-
-The intended public surface:
-
-- `RuleWorkspaceEditor`
+### RuleWorkspaceEditor
 
 ```ts
 /** Rule workspace editor component */

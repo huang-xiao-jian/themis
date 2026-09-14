@@ -2,12 +2,10 @@
 
 Encapsulates the core business rules, including rule inference, operator mapping, and threshold-property calculation. It infers available `operators` and `thresholder` values from `RuleFactorDefinition`, and infers selectable rule-factor options at the `AtomicRuleGroup` level.
 
-## Core Inference Logic
+## Prerequisites
 
-- At the `AtomicRule` level, infer available `operators` and `thresholder` values from `RuleFactorDefinition`. See the inference mechanism in [Rule factor interpreter](../interpreter.md).
-- At the `AtomicRuleGroup` level, infer rule-factor options according to the rule-configuration constraints in [Rule factor specification](../spec.md).
-
-> The inferrers are invoked by `AtomicRuleScheduler` inside the `effects` used to create the Formily form. See [Application layer - AtomicRuleForm](./application.md#atomicruleform).
+- [rule-factor](../baseline/rule-factor.md)
+- [rule-factor-interpreter](../baseline/rule-factor-interpreter.md)
 
 ## Domain Model
 

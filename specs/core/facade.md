@@ -6,8 +6,6 @@ Expose a type-safe `API` contract.
 
 Use the `provideXXXFetcher` factory functions to create type-safe `Fetcher` registrations:
 
-**Important**: `resourceName` does not need to be passed in. One `Fetcher` can be reused by multiple `Resource`s, and the resource name is forwarded at call time.
-
 ```ts
 function provideElementaryFetcher<T extends FieldDataSource>(
   fetcher: ElementaryFetcher<T>
@@ -31,7 +29,7 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 ```ts
 const PAGINATED_FILTERABLE_FETCHER = providePaginatedFilterableFetcher<FieldDataSource>({
   fetch(resourceName, keyword, page, pageSize) {
-    // resourceName comes from DSL `RuleFactorDefinition.resource.name`
+    // resourceName comes from `RuleFactorDefinition.resource.name`
     // The application can route to different backend services by resourceName
     if (resourceName === 'Employee') return api.searchEmployees(keyword, page, pageSize);
     if (resourceName === 'Department') return api.searchDepartments(keyword, page, pageSize);
@@ -40,12 +38,10 @@ const PAGINATED_FILTERABLE_FETCHER = providePaginatedFilterableFetcher<FieldData
 });
 ```
 
-## Builder Pattern Entry Point
+## API References
 
-**Factory function vs Builder Pattern** responsibility boundary:
-
-- `createRuleWorkspace`: a simplified one-stop entry point for creating a rule workspace, suitable for simple scenarios.
-- `RuleWorkspaceBuilder`: a chainable configuration entry point, suitable for scenarios that need fine-grained control.
+- `createRuleWorkspace`: a simplified one-stop entry point, suitable for simple scenarios.
+- `RuleWorkspaceBuilder`: a chainable entry point, suitable for scenarios that need fine-grained control.
 
 ```ts
 /**
@@ -88,7 +84,12 @@ class RuleWorkspaceBuilder {
 ### New Scenario
 
 ```ts
-import { DataType, Mode, Quantity, SchedulerState } from '@thesis/core';
+import {
+  RuleFactorDataType,
+  RuleFactorMode,
+  RuleFactorQuantity,
+  SchedulerState,
+} from '@thesis/core';
 import { RuleWorkspaceBuilder, providePaginatedFilterableFetcher } from '@thesis/core';
 
 // 1. Define the factors
@@ -198,9 +199,7 @@ workspace.destroy();
 ### Editing Scenario
 
 ```ts
-// Existing rule-group data (loaded from outside)
-import { AtomicRuleGroup, SchedulerState } from './spec.md';
-
+// 1. Load existing rule-group data
 const groups: AtomicRuleGroup[] = [
   {
     id: 'group-1',

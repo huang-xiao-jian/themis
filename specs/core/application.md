@@ -6,7 +6,7 @@ Orchestrates domain logic and encapsulates rule-configuration data and behavior.
 
 The three schedulers (`RuleWorkspaceScheduler` → `AtomicRuleGroup` → `AtomicRuleScheduler`) collaborate through two channels:
 
-- **Event bus (upstream)**: child components emit coordination events to notify the parent that a user action has occurred. Event subscription is handled by the dependency library (`nanoevents`).
+- **Event bus (upstream)**: child components emit coordination events to notify the parent that a user action has occurred.
 - **Signal channel (downstream)**: the parent wraps shared state in hierarchical coordination entities. Children derive their own state through `computed` or run side effects through `effect`; the parent does not directly manipulate the child.
 
 Each layer protocol explicitly contains both the event bus and the signal channel, forming a complete hierarchical communication contract.

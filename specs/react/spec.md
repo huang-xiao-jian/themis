@@ -14,15 +14,18 @@
 
 ## Tech Conventions
 
-- Any component that reads `Signal.value` must be wrapped with `observer` from `@unsignal/react`.
+- Prefer `HOC Pattern` to consume `Signal` within reactive components
 
 ```tsx
+import { Signal } from '@preact/signals-core';
 import { observer } from '@unsignal/react';
 
-const ExampleView = observer(function ExampleView(props: ExampleViewProps): ReactElement {
-  const canAdd = props.scheduler.canAdd.value;
+interface ExampleViewProps {
+  locked: Signal<boolean>;
+}
 
-  return <button disabled={!canAdd}>Add</button>;
+const ExampleView = observer(function ExampleView(props: ExampleViewProps): ReactElement {
+  return <button disabled={props.locked.value}>Add</button>;
 });
 ```
 
@@ -57,11 +60,10 @@ function useSisyphusScheduler(): RuleWorkspaceScheduler;
 
 If the hook is used outside `SisyphusProvider`, it throws a framework error.
 
-## Usage Example
-
-The application creates the scheduler via `@thesis/core`, provides it through `SisyphusProvider`, and renders the adapter component:
+## Example
 
 ```tsx
+import { createRuleWorkspaceScheduler } from '@thesis/core';
 import { SisyphusProvider } from '@thesis/react';
 import { RuleWorkspaceEditor } from '@thesis/antd';
 
@@ -76,7 +78,7 @@ function App() {
 }
 ```
 
-Adapter components can access the scheduler from context:
+Internal components use the scheduler from context:
 
 ```tsx
 import { useSisyphusScheduler } from '@thesis/react';
