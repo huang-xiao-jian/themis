@@ -66,31 +66,15 @@ stateDiagram-v2
 
 **Static constraints**
 
-- There may be at most 20 active Rule Management Workspaces.
-- Archived workspaces do not count toward the active workspace limit.
-- An archived workspace belongs to the Archive Zone.
-- Archive Zone behavior is outside the scope of this requirement.
+- There may be at most 20 active Rule Management Workspaces; archived workspaces do not count toward this limit.
+- An archived workspace belongs to the Archive Zone, whose behavior is outside the scope of this requirement.
 
 **Behavioral constraints**
 
-- A workspace identifier is read-only once created.
-- The Rule Manager supplies workspace metadata when creating a workspace.
-- The Rule Manager may change workspace metadata only while the workspace is active.
-- An edit that duplicates a workspace name is refused.
-- A workspace may be archived only when it contains at least one non-initial released Workspace Version.
-- A workspace may be archived only when it has no unreleased Workspace Versions.
-- The Rule Manager must permanently delete all unreleased Workspace Versions before archiving a workspace.
-- Archiving is permanent.
-- Archiving applies only to a Rule Management Workspace.
-- Archiving does not change a Rule available from a released Workspace Version.
-- Archiving does not make unavailable a Rule available from a released Workspace Version.
-- The Rule Manager cannot create content in an archived workspace.
-- The Rule Manager cannot change an archived workspace, its versions, or their contents.
-- The Rule Manager cannot release a version in an archived workspace.
-- The Rule Manager cannot delete an archived workspace, its versions, or their contents.
-- An archived workspace remains available to Downstream Applications.
-- An active workspace may be permanently deleted only when it has no non-initial released Workspace Versions.
-- An active workspace may be permanently deleted only when it has no unreleased Workspace Versions.
+- A workspace identifier is read-only once created. The Rule Manager supplies workspace metadata on creation and may change it only while the workspace is active; an edit that duplicates a workspace name is refused.
+- A workspace may be archived only after all unreleased Workspace Versions have been permanently deleted and it contains at least one non-initial released Workspace Version. Archiving is permanent and applies only to a Rule Management Workspace.
+- Archiving neither changes nor makes unavailable Rules from released Workspace Versions. An archived workspace remains available to Downstream Applications, but its metadata, versions, and contents cannot be changed; neither content creation nor version release or deletion is permitted.
+- An active workspace may be permanently deleted only when it has neither non-initial released Workspace Versions nor unreleased Workspace Versions.
 
 ### Workspace Version
 
@@ -144,38 +128,16 @@ A transition from `Initial` or `Released` to `Unreleased` creates a new Workspac
 
 **Static constraints**
 
-- The initial Workspace Version is empty.
-- The initial Workspace Version is read-only.
-- The initial Workspace Version is treated as released.
-- The initial Workspace Version is available solely as the base for subsequent Workspace Versions.
-- The initial Workspace Version does not prevent deletion of a workspace that has no non-initial released Workspace Versions.
-- A Rule Management Workspace may have at most three unreleased Workspace Versions at one time.
-- The initial Workspace Version does not count toward the unreleased version limit.
+- The initial Workspace Version is empty, read-only, and treated as released; it is available solely as the base for subsequent Workspace Versions and does not prevent deletion of a workspace with no non-initial released Workspace Versions.
+- A Rule Management Workspace may have at most three unreleased Workspace Versions at one time. The initial Workspace Version does not count toward this limit.
 
 **Behavioral constraints**
 
-- The platform creates the initial Workspace Version when its Rule Management Workspace is created.
-- The Rule Manager supplies the initial Workspace Version identifier and metadata.
-- A subsequent Workspace Version may be created only from a released Workspace Version.
-- A subsequent Workspace Version inherits its base version's Resources, Rule Factors, Rules, and their identifiers as its initial content.
-- Changes to a subsequent Workspace Version do not change its base version.
-- The Rule Manager supplies metadata for a subsequent Workspace Version.
-- A subsequent Workspace Version does not inherit its base version's metadata.
-- A Workspace Version identifier is read-only once created.
-- An edit that duplicates a version name within its workspace is refused.
-- The Rule Manager chooses a Workspace Version identifier.
-- The platform validates a Workspace Version identifier's semantic-version format.
-- The platform validates a Workspace Version identifier's uniqueness within its workspace.
-- The platform validates that a subsequent Workspace Version identifier is strictly greater than its base version identifier.
-- The platform applies no additional validation based on major, minor, or patch level.
-- Multiple unreleased Workspace Versions may be derived from the same released Workspace Version.
-- A derived Workspace Version is validated only against its own base version.
-- A derived Workspace Version may be released when another version derived from the same base has a higher identifier.
-- The Rule Manager may view an unreleased Workspace Version at any time.
-- The Rule Manager may change an unreleased Workspace Version at any time.
-- The Rule Manager may permanently delete an unreleased Workspace Version at any time.
-- An unreleased Workspace Version cannot be archived.
-- Permanently deleting an unreleased Workspace Version immediately frees an unreleased version slot.
+- The platform creates the initial Workspace Version when its Rule Management Workspace is created, using the identifier and metadata supplied by the Rule Manager.
+- A subsequent Workspace Version may be created only from a released base. It inherits the base's Resources, Rule Factors, Rules, and their identifiers as initial content, but not the base metadata; subsequent changes do not affect the base.
+- The Rule Manager supplies metadata and chooses an identifier for every subsequent Workspace Version. An identifier is read-only once created, and the platform validates its semantic-version format, uniqueness within the workspace, and, for a subsequent version, that it is strictly greater than its base identifier. No further major, minor, or patch validation applies; duplicate version-name edits are refused.
+- Multiple unreleased Workspace Versions may be derived from the same released base. Each is validated only against its own base and may be released even if another version from that base has a higher identifier.
+- The Rule Manager may view, change, or permanently delete an unreleased Workspace Version at any time. An unreleased version cannot be archived, and deleting it immediately frees an unreleased-version slot.
 
 ### Resource
 
@@ -199,10 +161,7 @@ A Resource belongs to one Workspace Version and may be used by multiple Rule Fac
 
 **Behavioral constraints**
 
-- The Rule Manager cannot create a Resource in a way that leaves an unsatisfied dependency.
-- The Rule Manager cannot update a Resource in a way that leaves an unsatisfied dependency.
-- The Rule Manager cannot delete a Resource in a way that leaves an unsatisfied dependency.
-- An action that leaves an unsatisfied Resource dependency is refused.
+- Creating, updating, or deleting a Resource must not leave an unsatisfied dependency; any action that would do so is refused.
 - A Resource that is not used by a Rule may remain in the Workspace Version.
 
 ### Rule Factor
@@ -233,12 +192,8 @@ A Rule Factor belongs to one Workspace Version and may associate with a Resource
 
 **Behavioral constraints**
 
-- Every Atomic Rule must satisfy its Rule Factor's declared constraints when it is created.
-- Every Atomic Rule must satisfy its Rule Factor's declared constraints when it is updated.
-- The Rule Manager cannot create a Rule Factor in a way that leaves an unsatisfied dependency or constraint.
-- The Rule Manager cannot update a Rule Factor in a way that leaves an unsatisfied dependency or constraint.
-- The Rule Manager cannot delete a Rule Factor in a way that leaves an unsatisfied dependency or constraint.
-- An action that leaves an unsatisfied Rule Factor dependency or constraint is refused.
+- Every Atomic Rule must satisfy its Rule Factor's declared constraints when created or updated.
+- Creating, updating, or deleting a Rule Factor must not leave an unsatisfied dependency or constraint; any action that would do so is refused.
 - A Rule Factor that is not used by a Rule may remain in the Workspace Version.
 
 ### Rule
@@ -299,26 +254,14 @@ A release identifies the complete snapshot of the Workspace Version, including i
 **Static constraints**
 
 - A Workspace Version must contain at least one Rule before it can be released.
-- A Workspace Version must contain every Rule Factor required by its Rules before it can be released.
-- Each Rule must contain at least one non-empty Atomic Rule Group before its Workspace Version can be released.
-- A derived Workspace Version's final Rule set must differ from its base version's final Rule set before it can be released.
-- A Rule Factor change does not itself change a final Rule definition.
-- Release is one-time and irreversible.
-- A locked Workspace Version cannot be modified.
-- A locked Workspace Version cannot be permanently deleted.
+- Before release, a Workspace Version must contain every Rule Factor required by its Rules, and each Rule must contain at least one non-empty Atomic Rule Group.
+- A derived Workspace Version's final Rule set must differ from its base version's final Rule set; a Rule Factor change alone does not change a final Rule definition.
+- Release is one-time and irreversible. A locked Workspace Version cannot be modified or permanently deleted.
 
 **Behavioral constraints**
 
-- Adding a final Rule satisfies the derived version release-difference requirement.
-- Removing a final Rule satisfies the derived version release-difference requirement.
-- Changing a final Rule satisfies the derived version release-difference requirement.
-- Changing only workspace metadata does not satisfy the derived version release-difference requirement.
-- Changing only Workspace Version metadata does not satisfy the derived version release-difference requirement.
-- Changing only internal Resources does not satisfy the derived version release-difference requirement.
-- Changing only internal Rule Factors does not satisfy the derived version release-difference requirement.
-- Releasing locks the complete Workspace Version snapshot.
-- On release, the platform immediately makes the version's Rules available for downstream retrieval.
-- On release, the platform does not notify Downstream Applications.
+- Adding, removing, or changing a final Rule satisfies the derived-version release-difference requirement. Changing only workspace metadata, Workspace Version metadata, internal Resources, or internal Rule Factors does not.
+- Releasing locks the complete Workspace Version snapshot and immediately makes its Rules available for downstream retrieval. The platform does not notify Downstream Applications.
 
 ### Rule Retrieval
 
