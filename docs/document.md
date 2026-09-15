@@ -30,6 +30,13 @@
 - A stateful entity defines its states in the `Data Model` and its allowed transitions with a Mermaid state diagram.
 - A state diagram distinguishes a transition of an existing entity from the creation of a new entity derived from an existing state.
 
+## Use Case Specifications
+
+- A use case specification follows the UML/RUP format: `Revision History`, `Use-Case Name`, `Brief Description`, `Flow of Events`, `Special Requirements`, `Preconditions`, `Postconditions`, and `Extension Points`.
+- `Flow of Events` contains separate `Basic Flow` and `Alternative Flows` subsections.
+- Prefer a Mermaid flowchart to describe the basic flow and its branches; retain concise numbered steps where they clarify the actor and platform responsibilities.
+- Each alternative flow identifies the basic-flow step where it begins, its triggering condition, and whether it resumes the basic flow or ends the use case.
+
 ## Heading Depth
 
 - `####` is the default deepest heading level.

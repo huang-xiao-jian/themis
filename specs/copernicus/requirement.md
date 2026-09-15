@@ -9,11 +9,14 @@ Enable Rule Managers to define, version, validate, and release governed rule sna
 | Actor                  | Use cases                                                                                                   |
 | :--------------------- | :---------------------------------------------------------------------------------------------------------- |
 | Rule Manager           | Create, view, update, archive, and delete Rule Management Workspaces.                                       |
+| Rule Manager           | View archived Rule Management Workspaces and their released Workspace Versions.                             |
 | Rule Manager           | Create, view, update, and delete unreleased Workspace Versions within an active Rule Management Workspace.  |
 | Rule Manager           | View released Workspace Versions within a Rule Management Workspace.                                        |
+| Rule Manager           | Derive an unreleased Workspace Version from a selected released Workspace Version.                          |
 | Rule Manager           | Create, view, update, and delete Resources, Rule Factors, and Rules within an unreleased Workspace Version. |
+| Rule Manager           | Review the complete snapshot of an unreleased Workspace Version before release.                             |
 | Rule Manager           | Release an unreleased Workspace Version.                                                                    |
-| Downstream Application | Retrieve a specified Rule from a released Workspace Version.                                                |
+| Downstream Application | [Retrieve a specified Rule from a released Workspace Version.](./user-case/retrieve-released-rule.md)       |
 
 ## Semantic Concepts
 
