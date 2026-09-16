@@ -14,13 +14,13 @@ Retrieve a Released Rule.
 
 ### 1.1 Brief Description
 
-A Downstream Application obtains the final definition of one Rule from a specified released Workspace Version. The canonical request shape and retrieval constraints are defined in the [Rule Management requirement](../requirement.md#rule-retrieval).
+A Downstream Application obtains the final definition of one Rule from a specified released Workspace Version. The canonical request shape and retrieval constraints are defined in the [Rule requirement](../requirement.md#rule-retrieval).
 
 ```ts
 import { RuleRetrievalRequest } from '../requirement.md';
 ```
 
-The Downstream Application initiates this use case by submitting a `RuleRetrievalRequest` containing the Rule Management Workspace identifier, Workspace Version identifier, and Rule identifier.
+The Downstream Application initiates this use case by submitting a `RuleRetrievalRequest` containing the Rule Workspace identifier, Workspace Version identifier, and Rule identifier.
 
 ## 2. Flow of Events
 
@@ -47,7 +47,7 @@ flowchart TD
 
 #### 2.2.1 Archived Workspace
 
-At step 2, the specified Rule Management Workspace is archived. If the specified Rule exists in the released Workspace Version, the platform resumes at step 3. Archival does not make the Rule unavailable.
+At step 2, the specified Rule Workspace is archived. If the specified Rule exists in the released Workspace Version, the platform resumes at step 3. Archival does not make the Rule unavailable.
 
 #### 2.2.2 Unavailable Rule
 
@@ -64,7 +64,7 @@ None.
 ## 5. Postconditions
 
 - On success, the Downstream Application has the final definition of the specified Rule.
-- Retrieval does not change the Rule Management Workspace, Workspace Version, or Rule.
+- Retrieval does not change the Rule Workspace, Workspace Version, or Rule.
 
 ## 6. Extension Points
 
