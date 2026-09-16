@@ -16,12 +16,12 @@ A Rule Manager changes a version-local Rule Factor in an unreleased Workspace Ve
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+- The specified Rule Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
+- The specified Rule Factor exists in that Workspace Version.
 
 ## 4. Postconditions
 
 - On success, the Rule Factor stores the validated replacement definition; its identifier remains unchanged.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

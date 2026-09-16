@@ -16,12 +16,11 @@ A Rule Manager reviews the complete snapshot of an unreleased Workspace Version 
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Rule Workspace exists and is active, and the specified Workspace Version exists in that workspace and is unreleased.
 
 ## 4. Postconditions
 
 - On success, the manager has the complete snapshot and release-readiness findings; the version remains unreleased and unchanged.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

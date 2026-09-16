@@ -16,12 +16,11 @@ A Rule Manager views an active Rule Workspace, including its metadata and Worksp
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Rule Workspace exists and is active.
 
 ## 4. Postconditions
 
 - On success, the manager has current workspace metadata and version information; no managed definition changes.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

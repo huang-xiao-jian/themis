@@ -16,12 +16,12 @@ A Rule Manager permanently archives an active Rule Workspace. The relevant conce
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+- The specified Rule Workspace exists and is active.
+- The workspace has no unreleased Workspace Versions and at least one non-initial released Workspace Version.
 
 ## 4. Postconditions
 
 - On success, the workspace is permanently archived; released Rules remain retrievable but no workspace metadata, version, or content can change.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

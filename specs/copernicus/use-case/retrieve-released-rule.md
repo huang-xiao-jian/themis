@@ -26,8 +26,7 @@ None.
 
 ## 4. Postconditions
 
-- On success, the Downstream Application has the final definition of the specified Rule.
-- Retrieval does not change the Rule Workspace, Workspace Version, or Rule.
+- On success, the Downstream Application has the final definition of the specified Rule; no managed definitions change.
 
 ## 5. Flow of Events
 

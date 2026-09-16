@@ -16,12 +16,11 @@ A Rule Manager views the locked snapshot of a released Workspace Version. The re
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Rule Workspace exists, and the specified Workspace Version exists in that workspace and is released.
 
 ## 4. Postconditions
 
 - On success, the manager has the released version metadata and immutable content snapshot; no content changes.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

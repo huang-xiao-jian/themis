@@ -16,12 +16,11 @@ A Rule Manager creates a version-local Resource in an unreleased Workspace Versi
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Rule Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
 
 ## 4. Postconditions
 
 - On success, the Resource exists with its immutable identifier and satisfies applicable managed-definition constraints.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

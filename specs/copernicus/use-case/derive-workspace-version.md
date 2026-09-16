@@ -16,12 +16,13 @@ A Rule Manager derives a new unreleased Workspace Version from a selected releas
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+- The specified Rule Workspace exists and is active.
+- The selected base Workspace Version exists in that workspace and is released.
+- Fewer than three unreleased Workspace Versions exist in that workspace.
 
 ## 4. Postconditions
 
 - On success, a new unreleased version has the selected base identifier and an independent copy of the base Resources, Rule Factors, Rules, and identifiers; the base remains unchanged.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

@@ -16,12 +16,11 @@ A Rule Manager creates an active Rule Workspace and supplies its metadata and th
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+Fewer than 20 active Rule Workspaces exist.
 
 ## 4. Postconditions
 
 - On success, an active Rule Workspace and its empty, read-only initial Workspace Version exist; the active-workspace limit is respected.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

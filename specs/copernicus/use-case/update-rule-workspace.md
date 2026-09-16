@@ -16,12 +16,11 @@ A Rule Manager changes the metadata of an active Rule Workspace. The relevant co
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Rule Workspace exists and is active.
 
 ## 4. Postconditions
 
 - On success, the workspace stores validated replacement metadata; its identifier and versions remain unchanged.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

@@ -16,12 +16,11 @@ A Rule Manager views an archived Rule Workspace and its released Workspace Versi
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Rule Workspace exists and is archived.
 
 ## 4. Postconditions
 
 - On success, the manager has the archived workspace metadata and released Workspace Versions; no content changes.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

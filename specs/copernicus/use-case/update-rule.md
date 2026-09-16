@@ -16,12 +16,12 @@ A Rule Manager changes a version-local Rule in an unreleased Workspace Version. 
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+- The specified Rule Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
+- The specified Rule exists in that Workspace Version.
 
 ## 4. Postconditions
 
 - On success, the Rule stores the validated replacement definition; its identifier remains unchanged.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

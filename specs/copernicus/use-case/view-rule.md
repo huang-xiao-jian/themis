@@ -16,12 +16,11 @@ A Rule Manager views a version-local Rule in a Workspace Version. The relevant c
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Workspace Version and Rule exist, and the Rule belongs to that Workspace Version.
 
 ## 4. Postconditions
 
 - On success, the manager has the selected Rule definition; no content changes.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

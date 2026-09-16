@@ -16,12 +16,11 @@ A Rule Manager views a version-local Rule Factor in a Workspace Version. The rel
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Workspace Version and Rule Factor exist, and the Rule Factor belongs to that Workspace Version.
 
 ## 4. Postconditions
 
 - On success, the manager has the selected Rule Factor definition; no content changes.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

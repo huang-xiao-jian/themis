@@ -16,12 +16,11 @@ A Rule Manager changes the metadata of an unreleased Workspace Version. The rele
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Rule Workspace exists and is active, and the specified Workspace Version exists in that workspace and is unreleased.
 
 ## 4. Postconditions
 
 - On success, the version stores validated replacement metadata; its identifier, base, and content remain unchanged.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

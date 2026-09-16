@@ -16,12 +16,12 @@ A Rule Manager permanently deletes a version-local Rule from an unreleased Works
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+- The specified Rule Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
+- The specified Rule exists in that Workspace Version.
 
 ## 4. Postconditions
 
 - On success, the Rule no longer exists, and the manager may create a Rule with the deleted identifier.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

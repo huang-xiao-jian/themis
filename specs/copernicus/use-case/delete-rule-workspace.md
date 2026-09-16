@@ -16,12 +16,12 @@ A Rule Manager permanently deletes an active Rule Workspace with no protected ve
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+- The specified Rule Workspace exists and is active.
+- The workspace has no non-initial released Workspace Versions and no unreleased Workspace Versions.
 
 ## 4. Postconditions
 
 - On success, the workspace and its initial Workspace Version no longer exist.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 

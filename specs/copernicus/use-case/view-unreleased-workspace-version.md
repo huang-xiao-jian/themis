@@ -16,12 +16,11 @@ A Rule Manager views an unreleased Workspace Version and its version-local conte
 
 ## 3. Preconditions
 
-The required target exists in the required lifecycle state stated by this use case.
+The specified Rule Workspace exists and is active, and the specified Workspace Version exists in that workspace and is unreleased.
 
 ## 4. Postconditions
 
 - On success, the manager has the version metadata, base identifier, Resources, Rule Factors, and Rules; no content changes.
-- The platform changes no state beyond that described above.
 
 ## 5. Flow of Events
 
