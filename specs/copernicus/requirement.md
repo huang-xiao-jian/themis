@@ -6,17 +6,51 @@ Enable Rule Managers to define, version, validate, and release governed rule sna
 
 ## Actors and Use Cases
 
-| Actor                  | Use cases                                                                                                   |
-| :--------------------- | :---------------------------------------------------------------------------------------------------------- |
-| Rule Manager           | Create, view, update, archive, and delete Rule Workspaces.                                                  |
-| Rule Manager           | View archived Rule Workspaces and their released Workspace Versions.                                        |
-| Rule Manager           | Create, view, update, and delete unreleased Workspace Versions within an active Rule Workspace.             |
-| Rule Manager           | View released Workspace Versions within a Rule Workspace.                                                   |
-| Rule Manager           | Derive an unreleased Workspace Version from a selected released Workspace Version.                          |
-| Rule Manager           | Create, view, update, and delete Resources, Rule Factors, and Rules within an unreleased Workspace Version. |
-| Rule Manager           | Review the complete snapshot of an unreleased Workspace Version before release.                             |
-| Rule Manager           | Release an unreleased Workspace Version.                                                                    |
-| Downstream Application | [Retrieve a specified Rule from a released Workspace Version.](./use-case/retrieve-released-rule.md)        |
+### Rule Manager
+
+#### Rule Workspaces
+
+- [Create a Rule Workspace](./use-case/create-rule-workspace.md)
+- [View an Active Rule Workspace](./use-case/view-rule-workspace.md)
+- [View an Archived Rule Workspace](./use-case/view-archived-rule-workspace.md)
+- [Update a Rule Workspace](./use-case/update-rule-workspace.md)
+- [Archive a Rule Workspace](./use-case/archive-rule-workspace.md)
+- [Delete a Rule Workspace](./use-case/delete-rule-workspace.md)
+
+#### Workspace Versions
+
+- [View an Unreleased Workspace Version](./use-case/view-unreleased-workspace-version.md)
+- [Update an Unreleased Workspace Version](./use-case/update-unreleased-workspace-version.md)
+- [Delete an Unreleased Workspace Version](./use-case/delete-unreleased-workspace-version.md)
+- [View a Released Workspace Version](./use-case/view-released-workspace-version.md)
+- [Derive an Unreleased Workspace Version](./use-case/derive-workspace-version.md)
+- [Review an Unreleased Workspace Version](./use-case/review-unreleased-workspace-version.md)
+- [Release an Unreleased Workspace Version](./use-case/release-workspace-version.md)
+
+#### Resources
+
+- [Create a Resource](./use-case/create-resource.md)
+- [View a Resource](./use-case/view-resource.md)
+- [Update a Resource](./use-case/update-resource.md)
+- [Delete a Resource](./use-case/delete-resource.md)
+
+#### Rule Factors
+
+- [Create a Rule Factor](./use-case/create-rule-factor.md)
+- [View a Rule Factor](./use-case/view-rule-factor.md)
+- [Update a Rule Factor](./use-case/update-rule-factor.md)
+- [Delete a Rule Factor](./use-case/delete-rule-factor.md)
+
+#### Rules
+
+- [Create a Rule](./use-case/create-rule.md)
+- [View a Rule](./use-case/view-rule.md)
+- [Update a Rule](./use-case/update-rule.md)
+- [Delete a Rule](./use-case/delete-rule.md)
+
+### Downstream Application
+
+- [Retrieve a Released Rule](./use-case/retrieve-released-rule.md)
 
 ## Semantic Concepts
 
