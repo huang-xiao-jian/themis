@@ -36,20 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager identifies a Workspace Version and Resource.
-2. The platform finds the Resource in that version.
-3. The platform returns the Resource definition.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Resource unavailable
-
-The platform reports it unavailable when the version or Resource cannot be found.
-
 ## 6. Special Requirements
 
 None.

@@ -36,21 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager requests review.
-2. The platform obtains the complete Resources, Rule Factors, and Rules snapshot.
-3. The platform evaluates release constraints.
-4. The platform returns the snapshot and findings.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not reviewable
-
-The platform reports it unavailable for review when the workspace is archived or the version is absent, initial, or released.
-
 ## 6. Special Requirements
 
 None.

@@ -36,20 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager identifies a Workspace Version and Rule Factor.
-2. The platform finds the Rule Factor in that version.
-3. The platform returns the Rule Factor definition.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Rule Factor unavailable
-
-The platform reports it unavailable when the version or Rule Factor cannot be found.
-
 ## 6. Special Requirements
 
 None.

@@ -22,9 +22,13 @@ The specified Rule Workspace exists and is active.
 
 - On success, the workspace stores validated replacement metadata; its identifier and versions remain unchanged.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- Workspace metadata may be changed only while the workspace is active.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -36,29 +40,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager submits replacement workspace metadata.
-2. The platform finds the active workspace.
-3. The platform validates the metadata and name uniqueness.
-4. The platform updates the metadata.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Workspace not active
-
-The platform refuses an update to an absent or archived workspace.
-
-#### 5.3.2 Invalid or duplicate metadata
-
-The platform refuses metadata that is invalid or has a name used by another workspace.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

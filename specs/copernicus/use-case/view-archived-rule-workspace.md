@@ -36,20 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager identifies an archived workspace.
-2. The platform finds the archived workspace.
-3. The platform returns its metadata and released versions.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Archived workspace unavailable
-
-The platform reports it unavailable when it does not exist or is not archived.
-
 ## 6. Special Requirements
 
 None.

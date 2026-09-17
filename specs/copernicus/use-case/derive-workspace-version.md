@@ -22,11 +22,18 @@ A Rule Manager derives a new unreleased Workspace Version from a selected releas
 
 ## 4. Postconditions
 
-- On success, a new unreleased version has the selected base identifier and an independent copy of the base Resources, Rule Factors, Rules, and identifiers; the base remains unchanged.
+- On success, a new unreleased version has the selected base identifier, the submitted metadata, and an independent copy of the base Resources, Rule Factors, Rules, and identifiers; the base remains unchanged.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- A subsequent Workspace Version is created only from a released base in the same active workspace.
+- The new version copies the base Resources, Rule Factors, Rules, and identifiers but not its metadata; later changes do not affect the base.
+- The Rule Manager supplies the new version identifier and metadata. Its identifier must have semantic-version form, be unique within the workspace, and be strictly greater than the selected base; no other semantic-version ordering is required.
+- Multiple unreleased versions may share a released base. Each is assessed only against its own base.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -38,33 +45,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager selects a released base and submits new version metadata and identifier.
-2. The platform confirms fewer than three unreleased versions exist.
-3. The platform validates semantic-version form, uniqueness, and strict ordering above the base.
-4. The platform creates the copied unreleased version and records the base.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Invalid base or workspace
-
-The platform refuses a request where the workspace is not active or the base is not released in it.
-
-#### 5.3.2 Unreleased version limit reached
-
-The platform refuses when three unreleased versions exist.
-
-#### 5.3.3 Invalid version data
-
-The platform refuses invalid, duplicate, or insufficiently greater identifiers and invalid metadata.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

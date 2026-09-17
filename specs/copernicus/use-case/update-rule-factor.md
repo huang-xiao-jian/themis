@@ -21,11 +21,16 @@ A Rule Manager changes a version-local Rule Factor in an unreleased Workspace Ve
 
 ## 4. Postconditions
 
-- On success, the Rule Factor stores the validated replacement definition; its identifier remains unchanged.
+- On success, the Rule Factor stores the validated replacement definition; its identifier remains unchanged, and Rules containing Atomic Rules previously configured from it remain unchanged.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- A Rule Factor change must produce a valid Rule Factor projection; an invalid change is refused.
+- Changing a Rule Factor does not change Atomic Rules previously configured from it.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -37,29 +42,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager submits a replacement Rule Factor definition.
-2. The platform finds the target Rule Factor in the unreleased version.
-3. The platform validates the replacement against all applicable constraints.
-4. The platform updates the Rule Factor.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses the request when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Invalid Rule Factor update
-
-The platform refuses an invalid replacement. A Rule Factor definition must produce a valid Rule Factor projection.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

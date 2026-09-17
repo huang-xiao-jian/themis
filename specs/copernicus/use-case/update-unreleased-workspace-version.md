@@ -36,25 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager submits replacement version metadata.
-2. The platform finds the unreleased version in an active workspace.
-3. The platform validates metadata and name uniqueness within the workspace.
-4. The platform updates the metadata.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses an update when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Invalid or duplicate metadata
-
-The platform refuses invalid metadata or a name used by another version.
-
 ## 6. Special Requirements
 
 None.

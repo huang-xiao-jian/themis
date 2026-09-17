@@ -21,11 +21,16 @@ A Rule Manager changes a version-local Rule in an unreleased Workspace Version. 
 
 ## 4. Postconditions
 
-- On success, the Rule stores the validated replacement definition; its identifier remains unchanged.
+- On success, the Rule stores the validated replacement definition; its identifier remains unchanged. Any removed Atomic Rule Group or Atomic Rule identifier may be used again in the replacement or a later Rule update.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- The Rule Setter validates each Atomic Rule against the Rule Factor it consumes during configuration.
+- An Atomic Rule Group or Atomic Rule identifier removed during a Rule update may be used again in that version.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -37,29 +42,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager submits a replacement Rule definition.
-2. The platform finds the target Rule in the unreleased version.
-3. The platform validates the replacement against all applicable constraints.
-4. The platform updates the Rule.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses the request when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Invalid Rule update
-
-The platform refuses an invalid replacement. A Rule must retain non-empty Atomic Rule Groups satisfying the canonical Rule Definition constraints.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

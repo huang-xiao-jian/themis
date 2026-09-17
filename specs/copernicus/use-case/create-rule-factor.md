@@ -22,9 +22,13 @@ The specified Rule Workspace exists and is active, and the target Workspace Vers
 
 - On success, the Rule Factor exists with its immutable identifier and satisfies applicable managed-definition constraints.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- A new Rule Factor must produce a valid Rule Factor projection; an invalid definition is refused.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -36,29 +40,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager submits a Rule Factor identifier and definition.
-2. The platform finds the target unreleased version.
-3. The platform validates identifier uniqueness and Rule Factor-specific definition constraints.
-4. The platform adds the Rule Factor.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses the request when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Invalid Rule Factor definition
-
-The platform refuses an identifier collision or invalid definition. A Rule Factor definition must produce a valid Rule Factor projection.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

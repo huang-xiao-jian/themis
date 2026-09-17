@@ -21,11 +21,16 @@ A Rule Manager permanently deletes a version-local Rule Factor from an unrelease
 
 ## 4. Postconditions
 
-- On success, the Rule Factor no longer exists, and the manager may create a Rule Factor with the deleted identifier.
+- On success, the Rule Factor no longer exists, and the manager may create a Rule Factor with the deleted identifier. Rules containing Atomic Rules previously configured from it remain unchanged.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- A Rule Factor may be deleted after the Rule Setter consumed it because the resulting Atomic Rules do not retain a managed Rule Factor reference.
+- Deleting a Rule Factor does not change Atomic Rules previously configured from it.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -37,29 +42,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager requests deletion.
-2. The platform finds the target Rule Factor in the unreleased version.
-3. The platform validates that deletion preserves required associations and structural constraints.
-4. The platform permanently deletes the Rule Factor.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses the request when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Rule Factor deletion would violate constraints
-
-The platform refuses deletion that leaves invalid managed content. A Rule Factor definition must produce a valid Rule Factor projection.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

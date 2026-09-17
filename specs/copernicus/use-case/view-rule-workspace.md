@@ -36,20 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager identifies an active workspace.
-2. The platform finds the workspace.
-3. The platform returns its metadata and Workspace Versions.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Workspace unavailable
-
-The platform reports the workspace unavailable when it does not exist or is archived.
-
 ## 6. Special Requirements
 
 None.

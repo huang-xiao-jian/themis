@@ -23,9 +23,14 @@ A Rule Manager permanently archives an active Rule Workspace. The relevant conce
 
 - On success, the workspace is permanently archived; released Rules remain retrievable but no workspace metadata, version, or content can change.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- Archival is permanent and applies only to the Rule Workspace.
+- Archival neither changes nor makes unavailable Rules from released Workspace Versions. An archived workspace remains available to Downstream Applications but cannot be modified, and no content creation, version release, or version deletion is permitted.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -37,29 +42,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager requests archival.
-2. The platform confirms that all unreleased versions have been deleted.
-3. The platform confirms at least one non-initial released version exists.
-4. The platform changes the workspace state to archived.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Archival preconditions not met
-
-The platform refuses archival when an unreleased version exists or no non-initial released version exists.
-
-#### 5.3.2 Workspace not active
-
-The platform refuses the request for an absent or already archived workspace.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

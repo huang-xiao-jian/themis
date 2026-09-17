@@ -36,20 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager identifies a Workspace Version and Rule.
-2. The platform finds the Rule in that version.
-3. The platform returns the Rule definition.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Rule unavailable
-
-The platform reports it unavailable when the version or Rule cannot be found.
-
 ## 6. Special Requirements
 
 None.

@@ -22,9 +22,15 @@ Fewer than 20 active Rule Workspaces exist.
 
 - On success, an active Rule Workspace and its empty, read-only initial Workspace Version exist; the active-workspace limit is respected.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- The Rule Manager supplies the workspace metadata and the initial Workspace Version identifier and metadata.
+- The platform validates the submitted data against the applicable Rule Workspace and Workspace Version constraints before creation.
+- The platform creates the initial Workspace Version with the Rule Workspace; it is empty and read-only.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -36,29 +42,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager submits the workspace and initial-version data.
-2. The platform validates required non-empty, length-limited metadata and unique workspace name and identifier.
-3. The platform confirms that fewer than 20 active workspaces exist.
-4. The platform creates the workspace and its initial version.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Invalid or duplicate workspace data
-
-The platform refuses metadata or identifiers that violate the stated constraints.
-
-#### 5.3.2 Active workspace limit reached
-
-The platform refuses the request when 20 active workspaces already exist.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

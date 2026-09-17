@@ -28,9 +28,11 @@ None.
 
 - On success, the Downstream Application has the final definition of the specified Rule; no managed definitions change.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- A Rule remains retrievable from a released Workspace Version after its workspace is archived.
+
+## 6. Flow of Events
 
 ```mermaid
 flowchart TD
@@ -45,26 +47,10 @@ flowchart TD
     unavailable --> endUnavailable([End: Rule unavailable])
 ```
 
-1. The Downstream Application submits the `RuleRetrievalRequest`.
-2. The platform finds the specified Rule in the specified released Workspace Version.
-3. The platform returns the Rule's final definition.
-
-### 5.2 Alternative Flows
-
-#### 5.2.1 Archived Workspace
-
-At step 2, the specified Rule Workspace is archived. If the specified Rule exists in the released Workspace Version, the platform resumes at step 3. Archival does not make the Rule unavailable.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Unavailable Rule
-
-At step 2, the request does not identify a Rule in a released Workspace Version. The platform returns a simple unavailable exception, and the use case ends.
-
-## 6. Special Requirements
+## 7. Special Requirements
 
 None.
 
-## 7. Extension Points
+## 8. Extension Points
 
 None.

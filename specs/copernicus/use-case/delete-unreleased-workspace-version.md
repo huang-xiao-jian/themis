@@ -22,9 +22,13 @@ The specified Rule Workspace exists and is active, and the specified Workspace V
 
 - On success, the version and its version-local content no longer exist; an unreleased-version slot is immediately available.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- Deleting an unreleased Workspace Version immediately frees an unreleased-version slot.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -36,24 +40,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager requests deletion.
-2. The platform finds the unreleased version in the active workspace.
-3. The platform permanently deletes the version and its content.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not deletable
-
-The platform refuses deletion when the workspace is archived or the version is absent, initial, or released.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

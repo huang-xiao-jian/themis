@@ -22,9 +22,13 @@ The specified Rule Workspace exists and is active, and the target Workspace Vers
 
 - On success, the Rule exists with its immutable identifier and satisfies applicable managed-definition constraints.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- The Rule Setter validates each Atomic Rule against the Rule Factor it consumes during configuration.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -36,29 +40,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager submits a Rule identifier and definition.
-2. The platform finds the target unreleased version.
-3. The platform validates identifier uniqueness and Rule-specific definition constraints.
-4. The platform adds the Rule.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses the request when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Invalid Rule definition
-
-The platform refuses an identifier collision or invalid definition. A Rule must retain non-empty Atomic Rule Groups satisfying the canonical Rule Definition constraints.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

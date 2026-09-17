@@ -36,25 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager submits a Resource identifier and definition.
-2. The platform finds the target unreleased version.
-3. The platform validates identifier uniqueness and Resource-specific definition constraints.
-4. The platform adds the Resource.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses the request when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Invalid Resource definition
-
-The platform refuses an identifier collision or invalid definition. A Resource action must not leave a Rule Factor with an unsatisfied resource association.
-
 ## 6. Special Requirements
 
 None.

@@ -24,9 +24,15 @@ A Rule Manager releases and locks an unreleased Workspace Version as a stable sn
 
 - On success, the version is permanently released and locked; its Rules are available downstream; no downstream notification is sent.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- A final Rule added, removed, or changed from the base satisfies the derived-version difference requirement. Metadata, Resource, and Rule Factor changes alone do not.
+- Release locks the complete Workspace Version snapshot, is irreversible, and immediately makes its Rules available for downstream retrieval without notification.
+- A sibling version with a higher identifier does not prevent release; each version is compared only with its own base.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -38,34 +44,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager requests release.
-2. The platform verifies at least one Rule and non-empty valid Atomic Rule Groups.
-3. The platform validates Resource and Rule Factor projections and resolves Resource references.
-4. For a derived version, the platform verifies that the final Rule set differs from its base.
-5. The platform locks the snapshot, releases it, and enables retrieval.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Invalid release snapshot
-
-The platform refuses release when there is no Rule, an invalid Rule or projection, or an unresolved Resource reference.
-
-#### 5.3.2 No final Rule difference
-
-The platform refuses a derived version with the same final Rule set as its base.
-
-#### 5.3.3 Version not releasable
-
-The platform refuses when the workspace is archived or the version is absent, initial, or already released.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

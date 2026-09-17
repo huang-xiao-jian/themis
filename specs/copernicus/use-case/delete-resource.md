@@ -21,11 +21,16 @@ A Rule Manager permanently deletes a version-local Resource from an unreleased W
 
 ## 4. Postconditions
 
-- On success, the Resource no longer exists, and the manager may create a Resource with the deleted identifier.
+- On success, the Resource no longer exists, and the manager may create a Resource with the deleted identifier. Rule Factors and Rules remain unchanged.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- A Resource deletion is refused when it would leave a Rule Factor with an unsatisfied resource association.
+- Deleting a Resource does not modify Rule Factors or Rules.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -37,29 +42,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager requests deletion.
-2. The platform finds the target Resource in the unreleased version.
-3. The platform validates that deletion preserves required associations and structural constraints.
-4. The platform permanently deletes the Resource.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses the request when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Resource deletion would violate constraints
-
-The platform refuses deletion that leaves invalid managed content. A Resource action must not leave a Rule Factor with an unsatisfied resource association.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

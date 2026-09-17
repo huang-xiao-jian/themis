@@ -36,20 +36,6 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager identifies an unreleased version in an active workspace.
-2. The platform finds it.
-3. The platform returns the complete current content.
-
-### 5.2 Alternative Flows
-
-None.
-
-### 5.3 Exception Flows
-
-#### 5.3.1 Unreleased version unavailable
-
-The platform reports it unavailable when it is absent, not unreleased, or its workspace is not active.
-
 ## 6. Special Requirements
 
 None.

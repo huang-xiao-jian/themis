@@ -104,13 +104,6 @@ stateDiagram-v2
 - An archived workspace belongs to the Archive Zone, whose behavior is outside the scope of this requirement.
 - A workspace identifier is read-only once created.
 
-**Behavioral constraints**
-
-- The Rule Manager supplies workspace metadata on creation and may change it only while the workspace is active.
-- A workspace may be archived only after all unreleased Workspace Versions have been permanently deleted and it contains at least one non-initial released Workspace Version. Archiving is permanent and applies only to a Rule Workspace.
-- Archiving neither changes nor makes unavailable Rules from released Workspace Versions. An archived workspace remains available to Downstream Applications, but its metadata, versions, and contents cannot be changed; neither content creation nor version release or deletion is permitted.
-- An active workspace may be permanently deleted only when it has neither non-initial released Workspace Versions nor unreleased Workspace Versions.
-
 ### Workspace Version
 
 #### Definition
@@ -168,14 +161,6 @@ A transition from `Initial` or `Released` to `Unreleased` creates a new Workspac
 - A Workspace Version identifier is read-only once created.
 - A subsequent Workspace Version identifier must be strictly greater than its base version identifier.
 
-**Behavioral constraints**
-
-- The platform creates the initial Workspace Version when its Rule Workspace is created, using the identifier and metadata supplied by the Rule Manager.
-- A subsequent Workspace Version may be created only from a released base. It inherits the base's Resources, Rule Factors, Rules, and their identifiers as initial content, but not the base metadata; subsequent changes do not affect the base.
-- The Rule Manager supplies metadata and chooses an identifier for every subsequent Workspace Version. The platform validates its semantic-version format and uniqueness within the workspace. No further major, minor, or patch validation applies.
-- Multiple unreleased Workspace Versions may be derived from the same released base. Each is validated only against its own base and may be released even if another version from that base has a higher identifier.
-- The Rule Manager may view, change, or permanently delete an unreleased Workspace Version at any time. An unreleased version cannot be archived, and deleting it immediately frees an unreleased-version slot.
-
 ### Resource
 
 #### Definition
@@ -212,10 +197,6 @@ A Resource belongs to one Workspace Version and may be used by multiple Rule Fac
 - A Resource identifier is read-only once created.
 - A Resource that is not associated with a Rule Factor may remain in the Workspace Version.
 
-**Behavioral constraints**
-
-- Creating, updating, or deleting a Resource must not leave a Rule Factor with an unsatisfied resource association; any action that would do so is refused.
-
 ### Rule Factor
 
 #### Definition
@@ -249,12 +230,6 @@ A Rule Factor belongs to one Workspace Version. Its `identifier` becomes the `na
 - A Rule Factor without `resourceIdentifier` projects without a `resource`; a Rule Factor with `resourceIdentifier` projects with exactly one resource.
 - A Rule Factor identifier is read-only once created.
 - A Rule Factor that is not currently needed for configuration may remain in the Workspace Version.
-
-**Behavioral constraints**
-
-- The Rule Setter validates an Atomic Rule against the Rule Factor it consumes while that Atomic Rule is configured.
-- Creating or updating a Rule Factor must result in a valid Rule Factor projection; an invalid change is refused.
-- A Rule Factor may be deleted even when the Rule Setter previously consumed it to create an Atomic Rule, because that Atomic Rule has no managed Rule Factor reference.
 
 ### Rule
 
@@ -296,12 +271,6 @@ A Rule belongs to one Workspace Version. Its projected Atomic Rule uses `identif
 - A Rule, Atomic Rule Group, and Atomic Rule identifier is read-only once created.
 - Each Atomic Rule Group must contain at least one Atomic Rule.
 - Each Atomic Rule Group must satisfy the canonical Atomic Rule constraints in the [Rule Definition](../baseline/rule.md) specification.
-
-**Behavioral constraints**
-
-- Changing or deleting a Rule Factor does not change an Atomic Rule that the Rule Setter previously created.
-- After a Resource, Rule Factor, Rule, Atomic Rule Group, or Atomic Rule is removed from an unreleased Workspace Version, the Rule Manager may create an item of the same kind with that identifier.
-- The Rule Manager may remove all Rules from an unreleased Workspace Version.
 
 ### Managed Definition Projection
 
@@ -352,11 +321,6 @@ A release identifies the complete snapshot of the Workspace Version, including i
 - A derived Workspace Version's final Rule set must differ from its base version's final Rule set; a Rule Factor change alone does not change a final Rule definition.
 - Release is one-time and irreversible. A locked Workspace Version cannot be modified or permanently deleted.
 
-**Behavioral constraints**
-
-- Adding, removing, or changing a final Rule satisfies the derived-version release-difference requirement. Changing only workspace metadata, Workspace Version metadata, internal Resources, or internal Rule Factors does not.
-- Releasing locks the complete Workspace Version snapshot and immediately makes its Rules available for downstream retrieval. The platform does not notify Downstream Applications.
-
 ### Rule Retrieval
 
 #### Definition
@@ -372,8 +336,6 @@ interface RuleRetrievalRequest {
   ruleIdentifier: string;
 }
 ```
-
-#### Constraints
 
 ## Workflow
 

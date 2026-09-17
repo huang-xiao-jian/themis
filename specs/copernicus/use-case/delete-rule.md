@@ -21,11 +21,16 @@ A Rule Manager permanently deletes a version-local Rule from an unreleased Works
 
 ## 4. Postconditions
 
-- On success, the Rule no longer exists, and the manager may create a Rule with the deleted identifier.
+- On success, the Rule no longer exists, and the manager may create a Rule with the deleted identifier. This use case may remove the last Rule in the version.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- A Rule deletion may remove the last Rule in an unreleased Workspace Version.
+- A deleted Rule identifier may be used again in that version.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -37,29 +42,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager requests deletion.
-2. The platform finds the target Rule in the unreleased version.
-3. The platform validates that deletion preserves required associations and structural constraints.
-4. The platform permanently deletes the Rule.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Version not editable
-
-The platform refuses the request when the workspace is archived or the version is absent, initial, or released.
-
-#### 5.3.2 Rule deletion would violate constraints
-
-The platform refuses deletion that leaves invalid managed content. A Rule must retain non-empty Atomic Rule Groups satisfying the canonical Rule Definition constraints.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.

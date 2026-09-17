@@ -23,9 +23,13 @@ A Rule Manager permanently deletes an active Rule Workspace with no protected ve
 
 - On success, the workspace and its initial Workspace Version no longer exist.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- An active workspace may be permanently deleted only when it has neither non-initial released Workspace Versions nor unreleased Workspace Versions.
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -37,29 +41,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-1. The manager requests permanent deletion.
-2. The platform confirms that no unreleased version exists.
-3. The platform confirms that no non-initial released version exists.
-4. The platform permanently deletes the workspace.
-
-### 5.2 Alternative Flows
+## 7. Special Requirements
 
 None.
 
-### 5.3 Exception Flows
-
-#### 5.3.1 Deletion preconditions not met
-
-The platform refuses deletion when an unreleased or non-initial released version exists.
-
-#### 5.3.2 Workspace not active
-
-The platform refuses the request for an absent or archived workspace.
-
-## 6. Special Requirements
-
-None.
-
-## 7. Extension Points
+## 8. Extension Points
 
 None.
