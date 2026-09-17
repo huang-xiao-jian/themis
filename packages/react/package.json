@@ -24,7 +24,8 @@
     "@testing-library/react": "^16.3.3",
     "@types/node": "^26.5.1",
     "@types/react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
     "react": "^19.3.0"

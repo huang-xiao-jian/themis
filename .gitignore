@@ -145,6 +145,9 @@ rush-project.json
 # Monorepo tools
 packages/*/*/node_modules
 
+# Generated declarations beside package source files
+packages/*/src/**/*.d.ts
+
 # IDE
 .vscode/*
 !.vscode/extensions.json
