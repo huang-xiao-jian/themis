@@ -12,7 +12,7 @@ Create a Rule Factor.
 
 ## 2. Brief Description
 
-A Rule Manager creates a version-local Rule Factor in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager creates a version-local Rule Factor in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule Factor glossary entry](../glossary/rule-factor.md).
 
 ## 3. Preconditions
 

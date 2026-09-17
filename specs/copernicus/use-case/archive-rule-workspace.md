@@ -12,7 +12,7 @@ Archive a Rule Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager permanently archives an active Rule Workspace. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager permanently archives an active Rule Workspace. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
 
 ## 3. Preconditions
 

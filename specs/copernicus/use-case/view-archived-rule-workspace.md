@@ -12,7 +12,7 @@ View an Archived Rule Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager views an archived Rule Workspace and its released Workspace Versions. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager views an archived Rule Workspace and its released Workspace Versions. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
 
 ## 3. Preconditions
 

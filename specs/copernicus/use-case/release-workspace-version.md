@@ -12,7 +12,7 @@ Release an Unreleased Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager releases and locks an unreleased Workspace Version as a stable snapshot. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager releases and locks an unreleased Workspace Version as a stable snapshot. The relevant concepts and constraints are defined in the [Release glossary entry](../glossary/release.md).
 
 ## 3. Preconditions
 

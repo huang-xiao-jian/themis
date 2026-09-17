@@ -12,7 +12,7 @@ View an Unreleased Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager views an unreleased Workspace Version and its version-local content. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager views an unreleased Workspace Version and its version-local content. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
 
 ## 3. Preconditions
 

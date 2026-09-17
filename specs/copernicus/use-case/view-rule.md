@@ -12,7 +12,7 @@ View a Rule.
 
 ## 2. Brief Description
 
-A Rule Manager views a version-local Rule in a Workspace Version. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager views a version-local Rule in a Workspace Version. The relevant concepts and constraints are defined in the [Rule glossary entry](../glossary/rule.md).
 
 ## 3. Preconditions
 

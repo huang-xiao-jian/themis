@@ -12,7 +12,7 @@ Delete a Resource.
 
 ## 2. Brief Description
 
-A Rule Manager permanently deletes a version-local Resource from an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager permanently deletes a version-local Resource from an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Resource glossary entry](../glossary/resource.md).
 
 ## 3. Preconditions
 

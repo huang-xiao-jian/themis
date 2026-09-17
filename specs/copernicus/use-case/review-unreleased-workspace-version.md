@@ -12,7 +12,7 @@ Review an Unreleased Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager reviews the complete snapshot of an unreleased Workspace Version before release. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager reviews the complete snapshot of an unreleased Workspace Version before release. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
 
 ## 3. Preconditions
 

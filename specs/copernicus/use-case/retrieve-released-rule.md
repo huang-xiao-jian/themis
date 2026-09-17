@@ -12,13 +12,7 @@ Retrieve a Released Rule.
 
 ## 2. Brief Description
 
-A Downstream Application obtains the final definition of one Rule from a specified released Workspace Version. The canonical request shape and retrieval constraints are defined in the [Rule requirement](../requirement.md#rule-retrieval).
-
-```ts
-import { RuleRetrievalRequest } from '../requirement.md';
-```
-
-The Downstream Application initiates this use case by submitting a `RuleRetrievalRequest` containing the Rule Workspace identifier, Workspace Version identifier, and Rule identifier.
+A Downstream Application obtains the final definition of one Rule from a specified released Workspace Version.
 
 ## 3. Preconditions
 
@@ -36,7 +30,7 @@ None.
 
 ```mermaid
 flowchart TD
-    start([Start]) --> submit[Downstream Application submits RuleRetrievalRequest]
+    start([Start]) --> submit[Downstream Application request with RuleRetrievalBeacon]
     submit --> available{Does the request identify a Rule in a released Workspace Version?}
     available -->|Yes| archived{Is the workspace archived?}
     archived -->|No| returnRule[Platform returns the Rule's final definition]
@@ -46,6 +40,8 @@ flowchart TD
     available -->|No| unavailable[Platform returns a simple unavailable exception]
     unavailable --> endUnavailable([End: Rule unavailable])
 ```
+
+- The Downstream Application must provide [RuleRetrievalBeacon](../glossary/rule-retrieval-beacon.md)
 
 ## 7. Special Requirements
 

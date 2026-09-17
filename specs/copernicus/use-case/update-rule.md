@@ -12,7 +12,7 @@ Update a Rule.
 
 ## 2. Brief Description
 
-A Rule Manager changes a version-local Rule in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager changes a version-local Rule in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule glossary entry](../glossary/rule.md).
 
 ## 3. Preconditions
 

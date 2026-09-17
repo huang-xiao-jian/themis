@@ -12,7 +12,7 @@ View a Released Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager views the locked snapshot of a released Workspace Version. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager views the locked snapshot of a released Workspace Version. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
 
 ## 3. Preconditions
 

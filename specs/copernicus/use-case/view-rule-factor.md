@@ -12,7 +12,7 @@ View a Rule Factor.
 
 ## 2. Brief Description
 
-A Rule Manager views a version-local Rule Factor in a Workspace Version. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager views a version-local Rule Factor in a Workspace Version. The relevant concepts and constraints are defined in the [Rule Factor glossary entry](../glossary/rule-factor.md).
 
 ## 3. Preconditions
 

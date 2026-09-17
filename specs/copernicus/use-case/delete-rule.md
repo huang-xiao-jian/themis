@@ -12,7 +12,7 @@ Delete a Rule.
 
 ## 2. Brief Description
 
-A Rule Manager permanently deletes a version-local Rule from an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule requirement](../requirement.md).
+A Rule Manager permanently deletes a version-local Rule from an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule glossary entry](../glossary/rule.md).
 
 ## 3. Preconditions
 
