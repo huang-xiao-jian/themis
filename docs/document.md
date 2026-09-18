@@ -9,6 +9,10 @@ API implementation, or general Markdown such as `README.md`.
 **Must**, **Should**, and **May** mean required, recommended, and optional. A
 specific rule overrides a general one.
 
+## ADRs
+
+- [Unify Business-Concept Relationships](./adr/unify-business-concept-relationships.md)
+
 ## General Writing and Layout
 
 - Should use prose and headings for definitions;
@@ -30,12 +34,6 @@ specific rule overrides a general one.
 import type { FieldDataSource } from './spec.md';
 ```
 
-## Mermaid Guideline
-
-- Use a Mermaid flowchart for material sequence or branching; use numbered steps for
-  a simple linear flow.
-- Use a Mermaid state diagram for state transitions.
-
 ## Specification Templates
 
 Use these documents as the structural templates for new specifications:
@@ -45,12 +43,3 @@ Use these documents as the structural templates for new specifications:
 
 Preserve the applicable template structure. Update a template when a structural
 change should become a convention for future specifications.
-
-### Use-Case Business Rules
-
-Use-case specifications must separate policy from the flow of events. Place a
-`Business Rules` section after `Postconditions` and before `Flow of Events`.
-State applicability, validation criteria, and persistent effects in that
-section. The flow itself must describe only the ordered interaction between the
-actor and platform; it may refer to applicable business rules without restating
-them.

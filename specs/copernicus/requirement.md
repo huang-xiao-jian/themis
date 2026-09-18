@@ -67,6 +67,12 @@ Each concept has one canonical definition in the [glossary](./glossary/).
 - [Release](./glossary/release.md)
 - [Rule Retrieval Beacon](./glossary/rule-retrieval-beacon.md)
 
+For the classified relationships among these concepts, see
+
+## Semantic Concepts Relationship
+
+- [Concept Relationships](./relationships.md).
+
 ## Workflow
 
 ### First-Version Workflow
