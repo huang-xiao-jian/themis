@@ -1,4 +1,4 @@
-# Use Case Specification: View an Archived Rule Workspace
+# Use Case Specification: View an Archived Workspace
 
 ## Revision History
 
@@ -8,15 +8,15 @@
 
 ## 1. Use-Case Name
 
-View an Archived Rule Workspace.
+View an Archived Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager views an archived Rule Workspace and its released Workspace Versions. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager views an archived Workspace and its released Workspace Versions. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
 
 ## 3. Preconditions
 
-The specified Rule Workspace exists and is archived.
+The specified Workspace exists and is archived.
 
 ## 4. Postconditions
 

@@ -1,4 +1,4 @@
-# Use Case Specification: View an Active Rule Workspace
+# Use Case Specification: View an Active Workspace
 
 ## Revision History
 
@@ -8,15 +8,15 @@
 
 ## 1. Use-Case Name
 
-View an Active Rule Workspace.
+View an Active Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager views an active Rule Workspace, including its metadata and Workspace Versions. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager views an active Workspace, including its metadata and Workspace Versions. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
 
 ## 3. Preconditions
 
-The specified Rule Workspace exists and is active.
+The specified Workspace exists and is active.
 
 ## 4. Postconditions
 

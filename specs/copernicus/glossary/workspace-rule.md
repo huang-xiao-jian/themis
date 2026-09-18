@@ -1,4 +1,4 @@
-# RuleWorkspaceRule
+# WorkspaceRule
 
 ## Prerequisites
 

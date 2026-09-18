@@ -10,12 +10,12 @@ Enable Rule Managers to define, version, validate, and release governed rule sna
 
 ---
 
-- [Create a Rule Workspace](./use-case/create-rule-workspace.md)
-- [View an Active Rule Workspace](./use-case/view-rule-workspace.md)
-- [View an Archived Rule Workspace](./use-case/view-archived-rule-workspace.md)
-- [Update a Rule Workspace](./use-case/update-rule-workspace.md)
-- [Archive a Rule Workspace](./use-case/archive-rule-workspace.md)
-- [Delete a Rule Workspace](./use-case/delete-rule-workspace.md)
+- [Create a Workspace](./use-case/create-rule-workspace.md)
+- [View an Active Workspace](./use-case/view-rule-workspace.md)
+- [View an Archived Workspace](./use-case/view-archived-rule-workspace.md)
+- [Update a Workspace](./use-case/update-rule-workspace.md)
+- [Archive a Workspace](./use-case/archive-rule-workspace.md)
+- [Delete a Workspace](./use-case/delete-rule-workspace.md)
 
 ---
 
@@ -59,12 +59,12 @@ Enable Rule Managers to define, version, validate, and release governed rule sna
 
 Each concept has one canonical definition in the [glossary](./glossary/).
 
-- [Rule Workspace](./glossary/rule-workspace.md)
+- [Workspace](./glossary/workspace.md)
 - [Workspace Version](./glossary/workspace-version.md)
-- [Resource](./glossary/resource.md)
-- [Rule Factor](./glossary/rule-factor.md)
-- [Rule](./glossary/rule.md)
-- [Release](./glossary/release.md)
+- [Resource](./glossary/workspace-resource.md)
+- [Rule Factor](./glossary/workspace-rule-factor.md)
+- [Rule](./glossary/workspace-rule.md)
+- [Release](./glossary/workspace-release.md)
 - [Rule Retrieval Beacon](./glossary/rule-retrieval-beacon.md)
 
 For the classified relationships among these concepts, see
@@ -79,7 +79,7 @@ For the classified relationships among these concepts, see
 
 ```mermaid
 flowchart TD
-    createWorkspace[Rule Manager creates a Rule Workspace]
+    createWorkspace[Rule Manager creates a Workspace]
     createFirstDraft[Rule Manager creates an unreleased Workspace Version]
     configureFirstDraft[Rule Manager configures Resources, Rule Factors, and Rules]
     reviewFirstDraft[Rule Manager reviews the version snapshot]

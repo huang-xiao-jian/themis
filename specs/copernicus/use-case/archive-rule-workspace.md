@@ -1,4 +1,4 @@
-# Use Case Specification: Archive a Rule Workspace
+# Use Case Specification: Archive a Workspace
 
 ## Revision History
 
@@ -8,15 +8,15 @@
 
 ## 1. Use-Case Name
 
-Archive a Rule Workspace.
+Archive a Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager permanently archives an active Rule Workspace. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager permanently archives an active Workspace. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
 
 ## 3. Preconditions
 
-- The specified Rule Workspace exists and is active.
+- The specified Workspace exists and is active.
 - The workspace has no unreleased Workspace Versions and at least one released Workspace Version.
 
 ## 4. Postconditions
@@ -25,7 +25,7 @@ A Rule Manager permanently archives an active Rule Workspace. The relevant conce
 
 ## 5. Business Rules
 
-- Archival is permanent and applies only to the Rule Workspace.
+- Archival is permanent and applies only to the Workspace.
 - Archival neither changes nor makes unavailable Rules from released Workspace Versions. An archived workspace remains available to Downstream Applications but cannot be modified, and no content creation, version release, or version deletion is permitted.
 
 ## 6. Flow of Events

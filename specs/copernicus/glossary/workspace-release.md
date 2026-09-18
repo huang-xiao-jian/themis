@@ -14,7 +14,7 @@ None
 
 ## Attributes
 
-- **Workspace Identifier**: the identity of the Rule Workspace that owns the released Workspace Version.
+- **Workspace Identifier**: the identity of the Workspace that owns the released Workspace Version.
 - **Version Identifier**: the identity of the released Workspace Version.
 - **Content**: the complete released Workspace Version snapshot.
 

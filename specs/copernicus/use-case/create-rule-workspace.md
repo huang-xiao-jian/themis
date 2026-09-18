@@ -1,4 +1,4 @@
-# Use Case Specification: Create a Rule Workspace
+# Use Case Specification: Create a Workspace
 
 ## Revision History
 
@@ -8,25 +8,25 @@
 
 ## 1. Use-Case Name
 
-Create a Rule Workspace.
+Create a Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager creates an empty active Rule Workspace and supplies its metadata. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager creates an empty active Workspace and supplies its metadata. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
 
 ## 3. Preconditions
 
-Fewer than 20 active Rule Workspaces exist.
+Fewer than 20 active Workspaces exist.
 
 ## 4. Postconditions
 
-- On success, an active Rule Workspace with no Workspace Versions exists; the active-workspace limit is respected.
+- On success, an active Workspace with no Workspace Versions exists; the active-workspace limit is respected.
 
 ## 5. Business Rules
 
 - The Rule Manager supplies the workspace metadata.
-- The platform validates the submitted data against the applicable Rule Workspace constraints before creation.
-- The platform creates no Workspace Version with the Rule Workspace.
+- The platform validates the submitted data against the applicable Workspace constraints before creation.
+- The platform creates no Workspace Version with the Workspace.
 
 ## 6. Flow of Events
 

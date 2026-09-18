@@ -15,12 +15,12 @@ deletion, or runtime-lifetime behaviour.
 
 ## Concepts in Scope
 
-- [Rule Workspace](./glossary/rule-workspace.md) (`Workspace`) organizes a version history.
+- [Workspace](./glossary/workspace.md) (`Workspace`) organizes a version history.
 - [Workspace Version](./glossary/workspace-version.md) (`WorkspaceVersion`) is an isolated, version-local rule snapshot.
-- [Resource](./glossary/resource.md) (`WorkspaceResource`) provides managed selectable values within one version.
-- [Rule Factor](./glossary/rule-factor.md) (`WorkspaceRuleFactor`) is a managed factor used to configure an Atomic Rule.
-- [Rule](./glossary/rule.md) (`WorkspaceRule`) aggregates Atomic Rule Groups.
-- [Release](./glossary/release.md) (`WorkspaceRelease`) represents the publication of a released version snapshot.
+- [Workspace Resource](./glossary/workspace-resource.md) (`WorkspaceResource`) provides managed selectable values within one version.
+- [Workspace Rule Factor](./glossary/workspace-rule-factor.md) (`WorkspaceRuleFactor`) is a managed factor used to configure an Atomic Rule.
+- [Workspace Rule](./glossary/workspace-rule.md) (`WorkspaceRule`) aggregates Atomic Rule Groups.
+- [Workspace Release](./glossary/workspace-release.md) (`WorkspaceRelease`) represents the publication of a released version snapshot.
 - [Rule Retrieval Beacon](./glossary/rule-retrieval-beacon.md) (`RuleRetrievalBeacon`) identifies one released Rule for downstream retrieval.
 - [Atomic Rule Group](../baseline/rule.md) (`WorkspaceAtomicRuleGroup`) joins Atomic Rules with logical AND.
 - [Atomic Rule](../baseline/rule.md) (`WorkspaceAtomicRule`) is the smallest configured rule condition.
@@ -33,7 +33,7 @@ The [Rule Manager](./requirement.md#rule-manager) and [Downstream Application](.
 classDiagram
     direction LR
 
-    class RuleWorkspace
+    class Workspace
     class WorkspaceVersion
     class WorkspaceResource
     class WorkspaceRuleFactor
@@ -41,7 +41,7 @@ classDiagram
     class WorkspaceAtomicRuleGroup
     class WorkspaceAtomicRule
 
-    RuleWorkspace "1" o-- "0..*" WorkspaceVersion : organizes
+    Workspace "1" o-- "0..*" WorkspaceVersion : organizes
     WorkspaceVersion "1" *-- "0..*" WorkspaceResource : contains
     WorkspaceVersion "1" *-- "0..*" WorkspaceRuleFactor : contains
     WorkspaceVersion "1" *-- "0..*" WorkspaceRule : contains
@@ -51,7 +51,7 @@ classDiagram
     WorkspaceAtomicRule ..> WorkspaceRuleFactor : configured from
 ```
 
-### Rule Workspace → Workspace Version
+### Workspace → Workspace Version
 
 **Aggregation.** One workspace organizes zero or more versions; each version
 belongs to one workspace. The workspace is the organizational boundary for its
@@ -166,7 +166,7 @@ when the containing workspace is archived.
 - The Resource-to-Rule-Factor dependency is version-scoped. A Rule Factor must not use a Resource in another Workspace Version.
 - The Rule-Factor-to-Atomic-Rule dependency ends after configuration. It is deliberately not a persistent reference.
 - Releasing converts an unreleased Workspace Version into a locked, downstream-available snapshot. A derived version must have a final Rule set different from its base before release.
-- Archiving a Rule Workspace prevents further content changes but preserves retrieval of Rules from its released Workspace Versions.
+- Archiving a Workspace prevents further content changes but preserves retrieval of Rules from its released Workspace Versions.
 
 ## Relationship-Driven Lifecycle Summary
 

@@ -12,11 +12,11 @@ Delete an Unreleased Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager permanently deletes an unreleased Workspace Version from an active Rule Workspace. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
+A Rule Manager permanently deletes an unreleased Workspace Version from an active Workspace. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
 
 ## 3. Preconditions
 
-The specified Rule Workspace exists and is active, and the specified Workspace Version exists in that workspace and is unreleased.
+The specified Workspace exists and is active, and the specified Workspace Version exists in that workspace and is unreleased.
 
 ## 4. Postconditions
 

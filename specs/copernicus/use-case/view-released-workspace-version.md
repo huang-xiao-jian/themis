@@ -16,7 +16,7 @@ A Rule Manager views the locked snapshot of a released Workspace Version. The re
 
 ## 3. Preconditions
 
-The specified Rule Workspace exists, and the specified Workspace Version exists in that workspace and is released.
+The specified Workspace exists, and the specified Workspace Version exists in that workspace and is released.
 
 ## 4. Postconditions
 

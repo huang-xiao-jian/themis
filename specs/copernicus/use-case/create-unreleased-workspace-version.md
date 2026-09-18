@@ -12,11 +12,11 @@ Create an Unreleased Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager creates an empty unreleased Workspace Version in an active Rule Workspace. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
+A Rule Manager creates an empty unreleased Workspace Version in an active Workspace. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
 
 ## 3. Preconditions
 
-- The specified Rule Workspace exists and is active.
+- The specified Workspace exists and is active.
 - Fewer than three unreleased Workspace Versions exist in that workspace.
 
 ## 4. Postconditions

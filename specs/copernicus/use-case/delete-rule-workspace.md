@@ -1,4 +1,4 @@
-# Use Case Specification: Delete a Rule Workspace
+# Use Case Specification: Delete a Workspace
 
 ## Revision History
 
@@ -8,15 +8,15 @@
 
 ## 1. Use-Case Name
 
-Delete a Rule Workspace.
+Delete a Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager permanently deletes an active Rule Workspace with no protected version history. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager permanently deletes an active Workspace with no protected version history. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
 
 ## 3. Preconditions
 
-- The specified Rule Workspace exists and is active.
+- The specified Workspace exists and is active.
 - The workspace has no Workspace Versions.
 
 ## 4. Postconditions

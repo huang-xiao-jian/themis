@@ -16,7 +16,7 @@ A Rule Manager permanently deletes a version-local Rule Factor from an unrelease
 
 ## 3. Preconditions
 
-- The specified Rule Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
+- The specified Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
 - The specified Rule Factor exists in that Workspace Version.
 
 ## 4. Postconditions

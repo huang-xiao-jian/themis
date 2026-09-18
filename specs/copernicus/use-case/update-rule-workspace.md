@@ -1,4 +1,4 @@
-# Use Case Specification: Update a Rule Workspace
+# Use Case Specification: Update a Workspace
 
 ## Revision History
 
@@ -8,15 +8,15 @@
 
 ## 1. Use-Case Name
 
-Update a Rule Workspace.
+Update a Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager changes the metadata of an active Rule Workspace. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager changes the metadata of an active Workspace. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
 
 ## 3. Preconditions
 
-The specified Rule Workspace exists and is active.
+The specified Workspace exists and is active.
 
 ## 4. Postconditions
 

@@ -15,24 +15,24 @@ None
 
 ## Attributes
 
-- **Workspace Identifier**: the unique reference identity for **RuleWorkspace**
-- **Workspace Version Identifier**: the unique reference identity for **RuleWorkspaceVersion**
-- **Rule Identifier**: the unique reference identity for **RuleWorkspaceRule**
+- **Workspace Identifier**: the unique reference identity for **Workspace**
+- **Workspace Version Identifier**: the unique reference identity for **WorkspaceVersion**
+- **Rule Identifier**: the unique reference identity for **WorkspaceRule**
 
 ## Data Model
 
 ```ts
-import type { RuleWorkspace } from './rule-workspace.md';
-import type { RuleWorkspaceRule } from './rule.md';
-import type { RuleWorkspaceVersion } from './workspace-version.md';
+import type { Workspace } from './rule-workspace.md';
+import type { WorkspaceRule } from './rule.md';
+import type { WorkspaceVersion } from './workspace-version.md';
 
 interface RuleRetrievalBeacon {
   // required
-  workspaceIdentifier: RuleWorkspace['identifier'];
+  workspaceIdentifier: Workspace['identifier'];
   // required
-  versionIdentifier: RuleWorkspaceVersion['identifier'];
+  versionIdentifier: WorkspaceVersion['identifier'];
   // required
-  ruleIdentifier: RuleWorkspaceRule['identifier'];
+  ruleIdentifier: WorkspaceRule['identifier'];
 }
 ```
 

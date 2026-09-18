@@ -12,11 +12,11 @@ Derive an Unreleased Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager derives a new unreleased Workspace Version from a selected released base in an active Rule Workspace. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
+A Rule Manager derives a new unreleased Workspace Version from a selected released base in an active Workspace. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
 
 ## 3. Preconditions
 
-- The specified Rule Workspace exists and is active.
+- The specified Workspace exists and is active.
 - The selected base Workspace Version exists in that workspace and is released.
 - Fewer than three unreleased Workspace Versions exist in that workspace.
 

@@ -16,7 +16,7 @@ A Rule Manager creates a version-local Resource in an unreleased Workspace Versi
 
 ## 3. Preconditions
 
-The specified Rule Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
+The specified Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
 
 ## 4. Postconditions
 

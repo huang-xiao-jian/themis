@@ -16,7 +16,7 @@ A Rule Manager changes a version-local Rule in an unreleased Workspace Version. 
 
 ## 3. Preconditions
 
-- The specified Rule Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
+- The specified Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
 - The specified Rule exists in that Workspace Version.
 
 ## 4. Postconditions
