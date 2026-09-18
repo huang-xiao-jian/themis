@@ -1,6 +1,6 @@
 import { assert, describe, expect, it, vi } from 'vitest';
 import { RuleWorkspaceBuilder } from './builder/RuleWorkspaceBuilder';
-import type { RuleFactorDefinition } from './dsl';
+import type { RuleFactor } from './dsl';
 import { DataType } from './dsl/DataType';
 import { Mode } from './dsl/Mode';
 import { Quantity } from './dsl/Quantity';
@@ -9,7 +9,7 @@ import { provideElementaryFetcher } from './fetcher/provideElementaryFetcher';
 import { providePaginatedFilterableFetcher } from './fetcher/providePaginatedFilterableFetcher';
 import { createRuleWorkspace } from './index';
 
-const factors: readonly RuleFactorDefinition[] = [
+const factors: readonly RuleFactor[] = [
   {
     name: 'employee',
     title: '员工',

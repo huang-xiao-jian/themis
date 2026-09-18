@@ -63,7 +63,7 @@ interface WorkspaceCoordination {
 
   // ── Signal channel (downstream: Workspace → Group)────────────
   /** Available rule factor definition list (shared at the Workspace level) */
-  readonly allFactors: Signal<readonly RuleFactorDefinition[]>;
+  readonly allFactors: Signal<readonly RuleFactor[]>;
 }
 ```
 
@@ -369,7 +369,7 @@ The rule group manages a set of atomic rules:
  */
 class FactorOptionsInferrer {
   infer(
-    allFactors: readonly RuleFactorDefinition[],
+    allFactors: readonly RuleFactor[],
     usedFactorNames: readonly string[]
   ): readonly FieldDataSource[];
 }

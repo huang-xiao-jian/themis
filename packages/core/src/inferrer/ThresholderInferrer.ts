@@ -15,13 +15,13 @@ import { DataType } from '../dsl/DataType';
 import type { FieldConstraints } from '../dsl/FieldConstraints';
 import { Mode } from '../dsl/Mode';
 import { Quantity } from '../dsl/Quantity';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 import type { Resource, ResourceFactory } from '../factory/ResourceFactory';
 
 /**
  * 提取单值组件适用的约束（不含 minItems/maxItems）
  */
-function extractBaseConstraints(factor: RuleFactorDefinition): FieldConstraints | undefined {
+function extractBaseConstraints(factor: RuleFactor): FieldConstraints | undefined {
   if (!factor.constraints) return undefined;
   const { minItems: _mi, maxItems: _ma, ...rest } = factor.constraints;
   void _mi;
@@ -34,7 +34,7 @@ function extractBaseConstraints(factor: RuleFactorDefinition): FieldConstraints 
  * 提取列表级别约束（只取 minItems/maxItems）
  */
 function extractListBaseConstraints(
-  factor: RuleFactorDefinition
+  factor: RuleFactor
 ): { minItems?: number; maxItems?: number } | undefined {
   if (!factor.constraints) return undefined;
   const out: { minItems?: number; maxItems?: number } = {};
@@ -47,7 +47,7 @@ function extractListBaseConstraints(
 /**
  * 构建 BaseProperties
  */
-function buildBase(factor: RuleFactorDefinition): BaseProperties {
+function buildBase(factor: RuleFactor): BaseProperties {
   const base: BaseProperties = {
     name: factor.name,
     title: factor.title,
@@ -66,13 +66,13 @@ function buildBase(factor: RuleFactorDefinition): BaseProperties {
 /**
  * Thresholder 推断器
  *
- * 根据 RuleFactorDefinition 推断中间形态的表单组件
+ * 根据 RuleFactor 推断中间形态的表单组件
  * 决策图见 [interpreter.md 第 207-250 行](../specs/interpreter.md)
  */
 export class ThresholderInferrer {
   constructor(private readonly resourceFactory: ResourceFactory) {}
 
-  infer(factor: RuleFactorDefinition): ThresholdComponentProperties {
+  infer(factor: RuleFactor): ThresholdComponentProperties {
     // 1. 资源声明分支
     if (factor.resource) {
       const resource = this.resourceFactory.create(factor);
@@ -112,11 +112,11 @@ export class ThresholderInferrer {
     return this.buildManualPointSingle(factor);
   }
 
-  private buildSwitch(factor: RuleFactorDefinition): SwitchProperties {
+  private buildSwitch(factor: RuleFactor): SwitchProperties {
     return { ...buildBase(factor), type: 'Switch' };
   }
 
-  private buildSelect(factor: RuleFactorDefinition, resource: Resource): SelectProperties {
+  private buildSelect(factor: RuleFactor, resource: Resource): SelectProperties {
     // SelectProperties 资源类型为 StaticResource | ElementaryDynamicResource
     return {
       ...buildBase(factor),
@@ -125,10 +125,7 @@ export class ThresholderInferrer {
     };
   }
 
-  private buildMultipleSelect(
-    factor: RuleFactorDefinition,
-    resource: Resource
-  ): MultipleSelectProperties {
+  private buildMultipleSelect(factor: RuleFactor, resource: Resource): MultipleSelectProperties {
     return {
       ...buildBase(factor),
       type: 'MultipleSelect',
@@ -136,15 +133,15 @@ export class ThresholderInferrer {
     };
   }
 
-  private buildRangeInput(factor: RuleFactorDefinition): RangeInputProperties {
+  private buildRangeInput(factor: RuleFactor): RangeInputProperties {
     return { ...buildBase(factor), type: 'RangeInput' };
   }
 
-  private buildRangePicker(factor: RuleFactorDefinition): RangePickerProperties {
+  private buildRangePicker(factor: RuleFactor): RangePickerProperties {
     return { ...buildBase(factor), type: 'RangePicker' };
   }
 
-  private buildPicker(factor: RuleFactorDefinition): PickerProperties {
+  private buildPicker(factor: RuleFactor): PickerProperties {
     return { ...buildBase(factor), type: 'Picker' };
   }
 
@@ -155,7 +152,7 @@ export class ThresholderInferrer {
    * 其余 → Input
    */
   private buildManualPointSingle(
-    factor: RuleFactorDefinition
+    factor: RuleFactor
   ): InputProperties | InputNumberProperties | TextAreaProperties {
     if (factor.dataType === DataType.STRING) {
       const max = factor.constraints?.max;
@@ -169,7 +166,7 @@ export class ThresholderInferrer {
     return { ...buildBase(factor), type: 'Input' };
   }
 
-  private buildListBuilder(factor: RuleFactorDefinition, isAuto: boolean): ListBuilderProperties {
+  private buildListBuilder(factor: RuleFactor, isAuto: boolean): ListBuilderProperties {
     const itemConstraints = extractBaseConstraints(factor);
     const itemBase = {
       dataType: factor.dataType,
@@ -198,10 +195,7 @@ export class ThresholderInferrer {
     return props;
   }
 
-  private buildListRangeBuilder(
-    factor: RuleFactorDefinition,
-    isAuto: boolean
-  ): ListRangeBuilderProperties {
+  private buildListRangeBuilder(factor: RuleFactor, isAuto: boolean): ListRangeBuilderProperties {
     const itemConstraints = extractBaseConstraints(factor);
     const itemBase = { dataType: factor.dataType } as {
       dataType: DataType;

@@ -7,11 +7,11 @@ import { Semantic } from './Semantic';
 import { StaticRuleFactorResource } from './StaticRuleFactorResource';
 
 /**
- * 规则因子定义（DSL 主入口）
+ * 规则因子（DSL 主入口）
  *
  * 描述一个规则因子的语义化结构，供解释器推断 operator / thresholder
  */
-export interface RuleFactorDefinition {
+export interface RuleFactor {
   /** 规则因子唯一名称 */
   readonly name: string;
   /** 显示标题 */

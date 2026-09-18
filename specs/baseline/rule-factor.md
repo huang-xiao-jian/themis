@@ -193,7 +193,7 @@ For **multi-value scenarios**, the constraints use the closed interval `[minItem
 | `minItems`       | `multiple` | Minimum count |
 | `maxItems`       | `multiple` | Maximum count |
 
-### Rule Factor Definition
+### Rule Factor
 
 ```ts
 interface RuleFactorResource {
@@ -201,7 +201,7 @@ interface RuleFactorResource {
   features?: DynamicRuleFactorResourceFeature[];
 }
 
-interface RuleFactorDefinition {
+interface RuleFactor {
   name: string;
   title: string;
   description: string;

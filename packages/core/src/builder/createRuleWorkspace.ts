@@ -1,5 +1,5 @@
 import type { AtomicRuleGroup } from '../dsl/AtomicRule';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 import type { FetcherProvider } from '../fetcher/FetcherProvider';
 import { RuleWorkspaceScheduler } from '../scheduler/RuleWorkspaceScheduler';
 import { RuleWorkspaceBuilder } from './RuleWorkspaceBuilder';
@@ -10,7 +10,7 @@ import { RuleWorkspaceBuilder } from './RuleWorkspaceBuilder';
  * 适合简单场景；推荐新手使用
  */
 export function createRuleWorkspace(config: {
-  factors: readonly RuleFactorDefinition[];
+  factors: readonly RuleFactor[];
   fetchers?: readonly FetcherProvider<unknown>[];
   ruleGroups?: readonly AtomicRuleGroup[];
 }): RuleWorkspaceScheduler {

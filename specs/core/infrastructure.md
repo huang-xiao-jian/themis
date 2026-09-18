@@ -28,7 +28,7 @@ enum FetcherType {
 // Basic dynamic resource fetcher - no pagination, no filtering
 interface ElementaryFetcher<T = FieldDataSource> {
   /**
-   * @param resourceName Resource name, comes from `RuleFactorDefinition.resource.name`
+   * @param resourceName Resource name, comes from `RuleFactor.resource.name`
    */
   fetch(resourceName: string): Promise<T[]>;
 }
@@ -36,7 +36,7 @@ interface ElementaryFetcher<T = FieldDataSource> {
 // Paginated dynamic resource fetcher
 interface PaginatedFetcher<T = FieldDataSource> {
   /**
-   * @param resourceName Resource name, comes from `RuleFactorDefinition.resource.name`
+   * @param resourceName Resource name, comes from `RuleFactor.resource.name`
    * @param pageIndex Current page number (starting from 1)
    * @param pageSize Items per page
    */
@@ -46,7 +46,7 @@ interface PaginatedFetcher<T = FieldDataSource> {
 // Filterable dynamic resource fetcher
 interface FilterableFetcher<T = FieldDataSource> {
   /**
-   * @param resourceName Resource name, comes from `RuleFactorDefinition.resource.name`
+   * @param resourceName Resource name, comes from `RuleFactor.resource.name`
    * @param keyword Filter keyword
    */
   fetch(resourceName: string, keyword: string): Promise<T[]>;
@@ -55,7 +55,7 @@ interface FilterableFetcher<T = FieldDataSource> {
 // Paginated + filterable dynamic resource fetcher
 interface PaginatedFilterableFetcher<T = FieldDataSource> {
   /**
-   * @param resourceName Resource name, comes from `RuleFactorDefinition.resource.name`
+   * @param resourceName Resource name, comes from `RuleFactor.resource.name`
    * @param keyword Filter keyword
    * @param pageIndex Current page number (starting from 1)
    * @param pageSize Items per page
@@ -96,7 +96,7 @@ classDiagram
 - `FetcherRegistry`: holds the `FetcherProvider` list and provides lookup by `type`. `FetcherRegistry` does **not** map by resource name, because the resource name is a request parameter passed when calling `Fetcher`, not registration metadata.
 - `StaticResourceFactory`: converts `StaticRuleFactorResource` into a `StaticResource` entity.
 - `DynamicResourceFactory`: converts `DynamicRuleFactorResource` into the appropriate `DynamicResource` subtype. It determines the subtype from `features` and then selects the matching `Fetcher` from `FetcherRegistry` by `type`.
-- `ResourceFactory`: acts as the unified `Facade` entry point and automatically chooses the factory according to the shape of `RuleFactorDefinition.resource`.
+- `ResourceFactory`: acts as the unified `Facade` entry point and automatically chooses the factory according to the shape of `RuleFactor.resource`.
 
 ### Abstract Design
 
@@ -210,7 +210,7 @@ abstract class DynamicResourceFactory {
  * Unified resource factory (Facade)
  *
  * Responsibility: unified entry point for resource creation
- *               automatically selects a factory according to the shape of RuleFactorDefinition.resource
+ *               automatically selects a factory according to the shape of RuleFactor.resource
  * Dependency: StaticResourceFactory + DynamicResourceFactory
  */
 abstract class ResourceFactory {
@@ -219,6 +219,6 @@ abstract class ResourceFactory {
    * @param factor Rule factor definition
    * @returns the resource instance, or null if no resource is declared
    */
-  abstract create(factor: RuleFactorDefinition): Resource | null;
+  abstract create(factor: RuleFactor): Resource | null;
 }
 ```

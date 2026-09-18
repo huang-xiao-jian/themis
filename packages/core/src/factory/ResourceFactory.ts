@@ -1,6 +1,6 @@
 import type { DynamicRuleFactorResource } from '../dsl/DynamicRuleFactorResource';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 import type { StaticRuleFactorResource } from '../dsl/StaticRuleFactorResource';
 import type { DynamicResource } from '../resource/DynamicResource';
 import type { StaticResource } from '../resource/StaticResource';
@@ -22,7 +22,7 @@ export abstract class ResourceFactory {
    * - 含 options：创建静态资源
    * - 否则：创建动态资源（features / Fetcher 异常由内部工厂抛错）
    */
-  abstract create(factor: RuleFactorDefinition): Resource | null;
+  abstract create(factor: RuleFactor): Resource | null;
 }
 
 /**
@@ -36,7 +36,7 @@ export class DefaultResourceFactory extends ResourceFactory {
     super();
   }
 
-  override create(factor: RuleFactorDefinition): Resource | null {
+  override create(factor: RuleFactor): Resource | null {
     if (!factor.resource) {
       return null;
     }

@@ -1,5 +1,5 @@
 import type { AtomicRuleGroup } from '../dsl/AtomicRule';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 import { DefaultDynamicResourceFactory } from '../factory/DynamicResourceFactory';
 import { FetcherRegistry } from '../factory/FetcherRegistry';
 import { DefaultResourceFactory } from '../factory/ResourceFactory';
@@ -16,11 +16,11 @@ import { RuleWorkspaceScheduler } from '../scheduler/RuleWorkspaceScheduler';
  * 推荐在需要精细控制配置的场景使用
  */
 export class RuleWorkspaceBuilder {
-  private factors: readonly RuleFactorDefinition[] = [];
+  private factors: readonly RuleFactor[] = [];
   private fetchers: readonly FetcherProvider<unknown>[] = [];
   private ruleGroups: readonly AtomicRuleGroup[] | undefined;
 
-  withFactors(factors: readonly RuleFactorDefinition[]): this {
+  withFactors(factors: readonly RuleFactor[]): this {
     this.factors = factors;
     return this;
   }

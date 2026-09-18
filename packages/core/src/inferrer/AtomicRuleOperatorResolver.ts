@@ -1,7 +1,7 @@
 import { DataType } from '../dsl/DataType';
 import { Mode } from '../dsl/Mode';
 import { Quantity } from '../dsl/Quantity';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 
 /**
  * number 的 Operator 表
@@ -41,10 +41,10 @@ const BOOLEAN_POINT_SINGLE: readonly string[] = ['is'];
 /**
  * 原子规则操作符解析器
  *
- * 根据 RuleFactorDefinition 的 dataType + mode + quantity 解析可用的操作符列表
+ * 根据 RuleFactor 的 dataType + mode + quantity 解析可用的操作符列表
  */
 export class AtomicRuleOperatorResolver {
-  resolve(factor: RuleFactorDefinition): readonly string[] {
+  resolve(factor: RuleFactor): readonly string[] {
     const dataDomain = factor.dataType;
     const mode = this.resolveMode(factor);
     const quantity = this.resolveQuantity(factor);
@@ -71,11 +71,11 @@ export class AtomicRuleOperatorResolver {
     return [];
   }
 
-  private resolveMode(factor: RuleFactorDefinition): Mode {
+  private resolveMode(factor: RuleFactor): Mode {
     return factor.mode ?? Mode.POINT;
   }
 
-  private resolveQuantity(factor: RuleFactorDefinition): Quantity {
+  private resolveQuantity(factor: RuleFactor): Quantity {
     return factor.quantity ?? Quantity.SINGLE;
   }
 }

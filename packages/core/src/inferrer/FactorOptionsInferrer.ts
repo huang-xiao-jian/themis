@@ -1,5 +1,5 @@
 import type { FieldDataSource } from '../dsl/FieldDataSource';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 
 /**
  * 规则因子选项推断器
@@ -9,7 +9,7 @@ import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
  */
 export class FactorOptionsInferrer {
   infer(
-    allFactors: readonly RuleFactorDefinition[],
+    allFactors: readonly RuleFactor[],
     usedFactorNames: readonly string[]
   ): readonly FieldDataSource[] {
     const usedSet = new Set<string>(usedFactorNames);

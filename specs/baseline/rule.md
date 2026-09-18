@@ -2,7 +2,7 @@
 
 ## Goal
 
-Define minimum unit for **Rule Factor** consume.
+Define minimum unit for **Rule Factor** consumer.
 
 ## Rule Concepts
 
@@ -14,7 +14,7 @@ Define minimum unit for **Rule Factor** consume.
 interface AtomicRule<T> {
   // no business semantics, only a unique storage identifier
   id: string;
-  // rule factor namecomes from"RuleFactorDefinition", e.g. DEVICE_ID
+  // rule factor name comes from RuleFactor, e.g. DEVICE_ID
   name: string;
   // matching operator, defining comparison behavior such as BETWEEN, IN, GT
   operator: string;

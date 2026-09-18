@@ -14,6 +14,6 @@ export type {
 export type { FieldConstraints } from './FieldConstraints';
 export type { FieldDataSource } from './FieldDataSource';
 export type { GroupCoordinationEvent } from './GroupCoordinationEvent';
-export type { RuleFactorDefinition } from './RuleFactorDefinition';
+export type { RuleFactor } from './RuleFactor';
 export type { StaticRuleFactorResource } from './StaticRuleFactorResource';
 export type { WorkspaceCoordinationEvent } from './WorkspaceCoordinationEvent';

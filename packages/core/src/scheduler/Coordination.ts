@@ -3,7 +3,7 @@ import { createNanoEvents, type Emitter, type EventsMap } from 'nanoevents';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
 import type { GroupCoordinationEvent } from '../dsl/GroupCoordinationEvent';
 import { GroupCoordinationEventType } from '../dsl/GroupCoordinationEventType';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 import type { WorkspaceCoordinationEvent } from '../dsl/WorkspaceCoordinationEvent';
 import { WorkspaceCoordinationEventType } from '../dsl/WorkspaceCoordinationEventType';
 
@@ -41,7 +41,7 @@ export interface WorkspaceCoordination {
 
   // ── 信号通道（下行：Workspace → Group）────────────
   /** 可用规则因子定义列表（Workspace 级共享） */
-  readonly allFactors: Signal<readonly RuleFactorDefinition[]>;
+  readonly allFactors: Signal<readonly RuleFactor[]>;
 }
 
 /**
@@ -68,12 +68,10 @@ export interface GroupCoordination {
  *
  * 由 RuleWorkspaceScheduler 持有，供 AtomicRuleGroupScheduler 消费
  */
-export function createWorkspaceCoordination(
-  factors: readonly RuleFactorDefinition[]
-): WorkspaceCoordination {
+export function createWorkspaceCoordination(factors: readonly RuleFactor[]): WorkspaceCoordination {
   return {
     bus: createNanoEvents<WorkspaceCoordinationEvents>(),
-    allFactors: signal<readonly RuleFactorDefinition[]>([...factors]),
+    allFactors: signal<readonly RuleFactor[]>([...factors]),
   };
 }
 

@@ -1,6 +1,6 @@
 # Rule Factor Interpreter
 
-Defines the mechanism of the interpreter, clarifies how the **RuleFactorDefinition** transformed from abstract into concrete runtime.
+Defines the mechanism of the interpreter, clarifies how the **RuleFactor** transformed from abstract into concrete runtime.
 
 ## Terminology
 
@@ -183,7 +183,7 @@ The inference logic uses only `dataType` to determine the "data domain", then co
 
 ## Inferring Form Components Intermediate Representation
 
-Infer the intermediate form component and form component properties from the **RuleFactorDefinition** to support multiple adapters (framework + component library) efficiently.
+Infer the intermediate form component and form component properties from the **RuleFactor** to support multiple adapters (framework + component library) efficiently.
 
 ```mermaid
 graph TD
@@ -352,7 +352,7 @@ Suitable for constrained single-select scenarios (associated with a runtime `Res
 interface SelectProperties extends BaseProperties {
   /** Component type identifier */
   readonly type: 'Select';
-  /** Data resource, interpreted from the RuleFactorDefinition's resource attribute */
+  /** Data resource, interpreted from the RuleFactor's resource attribute */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
 ```
@@ -365,7 +365,7 @@ Suitable for constrained multi-select scenarios (associated with a runtime `Reso
 interface MultipleSelectProperties extends BaseProperties {
   /** Component type identifier */
   readonly type: 'MultipleSelect';
-  /** Data resource, interpreted from the RuleFactorDefinition's resource attribute */
+  /** Data resource, interpreted from the RuleFactor's resource attribute */
   readonly resource: StaticResource<any> | ElementaryDynamicResource<any>;
 }
 ```

@@ -29,7 +29,7 @@ function providePaginatedFilterableFetcher<T extends FieldDataSource>(
 ```ts
 const PAGINATED_FILTERABLE_FETCHER = providePaginatedFilterableFetcher<FieldDataSource>({
   fetch(resourceName, keyword, page, pageSize) {
-    // resourceName comes from `RuleFactorDefinition.resource.name`
+    // resourceName comes from `RuleFactor.resource.name`
     // The application can route to different backend services by resourceName
     if (resourceName === 'Employee') return api.searchEmployees(keyword, page, pageSize);
     if (resourceName === 'Department') return api.searchDepartments(keyword, page, pageSize);
@@ -48,7 +48,7 @@ const PAGINATED_FILTERABLE_FETCHER = providePaginatedFilterableFetcher<FieldData
  * Simplified factory function - one-stop creation (recommended for newcomers)
  */
 function createRuleWorkspace(config: {
-  factors: RuleFactorDefinition[];
+  factors: RuleFactor[];
   fetchers?: readonly FetcherProvider[];
   ruleGroups?: readonly AtomicRuleGroup[];
 }): RuleWorkspaceScheduler;
@@ -60,7 +60,7 @@ class RuleWorkspaceBuilder {
   /**
    * Configure rule factor definitions (required)
    */
-  withFactors(factors: RuleFactorDefinition[]): RuleWorkspaceBuilder;
+  withFactors(factors: RuleFactor[]): RuleWorkspaceBuilder;
 
   /**
    * Configure dynamic resource Fetchers (required for DynamicResource; StaticResource is provided by the core by default)
@@ -95,7 +95,7 @@ import { RuleWorkspaceBuilder, providePaginatedFilterableFetcher } from '@thesis
 // 1. Define the factors
 // Multiple factors can share the same Fetcher for the same feature combination
 // (for example, employee / department both use pagination + filtering)
-const factors: RuleFactorDefinition[] = [
+const factors: RuleFactor[] = [
   {
     name: 'employee',
     title: 'Employee',

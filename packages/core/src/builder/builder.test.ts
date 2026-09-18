@@ -2,7 +2,7 @@ import { assert, describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS } from '../__fixtures__/factors';
 import { SAMPLE_GROUP } from '../__fixtures__/rules';
 import { DataType } from '../dsl/DataType';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 import { providePaginatedFilterableFetcher } from '../fetcher/providePaginatedFilterableFetcher';
 import { RuleWorkspaceBuilder } from './RuleWorkspaceBuilder';
 import { createRuleWorkspace } from './createRuleWorkspace';
@@ -41,7 +41,7 @@ describe('RuleWorkspaceBuilder', () => {
       fetch: vi.fn().mockResolvedValue({ data: [], page: 1, pageSize: 20, total: 0 }),
     });
     // 创建包含 dynamic resource 的 factor
-    const factors: readonly RuleFactorDefinition[] = [
+    const factors: readonly RuleFactor[] = [
       ...ALL_FACTORS,
       {
         name: 'employee_dyn',

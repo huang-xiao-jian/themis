@@ -1,6 +1,6 @@
 # Domain Layer
 
-Encapsulates the core business rules, including rule inference, operator mapping, and threshold-property calculation. It infers available `operators` and `thresholder` values from `RuleFactorDefinition`, and infers selectable rule-factor options at the `AtomicRuleGroup` level.
+Encapsulates the core business rules, including rule inference, operator mapping, and threshold-property calculation. It infers available `operators` and `thresholder` values from `RuleFactor`, and infers selectable rule-factor options at the `AtomicRuleGroup` level.
 
 ## Prerequisites
 
@@ -132,8 +132,8 @@ classDiagram
  * Looks up the matching rule factor definition by factor name.
  */
 class FactorInferrer {
-  constructor(factors: readonly RuleFactorDefinition[]);
-  infer(name: string | null | undefined): RuleFactorDefinition | undefined;
+  constructor(factors: readonly RuleFactor[]);
+  infer(name: string | null | undefined): RuleFactor | undefined;
 }
 
 /**
@@ -143,15 +143,15 @@ class FactorInferrer {
  * and quantity (single / multiple) to determine the "operation domain".
  */
 class OperatorInferrer {
-  infer(factor: RuleFactorDefinition): readonly FieldDataSource[];
+  infer(factor: RuleFactor): readonly FieldDataSource[];
 }
 
 /**
  * Threshold renderer property inferrer
  *
- * Infers the intermediate form component and form component properties from RuleFactorDefinition.
+ * Infers the intermediate form component and form component properties from RuleFactor.
  */
 class ThresholderInferrer {
-  infer(factor: RuleFactorDefinition): ThresholdComponentProperties;
+  infer(factor: RuleFactor): ThresholdComponentProperties;
 }
 ```

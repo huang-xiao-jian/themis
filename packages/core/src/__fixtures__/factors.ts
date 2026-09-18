@@ -1,4 +1,4 @@
-import type { RuleFactorDefinition } from '../dsl';
+import type { RuleFactor } from '../dsl';
 import { DataType } from '../dsl/DataType';
 import { Mode } from '../dsl/Mode';
 import { Quantity } from '../dsl/Quantity';
@@ -8,13 +8,13 @@ import { Semantic } from '../dsl/Semantic';
  * 9 种关键组合的 DSL fixture，用于测试推断器/调度器
  */
 
-export const BOOLEAN_FACTOR: RuleFactorDefinition = {
+export const BOOLEAN_FACTOR: RuleFactor = {
   name: 'is_active',
   title: '是否激活',
   dataType: DataType.BOOLEAN,
 };
 
-export const STRING_POINT_SINGLE_FACTOR: RuleFactorDefinition = {
+export const STRING_POINT_SINGLE_FACTOR: RuleFactor = {
   name: 'employee',
   title: '员工',
   dataType: DataType.STRING,
@@ -22,7 +22,7 @@ export const STRING_POINT_SINGLE_FACTOR: RuleFactorDefinition = {
   quantity: Quantity.SINGLE,
 };
 
-export const STRING_POINT_MULTIPLE_FACTOR: RuleFactorDefinition = {
+export const STRING_POINT_MULTIPLE_FACTOR: RuleFactor = {
   name: 'tags',
   title: '标签',
   dataType: DataType.STRING,
@@ -30,7 +30,7 @@ export const STRING_POINT_MULTIPLE_FACTOR: RuleFactorDefinition = {
   quantity: Quantity.MULTIPLE,
 };
 
-export const NUMBER_POINT_SINGLE_FACTOR: RuleFactorDefinition = {
+export const NUMBER_POINT_SINGLE_FACTOR: RuleFactor = {
   name: 'age',
   title: '年龄',
   dataType: DataType.NUMBER,
@@ -38,7 +38,7 @@ export const NUMBER_POINT_SINGLE_FACTOR: RuleFactorDefinition = {
   quantity: Quantity.SINGLE,
 };
 
-export const NUMBER_POINT_MULTIPLE_FACTOR: RuleFactorDefinition = {
+export const NUMBER_POINT_MULTIPLE_FACTOR: RuleFactor = {
   name: 'allowed_levels',
   title: '允许的等级',
   dataType: DataType.NUMBER,
@@ -46,7 +46,7 @@ export const NUMBER_POINT_MULTIPLE_FACTOR: RuleFactorDefinition = {
   quantity: Quantity.MULTIPLE,
 };
 
-export const NUMBER_RANGE_SINGLE_FACTOR: RuleFactorDefinition = {
+export const NUMBER_RANGE_SINGLE_FACTOR: RuleFactor = {
   name: 'order_amount',
   title: '订单金额',
   dataType: DataType.NUMBER,
@@ -54,7 +54,7 @@ export const NUMBER_RANGE_SINGLE_FACTOR: RuleFactorDefinition = {
   quantity: Quantity.SINGLE,
 };
 
-export const NUMBER_RANGE_MULTIPLE_FACTOR: RuleFactorDefinition = {
+export const NUMBER_RANGE_MULTIPLE_FACTOR: RuleFactor = {
   name: 'price_ranges',
   title: '价格区间',
   dataType: DataType.NUMBER,
@@ -62,7 +62,7 @@ export const NUMBER_RANGE_MULTIPLE_FACTOR: RuleFactorDefinition = {
   quantity: Quantity.MULTIPLE,
 };
 
-export const DATE_RANGE_SINGLE_FACTOR: RuleFactorDefinition = {
+export const DATE_RANGE_SINGLE_FACTOR: RuleFactor = {
   name: 'visit_date',
   title: '访问日期',
   dataType: DataType.NUMBER,
@@ -71,7 +71,7 @@ export const DATE_RANGE_SINGLE_FACTOR: RuleFactorDefinition = {
   quantity: Quantity.SINGLE,
 };
 
-export const STATIC_RESOURCE_FACTOR: RuleFactorDefinition = {
+export const STATIC_RESOURCE_FACTOR: RuleFactor = {
   name: 'deliver_city',
   title: '目标城市',
   dataType: DataType.STRING,
@@ -84,7 +84,7 @@ export const STATIC_RESOURCE_FACTOR: RuleFactorDefinition = {
   },
 };
 
-export const DYNAMIC_RESOURCE_FACTOR: RuleFactorDefinition = {
+export const DYNAMIC_RESOURCE_FACTOR: RuleFactor = {
   name: 'employee_dynamic',
   title: '员工',
   dataType: DataType.STRING,
@@ -94,21 +94,21 @@ export const DYNAMIC_RESOURCE_FACTOR: RuleFactorDefinition = {
   },
 };
 
-export const STRING_LONG_TEXT_FACTOR: RuleFactorDefinition = {
+export const STRING_LONG_TEXT_FACTOR: RuleFactor = {
   name: 'description',
   title: '描述',
   dataType: DataType.STRING,
   constraints: { max: 500 },
 };
 
-export const STRING_SHORT_TEXT_FACTOR: RuleFactorDefinition = {
+export const STRING_SHORT_TEXT_FACTOR: RuleFactor = {
   name: 'short_text',
   title: '短文本',
   dataType: DataType.STRING,
   constraints: { max: 50 },
 };
 
-export const ALL_FACTORS: RuleFactorDefinition[] = [
+export const ALL_FACTORS: RuleFactor[] = [
   BOOLEAN_FACTOR,
   STRING_POINT_SINGLE_FACTOR,
   STRING_POINT_MULTIPLE_FACTOR,

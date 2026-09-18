@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [Rule Factor Definition](../../baseline/rule-factor.md)
+- [Rule Factor](../../baseline/rule-factor.md)
 - [Rule Definition](../../baseline/rule.md)
 - [Workspace Resource](./resource.md)
 - [Workspace Version](./workspace-version.md)
@@ -17,17 +17,17 @@ None
 
 ## Attributes
 
-- **Identifier**: the unique Rule Factor identity within a Workspace Version and the `name` of its projected **Rule Factor Definition**.
-- **Definition**: the attributes of the projected **Rule Factor Definition**.
-- **Resource Identifier**: the optional identity of the **Workspace Resource** used to construct the projected resource in **Rule Factor Definition**.
+- **Identifier**: the unique Rule Factor identity within a Workspace Version and the `name` of its projected **RuleFactor**.
+- **Definition**: the attributes of the projected **RuleFactor**.
+- **Resource Identifier**: the optional identity of the **Workspace Resource** used to construct the projected resource in **RuleFactor**.
 
 ## Data Model
 
 ```ts
-import type { RuleFactorDefinition } from '../../baseline/rule-factor.md';
+import type { RuleFactor } from '../../baseline/rule-factor.md';
 import type { WorkspaceResource } from './resource.md';
 
-interface WorkspaceRuleFactor extends Omit<RuleFactorDefinition, 'resource'> {
+interface WorkspaceRuleFactor extends Omit<RuleFactor, 'resource'> {
   identifier: string;
   resourceIdentifier?: WorkspaceResource['identifier'];
 }

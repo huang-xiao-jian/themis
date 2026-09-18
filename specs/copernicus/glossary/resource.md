@@ -8,7 +8,7 @@
 
 ## Definition
 
-A version-local, managed source of selectable values. Its definition uses the resource contracts from the [Rule Factor Definition](../../baseline/rule-factor.md) specification, but the [Workspace](./rule-workspace.md) owns its identifier, membership, lifecycle, and the static options or dynamic capabilities configured for that version.
+A version-local, managed source of selectable values. Its definition uses the resource contracts from the [Rule Factor](../../baseline/rule-factor.md) specification, but the [Workspace](./rule-workspace.md) owns its identifier, membership, lifecycle, and the static options or dynamic capabilities configured for that version.
 
 ## Synonyms
 

@@ -1,7 +1,7 @@
 import { computed, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
 import { nanoid } from 'nanoid';
 import type { AtomicRuleGroup } from '../dsl/AtomicRule';
-import type { RuleFactorDefinition } from '../dsl/RuleFactorDefinition';
+import type { RuleFactor } from '../dsl/RuleFactor';
 import { WorkspaceCoordinationEventType } from '../dsl/WorkspaceCoordinationEventType';
 import type { Inferrers } from './AtomicRuleForm';
 import { AtomicRuleGroupScheduler } from './AtomicRuleGroupScheduler';
@@ -38,7 +38,7 @@ export class RuleWorkspaceScheduler {
   private destroyed = false;
 
   constructor(
-    factors: readonly RuleFactorDefinition[],
+    factors: readonly RuleFactor[],
     inferrers: Inferrers,
     snapshots?: readonly AtomicRuleGroup[]
   ) {
@@ -64,7 +64,7 @@ export class RuleWorkspaceScheduler {
   /**
    * 获取规则因子定义（只读访问）
    */
-  getFactors(): ReadonlySignal<readonly RuleFactorDefinition[]> {
+  getFactors(): ReadonlySignal<readonly RuleFactor[]> {
     return this.coordination.allFactors;
   }
 

@@ -6,7 +6,7 @@
  */
 export interface ElementaryFetcher<T = unknown> {
   /**
-   * @param resourceName 资源名称，来源于 DSL 中 RuleFactorDefinition.resource.name
+   * @param resourceName 资源名称，来源于 DSL 中 RuleFactor.resource.name
    */
   fetch(resourceName: string): Promise<readonly T[]>;
 }
