@@ -48,3 +48,7 @@ Network access rule: the device must be within the **device whitelist**, and the
   }
 ]
 ```
+
+## Relationship
+
+- The **AtomicRule** has no reference to the original **RuleFactor**

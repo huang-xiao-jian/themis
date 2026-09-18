@@ -1,12 +1,12 @@
-# RuleWorkspace
+# Workspace
 
 ## Prerequisites
 
-- [Workspace Version](./workspace-version.md)
+- [WorkspaceVersion](./workspace-version.md)
 
 ## Definition
 
-A Rule boundary within which [Workspace Versions](./workspace-version.md) are organized.
+A logical boundary to organize [Workspace Versions](./workspace-version.md).
 
 ## Synonyms
 
@@ -14,39 +14,34 @@ None
 
 ## Attributes
 
-- **Identifier**: the unique identity of a Rule Workspace.
-- **Metadata**: the required name and description of a Rule Workspace.
-- **State**: whether the Rule Workspace is active or archived.
-- **Versions**: the Workspace Versions organized by the Rule Workspace.
+- **Identifier**: the unique identity.
+- **Metadata**: the required name and description.
+- **State**: the Workspace's lifecycle
+- **Versions**: the **WorkspaceVersion** organized by the Workspace.
 
 ## Data Model
 
 ```ts
-import type { RuleWorkspaceVersion } from './workspace-version.md';
+import type { WorkspaceVersion } from './workspace-version.md';
 
-interface RuleWorkspaceMetadata {
+interface WorkspaceMetadata {
+  // required, length --> [5, 40]
   name: string;
+  // required, length --> [5, 120]
   description: string;
 }
 
-type RuleWorkspaceState = 'active' | 'archived';
+type WorkspaceState = 'active' | 'archived';
 
-interface RuleWorkspace {
+interface Workspace extends WorkspaceMetadata {
   identifier: string;
-  metadata: RuleWorkspaceMetadata;
-  state: RuleWorkspaceState;
-  versions: RuleWorkspaceVersion[];
+  state: WorkspaceState;
+  versions: WorkspaceVersion[];
 }
 ```
 
-- The `identifier` is unique across active and archived Rule Workspaces.
-- A workspace has required `name` metadata.
-- A workspace `name` is non-empty text.
-- A workspace `name` is unique across active and archived Rule Workspaces.
-- A workspace `name` is at most 40 characters.
-- A workspace has required `description` metadata.
-- A workspace `description` is non-empty text.
-- A workspace `description` is at most 120 characters.
+- The `identifier` is readonly after creation.
+- The Workspace's `name` is unique across active and archived Workspace.
 
 ## State Transitions
 
@@ -59,8 +54,5 @@ stateDiagram-v2
 
 ## Constraints
 
-**Static constraints**
-
-- There may be at most 20 active Rule Workspaces; archived workspaces do not count toward this limit.
+- The Rule Manager can hold 20 active Workspace at most, archived workspaces do not count toward this limit.
 - An archived workspace belongs to the Archive Zone, whose behavior is outside the scope of this requirement.
-- A workspace identifier is read-only once created.

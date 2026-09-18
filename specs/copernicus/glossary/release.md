@@ -1,12 +1,12 @@
-# RuleReleasedWorkspaceVersionSnapshot
+# WorkspaceRelease
 
 ## Prerequisites
 
-- [Workspace Version](./workspace-version.md)
+- [WorkspaceVersion](./workspace-version.md)
 
 ## Definition
 
-Release is the action that marks an unreleased [Workspace Version](./workspace-version.md) as stable.
+A publishment record, publish means to make **Rules** within **Workspace Version** available for external, (e.g. The Downstream Application)
 
 ## Synonyms
 
@@ -21,16 +21,17 @@ None
 ## Data Model
 
 ```ts
-import type { RuleWorkspaceVersion } from './workspace-version.md';
+import type { WorkspaceVersion } from './workspace-version.md';
 
-interface RuleReleasedWorkspaceVersionSnapshot {
+interface WorkspaceRelease {
   workspaceIdentifier: string;
   versionIdentifier: string;
-  content: RuleWorkspaceVersion;
+  // The descriptive information about this release
+  description: string;
+  // The publish time
+  publishAt: Date;
 }
 ```
-
-A release identifies the complete snapshot of the Workspace Version, including its Resources, Rule Factors, and Rules.
 
 ## State Transitions
 
@@ -38,9 +39,6 @@ None
 
 ## Constraints
 
-**Static constraints**
-
-- A Workspace Version must contain at least one Rule before it can be released.
-- Before release, every Resource and Rule Factor projection must be valid, and each Rule must contain at least one non-empty Atomic Rule Group.
-- A derived Workspace Version's final Rule set must differ from its base version's final Rule set; a Rule Factor change alone does not change a final Rule definition.
-- Release is one-time and irreversible. A locked Workspace Version cannot be modified or permanently deleted.
+- **Publish** is one-time and irreversible. A published Workspace Version stay in **Locked** mode.
+- **Workspace Version** must contain at least one Rule before it can be released.
+- **Workspace Version** must differ from its base version's final Rule set.

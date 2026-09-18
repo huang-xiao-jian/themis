@@ -3,7 +3,7 @@
 ## Prerequesities
 
 - [Rule](./rule.md)
-- [Workspace Version](./workspace-version.md).
+- [WorkspaceVersion](./workspace-version.md).
 
 ## Definition
 
@@ -27,8 +27,11 @@ import type { RuleWorkspaceRule } from './rule.md';
 import type { RuleWorkspaceVersion } from './workspace-version.md';
 
 interface RuleRetrievalBeacon {
+  // required
   workspaceIdentifier: RuleWorkspace['identifier'];
+  // required
   versionIdentifier: RuleWorkspaceVersion['identifier'];
+  // required
   ruleIdentifier: RuleWorkspaceRule['identifier'];
 }
 ```

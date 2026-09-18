@@ -196,18 +196,20 @@ For **multi-value scenarios**, the constraints use the closed interval `[minItem
 ### Rule Factor Definition
 
 ```ts
+interface RuleFactorResource {
+  name: string;
+  features?: DynamicRuleFactorResourceFeature[];
+}
+
 interface RuleFactorDefinition {
   name: string;
   title: string;
-  description?: string;
+  description: string;
   dataType: DataType;
   semantic?: Semantic;
   mode?: Mode;
   quantity?: Quantity;
-  resource?: {
-    name: string;
-    features?: DynamicRuleFactorResourceFeature[];
-  };
+  resource?: RuleFactorResource;
   constraints?: FieldConstraints;
 }
 ```
