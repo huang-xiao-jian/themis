@@ -22,7 +22,7 @@ A Rule Manager derives a new unreleased Workspace Version from a selected releas
 
 ## 4. Postconditions
 
-- On success, a new unreleased version has the selected base identifier, the submitted metadata, and an independent copy of the base Resources, Rule Factors, Rules, and identifiers; the base remains unchanged.
+- On success, a new unreleased version stores the selected base identifier, the submitted metadata, and an independent copy of the base Resources, Rule Factors, Rules, and identifiers; the base remains unchanged.
 
 ## 5. Business Rules
 

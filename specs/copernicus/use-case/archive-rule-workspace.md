@@ -17,7 +17,7 @@ A Rule Manager permanently archives an active Rule Workspace. The relevant conce
 ## 3. Preconditions
 
 - The specified Rule Workspace exists and is active.
-- The workspace has no unreleased Workspace Versions and at least one non-initial released Workspace Version.
+- The workspace has no unreleased Workspace Versions and at least one released Workspace Version.
 
 ## 4. Postconditions
 

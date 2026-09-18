@@ -41,4 +41,4 @@ None
 
 - **Publish** is one-time and irreversible. A published Workspace Version stay in **Locked** mode.
 - **Workspace Version** must contain at least one Rule before it can be released.
-- **Workspace Version** must differ from its base version's final Rule set.
+- A derived **Workspace Version** must differ from its base version's final Rule set.

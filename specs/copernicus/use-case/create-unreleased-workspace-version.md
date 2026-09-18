@@ -1,31 +1,32 @@
-# Use Case Specification: Delete a Rule Workspace
+# Use Case Specification: Create an Unreleased Workspace Version
 
 ## Revision History
 
 | Date       | Version | Description                 | Author |
 | :--------- | :------ | :-------------------------- | :----- |
-| 2026-09-17 | 1.0     | Initial use-case definition | Codex  |
+| 2026-09-18 | 1.0     | Initial use-case definition | Codex  |
 
 ## 1. Use-Case Name
 
-Delete a Rule Workspace.
+Create an Unreleased Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager permanently deletes an active Rule Workspace with no protected version history. The relevant concepts and constraints are defined in the [Rule Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager creates an empty unreleased Workspace Version in an active Rule Workspace. The relevant concepts and constraints are defined in the [Workspace Version glossary entry](../glossary/workspace-version.md).
 
 ## 3. Preconditions
 
 - The specified Rule Workspace exists and is active.
-- The workspace has no Workspace Versions.
+- Fewer than three unreleased Workspace Versions exist in that workspace.
 
 ## 4. Postconditions
 
-- On success, the workspace no longer exists.
+- On success, an empty unreleased Workspace Version with no base version exists in the workspace.
 
 ## 5. Business Rules
 
-- An active workspace may be permanently deleted only when it has no Workspace Versions.
+- The Rule Manager supplies the new version identifier and metadata. Its identifier must have semantic-version form and be unique within the workspace.
+- The platform creates no Resources, Rule Factors, or Rules with the version.
 
 ## 6. Flow of Events
 
