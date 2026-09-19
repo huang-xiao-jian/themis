@@ -12,9 +12,10 @@ Release an Unreleased Workspace Version.
 
 ## 2. Brief Description
 
-A Rule Manager releases and locks an unreleased Workspace Version as a stable
-snapshot. The relevant concepts and constraints are defined in the [Workspace
-Release glossary entry](../glossary/workspace-release.md).
+A Rule Manager releases and locks an unreleased Workspace Version, producing
+its immutable public Rule artifact. The relevant concepts and constraints are
+defined in the [Workspace Version Artifact glossary entry](../glossary/workspace-version-artifact.md)
+and the [Workspace Release glossary entry](../glossary/workspace-release.md).
 
 ## 3. Preconditions
 
@@ -28,17 +29,18 @@ Release glossary entry](../glossary/workspace-release.md).
 
 ## 4. Postconditions
 
-- On success, the version is permanently released and locked; its public Rules
-  are available downstream; no downstream notification is sent.
+- On success, the version is permanently released and locked; a Workspace
+  Version Artifact containing its public Rules exists and is available
+  downstream; no downstream notification is sent.
 
 ## 5. Business Rules
 
 - A final public Rule added, removed, or changed from the base satisfies the
   derived-version difference requirement. Metadata, Workspace Rule Factor
   Resource, and Workspace Rule Factor changes alone do not.
-- Release locks the complete Workspace Version snapshot, is irreversible, and
-  immediately makes its public Rules available for downstream retrieval without
-  notification.
+- Release locks the complete Workspace Version snapshot, creates its immutable
+  Workspace Version Artifact, and immediately makes the artifact's public Rules
+  available for downstream retrieval without notification.
 - A sibling version with a higher identifier does not prevent release; each version is compared only with its own base.
 
 ## 6. Flow of Events

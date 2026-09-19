@@ -12,7 +12,8 @@ Retrieve a Rule from a Released Workspace Version.
 
 ## 2. Brief Description
 
-A Downstream Application obtains the final definition of one Rule from a specified released Workspace Version.
+A Downstream Application obtains the final definition of one Rule from the
+Workspace Version Artifact produced by a specified released Workspace Version.
 
 ## 3. Preconditions
 
@@ -24,14 +25,14 @@ None.
 
 ## 5. Business Rules
 
-- A Rule remains retrievable from a released Workspace Version after its workspace is archived.
+- A Rule remains retrievable from a Workspace Version Artifact after its source workspace is archived.
 
 ## 6. Flow of Events
 
 ```mermaid
 flowchart TD
     start([Start]) --> submit[Downstream Application request with RuleRetrievalBeacon]
-    submit --> available{Does the request identify a Rule in a released Workspace Version?}
+    submit --> available{Does the request identify a Rule in a released Workspace Version Artifact?}
     available -->|Yes| archived{Is the workspace archived?}
     archived -->|No| returnRule[Platform returns the Rule's final definition]
     archived -->|Yes| returnRule

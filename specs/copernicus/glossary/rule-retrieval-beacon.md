@@ -1,13 +1,16 @@
 # RuleRetrievalBeacon
 
-## Prerequesities
+## Prerequisites
 
 - [Rule](../../baseline/rule.md)
+- [WorkspaceVersionArtifact](./workspace-version-artifact.md)
 - [WorkspaceVersion](./workspace-version.md).
 
 ## Definition
 
-The only clue for the Downstream Application, to request one specified **Rule** from a released **Workspace Version**.
+The only clue for the Downstream Application to request one specified **Rule**
+from the [Workspace Version Artifact](./workspace-version-artifact.md) of a
+released **Workspace Version**.
 
 ## Synonyms
 
@@ -18,6 +21,10 @@ None
 - **Workspace Identifier**: the unique reference identity for **Workspace**
 - **Workspace Version Identifier**: the unique reference identity for **WorkspaceVersion**
 - **Rule Identifier**: the unique reference identity for **WorkspaceRule**
+
+The Workspace and Workspace Version identifiers identify the corresponding
+Workspace Version Artifact. The beacon does not expose the artifact as a
+separate identifier.
 
 ## Data Model
 
@@ -36,7 +43,7 @@ interface RuleRetrievalBeacon {
 }
 ```
 
-## State Transitins
+## State Transitions
 
 None
 

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Enable Rule Managers to define, version, validate, and release governed rule snapshots, while allowing Downstream Applications to retrieve a specified Rule from a released Workspace Version.
+Enable Rule Managers to define, version, validate, and release governed rule snapshots, while allowing Downstream Applications to retrieve a specified Rule from the public artifact of a released Workspace Version.
 
 ## Actors and Use Cases
 
@@ -64,6 +64,7 @@ Each concept has one canonical definition in the [glossary](./glossary/).
 - [Workspace Rule Factor Resource](./glossary/workspace-rule-factor-resource.md)
 - [Workspace Rule Factor](./glossary/workspace-rule-factor.md)
 - [Workspace Rule](./glossary/workspace-rule.md)
+- [Workspace Version Artifact](./glossary/workspace-version-artifact.md)
 - [Workspace Release](./glossary/workspace-release.md)
 - [Rule Retrieval Beacon](./glossary/rule-retrieval-beacon.md)
 

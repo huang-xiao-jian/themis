@@ -41,8 +41,11 @@ are the constituents of a public `Rule`.
   (`WorkspaceRuleFactor`) is a managed factor definition.
 - [Workspace Rule](./glossary/workspace-rule.md) (`WorkspaceRule`) is a managed
   rule aggregate.
+- [Workspace Version Artifact](./glossary/workspace-version-artifact.md)
+  (`WorkspaceVersionArtifact`) is the immutable public Rule payload produced
+  from a released Workspace Version.
 - [Workspace Release](./glossary/workspace-release.md) (`WorkspaceRelease`) is
-  the publication record for a released version snapshot.
+  the publication record for a Workspace Version Artifact.
 
 ### Public Concepts
 
@@ -74,6 +77,7 @@ classDiagram
 
     class Workspace
     class WorkspaceVersion
+    class WorkspaceVersionArtifact
     class WorkspaceRuleFactorResource
     class WorkspaceRuleFactor
     class WorkspaceRule
@@ -82,6 +86,7 @@ classDiagram
     WorkspaceVersion "1" *-- "0..*" WorkspaceRuleFactorResource : contains
     WorkspaceVersion "1" *-- "0..*" WorkspaceRuleFactor : contains
     WorkspaceVersion "1" *-- "0..*" WorkspaceRule : contains
+    WorkspaceVersion "1" --> "0..1" WorkspaceVersionArtifact : produces on release
     WorkspaceRuleFactor "0..*" --> "0..1" WorkspaceRuleFactorResource : uses
 ```
 
@@ -185,14 +190,16 @@ deletion do not alter an already configured Atomic Rule.
 flowchart LR
     base[Released Workspace Version]
     version[Workspace Version]
+    artifact[Workspace Version Artifact]
     release[Workspace Release]
     rule[Rule]
     beacon[Rule Retrieval Beacon]
     app[Downstream Application]
 
     base -->|is base for derivation of| version
-    release -->|publishes snapshot of| version
-    release -->|makes available| rule
+    version -->|produces| artifact
+    release -->|publishes| artifact
+    artifact -->|contains| rule
     beacon -->|identifies| rule
     app -->|submits| beacon
     app -->|retrieves| rule
@@ -209,25 +216,33 @@ without a base has no derivation relationship.
 There is no `DerivedWorkspaceVersion` entity or subtype. “Derived” describes
 only the creation provenance of a Workspace Version.
 
-### Workspace Release → Workspace Version
+### Workspace Version → Workspace Version Artifact
 
-**Projection.** A Workspace Release is the publication representation of one
-released Workspace Version. It records the Workspace and version identities and
-the complete locked snapshot. Publication is one-time and irreversible.
+**Projection.** Releasing a Workspace Version produces exactly one immutable
+Workspace Version Artifact. The artifact contains only the final public Rules;
+the source version retains the authoring-only configuration from which those
+Rules were projected.
 
-### Workspace Release → Rule
+### Workspace Release → Workspace Version Artifact
 
-**Dependency.** A Workspace Release needs the released version's public Rules
-to publish a usable snapshot. Release is permitted only when the version has at
-least one Workspace Rule, and it makes the projected Rules available to
-downstream retrieval.
+**Publication.** A Workspace Release records publication of one Workspace
+Version Artifact. The release identifies the artifact through the same
+Workspace and Version identifiers as its source; it does not contain the
+artifact or the Rules.
+
+### Workspace Version Artifact → Rule
+
+**Composition.** A Workspace Version Artifact contains the final public Rules
+projected from its source Workspace Version. These Rules are the only rule
+content available to downstream retrieval.
 
 ### Rule Retrieval Beacon → Rule
 
 **Projection.** A Rule Retrieval Beacon identifies one Workspace, one
 Workspace Version, and one public Rule. It is the representation a Downstream
-Application uses to request a Rule. The identified version must be released
-and the Rule must exist in that version.
+Application uses to request a Rule from the corresponding Workspace Version
+Artifact. The identified version must be released and the Rule must exist in
+that artifact.
 
 ### Downstream Application → Rule Retrieval Beacon
 
@@ -238,5 +253,5 @@ unavailable exception.
 ### Downstream Application → Rule
 
 **Dependency.** A successful retrieval consumes one public Rule from a
-released Workspace Version. Retrieval neither changes managed definitions nor
+Workspace Version Artifact. Retrieval neither changes managed definitions nor
 becomes unavailable when the containing Workspace is archived.

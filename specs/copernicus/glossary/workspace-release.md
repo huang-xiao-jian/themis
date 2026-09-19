@@ -2,13 +2,15 @@
 
 ## Prerequisites
 
+- [WorkspaceVersionArtifact](./workspace-version-artifact.md)
 - [WorkspaceVersion](./workspace-version.md)
 
 ## Definition
 
-A publication record that makes the public **Rules** projected from a released
-**Workspace Version** available to external consumers, such as a Downstream
-Application.
+A one-time publication record for the [Workspace Version Artifact](./workspace-version-artifact.md)
+produced from a released [Workspace Version](./workspace-version.md). It records
+the publication metadata and makes that existing artifact available to external
+consumers, such as a Downstream Application.
 
 ## Synonyms
 
@@ -18,20 +20,22 @@ None
 
 - **Workspace Identifier**: the identity of the Workspace that owns the released Workspace Version.
 - **Version Identifier**: the identity of the released Workspace Version.
-- **Content**: the complete released Workspace Version snapshot.
+- **Description**: the descriptive information about the publication.
+- **Published At**: the time at which the artifact became available.
 
 ## Data Model
 
 ```ts
+import type { Workspace } from './workspace.md';
 import type { WorkspaceVersion } from './workspace-version.md';
 
 interface WorkspaceRelease {
-  workspaceIdentifier: string;
-  versionIdentifier: string;
-  // The descriptive information about this release
+  workspaceIdentifier: Workspace['identifier'];
+  versionIdentifier: WorkspaceVersion['identifier'];
+  // The descriptive information about this publication
   description: string;
-  // The publish time
-  publishAt: Date;
+  // The time at which the artifact became available
+  publishedAt: Date;
 }
 ```
 
@@ -41,7 +45,7 @@ None
 
 ## Constraints
 
-- **Publish** is one-time and irreversible. A published Workspace Version stay in **Locked** mode.
+- **Publish** is one-time and irreversible. It creates the source version's Workspace Version Artifact and leaves the published Workspace Version in **Locked** mode.
 - **Workspace Version** must contain at least one **Workspace Rule** before it
   can be released.
 - A derived **Workspace Version** must differ from its base version's final
