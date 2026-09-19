@@ -1,4 +1,4 @@
-# Use Case Specification: View a Resource
+# Use Case Specification: View a Workspace Rule Factor Resource
 
 ## Revision History
 
@@ -8,19 +8,23 @@
 
 ## 1. Use-Case Name
 
-View a Resource.
+View a Workspace Rule Factor Resource.
 
 ## 2. Brief Description
 
-A Rule Manager views a version-local Resource in a Workspace Version. The relevant concepts and constraints are defined in the [Resource glossary entry](../glossary/resource.md).
+A Rule Manager views a version-local Workspace Rule Factor Resource in a
+Workspace Version. The relevant concepts and constraints are defined in the
+[Workspace Rule Factor Resource glossary entry](../glossary/workspace-rule-factor-resource.md).
 
 ## 3. Preconditions
 
-The specified Workspace Version and Resource exist, and the Resource belongs to that Workspace Version.
+The specified Workspace Version and Workspace Rule Factor Resource exist, and
+the resource belongs to that Workspace Version.
 
 ## 4. Postconditions
 
-- On success, the manager has the selected Resource definition; no content changes.
+- On success, the manager has the selected Workspace Rule Factor Resource
+  definition; no content changes.
 
 ## 5. Flow of Events
 

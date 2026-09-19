@@ -1,4 +1,4 @@
-# Use Case Specification: View a Rule Factor
+# Use Case Specification: View a Workspace Rule Factor
 
 ## Revision History
 
@@ -8,19 +8,23 @@
 
 ## 1. Use-Case Name
 
-View a Rule Factor.
+View a Workspace Rule Factor.
 
 ## 2. Brief Description
 
-A Rule Manager views a version-local Rule Factor in a Workspace Version. The relevant concepts and constraints are defined in the [Rule Factor glossary entry](../glossary/rule-factor.md).
+A Rule Manager views a version-local Workspace Rule Factor in a Workspace
+Version. The relevant concepts and constraints are defined in the [Workspace
+Rule Factor glossary entry](../glossary/workspace-rule-factor.md).
 
 ## 3. Preconditions
 
-The specified Workspace Version and Rule Factor exist, and the Rule Factor belongs to that Workspace Version.
+The specified Workspace Version and Workspace Rule Factor exist, and the
+factor belongs to that Workspace Version.
 
 ## 4. Postconditions
 
-- On success, the manager has the selected Rule Factor definition; no content changes.
+- On success, the manager has the selected Workspace Rule Factor definition; no
+  content changes.
 
 ## 5. Flow of Events
 

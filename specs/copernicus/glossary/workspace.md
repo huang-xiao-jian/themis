@@ -49,7 +49,9 @@ interface Workspace extends WorkspaceMetadata {
 stateDiagram-v2
     [*] --> Active: create
     Active --> Archived: archive
-    Active --> [*]: permanently delete
+    Active --> Deleted: permanently delete
+    Archived --> [*]
+    Deleted --> [*]
 ```
 
 ## Constraints

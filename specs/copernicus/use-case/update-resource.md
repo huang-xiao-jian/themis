@@ -1,4 +1,4 @@
-# Use Case Specification: Update a Resource
+# Use Case Specification: Update a Workspace Rule Factor Resource
 
 ## Revision History
 
@@ -8,24 +8,28 @@
 
 ## 1. Use-Case Name
 
-Update a Resource.
+Update a Workspace Rule Factor Resource.
 
 ## 2. Brief Description
 
-A Rule Manager changes a version-local Resource in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Resource glossary entry](../glossary/resource.md).
+A Rule Manager changes a version-local Workspace Rule Factor Resource in an
+unreleased Workspace Version. The relevant concepts and constraints are defined
+in the [Workspace Rule Factor Resource glossary entry](../glossary/workspace-rule-factor-resource.md).
 
 ## 3. Preconditions
 
 - The specified Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
-- The specified Resource exists in that Workspace Version.
+- The specified Workspace Rule Factor Resource exists in that Workspace Version.
 
 ## 4. Postconditions
 
-- On success, the Resource stores the validated replacement definition; its identifier remains unchanged.
+- On success, the Workspace Rule Factor Resource stores the validated
+  replacement definition; its identifier remains unchanged.
 
 ## 5. Business Rules
 
-- A Resource change is refused when it would leave a Rule Factor with an unsatisfied resource association.
+- A Workspace Rule Factor Resource change is refused when it would leave a
+  Workspace Rule Factor with an unsatisfied resource association.
 
 ## 6. Flow of Events
 

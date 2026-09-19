@@ -3,12 +3,13 @@
 ## Prerequisites
 
 - [Rule Definition](../../baseline/rule.md)
-- [WorkspaceRuleFactor](./rule-factor.md)
+- [WorkspaceRuleFactor](./workspace-rule-factor.md)
 - [WorkspaceVersion](./workspace-version.md)
 
 ## Definition
 
-A version-local managed aggregate of Atomic Rule Groups. The Rule Setter creates its Atomic Rules by consuming a [Rule Factor](./rule-factor.md).
+A version-local managed aggregate of Atomic Rule Groups. The Rule Setter creates
+its Atomic Rules by consuming a [Rule Factor](../../baseline/rule-factor.md).
 
 ## Synonyms
 

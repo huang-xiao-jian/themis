@@ -1,4 +1,4 @@
-# Use Case Specification: Create a Rule
+# Use Case Specification: Create a Workspace Rule
 
 ## Revision History
 
@@ -8,11 +8,13 @@
 
 ## 1. Use-Case Name
 
-Create a Rule.
+Create a Workspace Rule.
 
 ## 2. Brief Description
 
-A Rule Manager creates a version-local Rule in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule glossary entry](../glossary/rule.md).
+A Rule Manager creates a version-local Workspace Rule in an unreleased
+Workspace Version. The relevant concepts and constraints are defined in the
+[Workspace Rule glossary entry](../glossary/workspace-rule.md).
 
 ## 3. Preconditions
 
@@ -20,7 +22,8 @@ The specified Workspace exists and is active, and the target Workspace Version e
 
 ## 4. Postconditions
 
-- On success, the Rule exists with its immutable identifier and satisfies applicable managed-definition constraints.
+- On success, the Workspace Rule exists with its immutable identifier and
+  satisfies applicable managed-definition constraints.
 
 ## 5. Business Rules
 

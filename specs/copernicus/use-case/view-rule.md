@@ -1,4 +1,4 @@
-# Use Case Specification: View a Rule
+# Use Case Specification: View a Workspace Rule
 
 ## Revision History
 
@@ -8,19 +8,22 @@
 
 ## 1. Use-Case Name
 
-View a Rule.
+View a Workspace Rule.
 
 ## 2. Brief Description
 
-A Rule Manager views a version-local Rule in a Workspace Version. The relevant concepts and constraints are defined in the [Rule glossary entry](../glossary/rule.md).
+A Rule Manager views a version-local Workspace Rule in a Workspace Version. The
+relevant concepts and constraints are defined in the [Workspace Rule glossary entry](../glossary/workspace-rule.md).
 
 ## 3. Preconditions
 
-The specified Workspace Version and Rule exist, and the Rule belongs to that Workspace Version.
+The specified Workspace Version and Workspace Rule exist, and the rule belongs
+to that Workspace Version.
 
 ## 4. Postconditions
 
-- On success, the manager has the selected Rule definition; no content changes.
+- On success, the manager has the selected Workspace Rule definition; no
+  content changes.
 
 ## 5. Flow of Events
 

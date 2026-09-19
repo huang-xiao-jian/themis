@@ -12,7 +12,8 @@ Archive a Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager permanently archives an active Workspace. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager permanently archives an active Workspace. The relevant concepts
+and constraints are defined in the [Workspace glossary entry](../glossary/workspace.md).
 
 ## 3. Preconditions
 
@@ -21,12 +22,17 @@ A Rule Manager permanently archives an active Workspace. The relevant concepts a
 
 ## 4. Postconditions
 
-- On success, the workspace is permanently archived; released Rules remain retrievable but no workspace metadata, version, or content can change.
+- On success, the Workspace is permanently archived; public Rules from its
+  released Workspace Versions remain retrievable, but no Workspace metadata,
+  version, or content can change.
 
 ## 5. Business Rules
 
 - Archival is permanent and applies only to the Workspace.
-- Archival neither changes nor makes unavailable Rules from released Workspace Versions. An archived workspace remains available to Downstream Applications but cannot be modified, and no content creation, version release, or version deletion is permitted.
+- Archival neither changes nor makes unavailable public Rules from released
+  Workspace Versions. An archived Workspace remains available to Downstream
+  Applications but cannot be modified, and no content creation, version
+  release, or version deletion is permitted.
 
 ## 6. Flow of Events
 

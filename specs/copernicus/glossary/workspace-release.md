@@ -6,7 +6,9 @@
 
 ## Definition
 
-A publishment record, publish means to make **Rules** within **Workspace Version** available for external, (e.g. The Downstream Application)
+A publication record that makes the public **Rules** projected from a released
+**Workspace Version** available to external consumers, such as a Downstream
+Application.
 
 ## Synonyms
 
@@ -40,5 +42,7 @@ None
 ## Constraints
 
 - **Publish** is one-time and irreversible. A published Workspace Version stay in **Locked** mode.
-- **Workspace Version** must contain at least one Rule before it can be released.
-- A derived **Workspace Version** must differ from its base version's final Rule set.
+- **Workspace Version** must contain at least one **Workspace Rule** before it
+  can be released.
+- A derived **Workspace Version** must differ from its base version's final
+  public **Rule** set.

@@ -22,12 +22,17 @@ A Rule Manager derives a new unreleased Workspace Version from a selected releas
 
 ## 4. Postconditions
 
-- On success, a new unreleased version stores the selected base identifier, the submitted metadata, and an independent copy of the base Resources, Rule Factors, Rules, and identifiers; the base remains unchanged.
+- On success, a new unreleased version stores the selected base identifier, the
+  submitted metadata, and an independent copy of the base Workspace Rule Factor
+  Resources, Workspace Rule Factors, Workspace Rules, and identifiers; the base
+  remains unchanged.
 
 ## 5. Business Rules
 
 - A subsequent Workspace Version is created only from a released base in the same active workspace.
-- The new version copies the base Resources, Rule Factors, Rules, and identifiers but not its metadata; later changes do not affect the base.
+- The new version copies the base Workspace Rule Factor Resources, Workspace
+  Rule Factors, Workspace Rules, and identifiers but not its metadata; later
+  changes do not affect the base.
 - The Rule Manager supplies the new version identifier and metadata. Its identifier must have semantic-version form, be unique within the workspace, and be strictly greater than the selected base; no other semantic-version ordering is required.
 - Multiple unreleased versions may share a released base. Each is assessed only against its own base.
 

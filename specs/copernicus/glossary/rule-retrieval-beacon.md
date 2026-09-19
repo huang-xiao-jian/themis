@@ -2,7 +2,7 @@
 
 ## Prerequesities
 
-- [Rule](./rule.md)
+- [Rule](../../baseline/rule.md)
 - [WorkspaceVersion](./workspace-version.md).
 
 ## Definition
@@ -22,8 +22,8 @@ None
 ## Data Model
 
 ```ts
-import type { Workspace } from './rule-workspace.md';
-import type { WorkspaceRule } from './rule.md';
+import type { Workspace } from './workspace.md';
+import type { WorkspaceRule } from './workspace-rule.md';
 import type { WorkspaceVersion } from './workspace-version.md';
 
 interface RuleRetrievalBeacon {

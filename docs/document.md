@@ -39,7 +39,7 @@ import type { FieldDataSource } from './spec.md';
 Use these documents as the structural templates for new specifications:
 
 - [Requirement specification template](../specs/copernicus/requirement.md)
-- [Use-case specification template](../specs/copernicus/use-case/retrieve-released-rule.md)
+- [Use-case specification template](../specs/copernicus/use-case/retrieve-rule-from-released-workspace-version.md)
 
 Preserve the applicable template structure. Update a template when a structural
 change should become a convention for future specifications.

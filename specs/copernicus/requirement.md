@@ -1,4 +1,4 @@
-# Rule
+# Workspace Rule Management
 
 ## Goal
 
@@ -30,30 +30,30 @@ Enable Rule Managers to define, version, validate, and release governed rule sna
 
 ---
 
-- [Create a Resource](./use-case/create-resource.md)
-- [View a Resource](./use-case/view-resource.md)
-- [Update a Resource](./use-case/update-resource.md)
-- [Delete a Resource](./use-case/delete-resource.md)
+- [Create a Workspace Rule Factor Resource](./use-case/create-resource.md)
+- [View a Workspace Rule Factor Resource](./use-case/view-resource.md)
+- [Update a Workspace Rule Factor Resource](./use-case/update-resource.md)
+- [Delete a Workspace Rule Factor Resource](./use-case/delete-resource.md)
 
 ---
 
-- [Create a Rule Factor](./use-case/create-rule-factor.md)
-- [View a Rule Factor](./use-case/view-rule-factor.md)
-- [Update a Rule Factor](./use-case/update-rule-factor.md)
-- [Delete a Rule Factor](./use-case/delete-rule-factor.md)
+- [Create a Workspace Rule Factor](./use-case/create-rule-factor.md)
+- [View a Workspace Rule Factor](./use-case/view-rule-factor.md)
+- [Update a Workspace Rule Factor](./use-case/update-rule-factor.md)
+- [Delete a Workspace Rule Factor](./use-case/delete-rule-factor.md)
 
 ---
 
-- [Create a Rule](./use-case/create-rule.md)
-- [View a Rule](./use-case/view-rule.md)
-- [Update a Rule](./use-case/update-rule.md)
-- [Delete a Rule](./use-case/delete-rule.md)
+- [Create a Workspace Rule](./use-case/create-rule.md)
+- [View a Workspace Rule](./use-case/view-rule.md)
+- [Update a Workspace Rule](./use-case/update-rule.md)
+- [Delete a Workspace Rule](./use-case/delete-rule.md)
 
 ---
 
 ### Downstream Application
 
-- [Retrieve a Released Rule](./use-case/retrieve-released-rule.md)
+- [Retrieve a Rule from a Released Workspace Version](./use-case/retrieve-rule-from-released-workspace-version.md)
 
 ## Semantic Concepts
 
@@ -61,10 +61,10 @@ Each concept has one canonical definition in the [glossary](./glossary/).
 
 - [Workspace](./glossary/workspace.md)
 - [Workspace Version](./glossary/workspace-version.md)
-- [Resource](./glossary/workspace-resource.md)
-- [Rule Factor](./glossary/workspace-rule-factor.md)
-- [Rule](./glossary/workspace-rule.md)
-- [Release](./glossary/workspace-release.md)
+- [Workspace Rule Factor Resource](./glossary/workspace-rule-factor-resource.md)
+- [Workspace Rule Factor](./glossary/workspace-rule-factor.md)
+- [Workspace Rule](./glossary/workspace-rule.md)
+- [Workspace Release](./glossary/workspace-release.md)
 - [Rule Retrieval Beacon](./glossary/rule-retrieval-beacon.md)
 
 For the classified relationships among these concepts, see
@@ -81,7 +81,7 @@ For the classified relationships among these concepts, see
 flowchart TD
     createWorkspace[Rule Manager creates a Workspace]
     createFirstDraft[Rule Manager creates an unreleased Workspace Version]
-    configureFirstDraft[Rule Manager configures Resources, Rule Factors, and Rules]
+    configureFirstDraft[Rule Manager configures Workspace Rule Factor Resources, Workspace Rule Factors, and Workspace Rules]
     reviewFirstDraft[Rule Manager reviews the version snapshot]
     releaseFirstDraft[Rule Manager releases the Workspace Version]
     retrieveRule[Downstream Application retrieves a specified Rule]
@@ -99,7 +99,7 @@ flowchart TD
 flowchart TD
     selectBase[Rule Manager selects a released Workspace Version]
     createDraft[Rule Manager creates an unreleased Workspace Version from the selected version]
-    configureDraft[Rule Manager configures Resources, Rule Factors, and Rules]
+    configureDraft[Rule Manager configures Workspace Rule Factor Resources, Workspace Rule Factors, and Workspace Rules]
     reviewDraft[Rule Manager reviews the version snapshot]
     releaseDraft[Rule Manager releases the Workspace Version]
     releasedVersion[Released Workspace Version]

@@ -2,14 +2,18 @@
 
 ## Prerequisites
 
-- [Workspace](./rule-workspace.md)
-- [Workspace Resource](./resource.md)
-- [Workspace Rule Factor](./rule-factor.md)
-- [Workspace Rule](./rule.md)
+- [Workspace](./workspace.md)
+- [Workspace Rule Factor Resource](./workspace-rule-factor-resource.md)
+- [Workspace Rule Factor](./workspace-rule-factor.md)
+- [Workspace Rule](./workspace-rule.md)
 
 ## Definition
 
-An isolated line of change within a [Workspace](./rule-workspace.md). It contains version-local [Resources](./resource.md), [Rule Factors](./rule-factor.md), and [Rules](./rule.md). Actions within one Workspace Version do not affect another Workspace Version.
+An isolated line of change within a [Workspace](./workspace.md). It contains
+version-local [Workspace Rule Factor Resources](./workspace-rule-factor-resource.md),
+[Workspace Rule Factors](./workspace-rule-factor.md), and
+[Workspace Rules](./workspace-rule.md). Actions within one Workspace Version
+do not affect another Workspace Version.
 
 ## Synonyms
 

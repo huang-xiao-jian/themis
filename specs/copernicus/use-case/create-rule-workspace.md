@@ -12,7 +12,8 @@ Create a Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager creates an empty active Workspace and supplies its metadata. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager creates an empty active Workspace and supplies its metadata. The
+relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/workspace.md).
 
 ## 3. Preconditions
 

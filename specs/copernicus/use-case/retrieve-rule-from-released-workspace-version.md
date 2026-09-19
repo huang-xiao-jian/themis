@@ -1,4 +1,4 @@
-# Use Case Specification: Retrieve a Released Rule
+# Use Case Specification: Retrieve a Rule from a Released Workspace Version
 
 ## Revision History
 
@@ -8,7 +8,7 @@
 
 ## 1. Use-Case Name
 
-Retrieve a Released Rule.
+Retrieve a Rule from a Released Workspace Version.
 
 ## 2. Brief Description
 

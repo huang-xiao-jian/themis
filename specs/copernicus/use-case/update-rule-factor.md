@@ -1,4 +1,4 @@
-# Use Case Specification: Update a Rule Factor
+# Use Case Specification: Update a Workspace Rule Factor
 
 ## Revision History
 
@@ -8,25 +8,31 @@
 
 ## 1. Use-Case Name
 
-Update a Rule Factor.
+Update a Workspace Rule Factor.
 
 ## 2. Brief Description
 
-A Rule Manager changes a version-local Rule Factor in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule Factor glossary entry](../glossary/rule-factor.md).
+A Rule Manager changes a version-local Workspace Rule Factor in an unreleased
+Workspace Version. The relevant concepts and constraints are defined in the
+[Workspace Rule Factor glossary entry](../glossary/workspace-rule-factor.md).
 
 ## 3. Preconditions
 
 - The specified Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
-- The specified Rule Factor exists in that Workspace Version.
+- The specified Workspace Rule Factor exists in that Workspace Version.
 
 ## 4. Postconditions
 
-- On success, the Rule Factor stores the validated replacement definition; its identifier remains unchanged, and Rules containing Atomic Rules previously configured from it remain unchanged.
+- On success, the Workspace Rule Factor stores the validated replacement
+  definition; its identifier remains unchanged, and Workspace Rules containing
+  Atomic Rules previously configured from it remain unchanged.
 
 ## 5. Business Rules
 
-- A Rule Factor change must produce a valid Rule Factor projection; an invalid change is refused.
-- Changing a Rule Factor does not change Atomic Rules previously configured from it.
+- A Workspace Rule Factor change must produce a valid Rule Factor projection; an
+  invalid change is refused.
+- Changing a Workspace Rule Factor does not change Atomic Rules previously
+  configured from it.
 
 ## 6. Flow of Events
 

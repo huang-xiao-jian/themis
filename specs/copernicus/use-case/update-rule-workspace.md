@@ -12,7 +12,8 @@ Update a Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager changes the metadata of an active Workspace. The relevant concepts and constraints are defined in the [Workspace glossary entry](../glossary/rule-workspace.md).
+A Rule Manager changes the metadata of an active Workspace. The relevant
+concepts and constraints are defined in the [Workspace glossary entry](../glossary/workspace.md).
 
 ## 3. Preconditions
 

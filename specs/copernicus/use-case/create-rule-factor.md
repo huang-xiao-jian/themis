@@ -1,4 +1,4 @@
-# Use Case Specification: Create a Rule Factor
+# Use Case Specification: Create a Workspace Rule Factor
 
 ## Revision History
 
@@ -8,11 +8,13 @@
 
 ## 1. Use-Case Name
 
-Create a Rule Factor.
+Create a Workspace Rule Factor.
 
 ## 2. Brief Description
 
-A Rule Manager creates a version-local Rule Factor in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule Factor glossary entry](../glossary/rule-factor.md).
+A Rule Manager creates a version-local Workspace Rule Factor in an unreleased
+Workspace Version. The relevant concepts and constraints are defined in the
+[Workspace Rule Factor glossary entry](../glossary/workspace-rule-factor.md).
 
 ## 3. Preconditions
 
@@ -20,11 +22,13 @@ The specified Workspace exists and is active, and the target Workspace Version e
 
 ## 4. Postconditions
 
-- On success, the Rule Factor exists with its immutable identifier and satisfies applicable managed-definition constraints.
+- On success, the Workspace Rule Factor exists with its immutable identifier and
+  satisfies applicable managed-definition constraints.
 
 ## 5. Business Rules
 
-- A new Rule Factor must produce a valid Rule Factor projection; an invalid definition is refused.
+- A new Workspace Rule Factor must produce a valid Rule Factor projection; an
+  invalid definition is refused.
 
 ## 6. Flow of Events
 

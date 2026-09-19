@@ -1,4 +1,4 @@
-# Use Case Specification: Create a Resource
+# Use Case Specification: Create a Workspace Rule Factor Resource
 
 ## Revision History
 
@@ -8,11 +8,13 @@
 
 ## 1. Use-Case Name
 
-Create a Resource.
+Create a Workspace Rule Factor Resource.
 
 ## 2. Brief Description
 
-A Rule Manager creates a version-local Resource in an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Resource glossary entry](../glossary/resource.md).
+A Rule Manager creates a version-local Workspace Rule Factor Resource in an
+unreleased Workspace Version. The relevant concepts and constraints are defined
+in the [Workspace Rule Factor Resource glossary entry](../glossary/workspace-rule-factor-resource.md).
 
 ## 3. Preconditions
 
@@ -20,7 +22,8 @@ The specified Workspace exists and is active, and the target Workspace Version e
 
 ## 4. Postconditions
 
-- On success, the Resource exists with its immutable identifier and satisfies applicable managed-definition constraints.
+- On success, the Workspace Rule Factor Resource exists with its immutable
+  identifier and satisfies applicable managed-definition constraints.
 
 ## 5. Flow of Events
 

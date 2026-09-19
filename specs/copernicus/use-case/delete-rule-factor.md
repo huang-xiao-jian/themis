@@ -1,4 +1,4 @@
-# Use Case Specification: Delete a Rule Factor
+# Use Case Specification: Delete a Workspace Rule Factor
 
 ## Revision History
 
@@ -8,25 +8,32 @@
 
 ## 1. Use-Case Name
 
-Delete a Rule Factor.
+Delete a Workspace Rule Factor.
 
 ## 2. Brief Description
 
-A Rule Manager permanently deletes a version-local Rule Factor from an unreleased Workspace Version. The relevant concepts and constraints are defined in the [Rule Factor glossary entry](../glossary/rule-factor.md).
+A Rule Manager permanently deletes a version-local Workspace Rule Factor from
+an unreleased Workspace Version. The relevant concepts and constraints are
+defined in the [Workspace Rule Factor glossary entry](../glossary/workspace-rule-factor.md).
 
 ## 3. Preconditions
 
 - The specified Workspace exists and is active, and the target Workspace Version exists in that workspace and is unreleased.
-- The specified Rule Factor exists in that Workspace Version.
+- The specified Workspace Rule Factor exists in that Workspace Version.
 
 ## 4. Postconditions
 
-- On success, the Rule Factor no longer exists, and the manager may create a Rule Factor with the deleted identifier. Rules containing Atomic Rules previously configured from it remain unchanged.
+- On success, the Workspace Rule Factor no longer exists, and the manager may
+  create a Workspace Rule Factor with the deleted identifier. Workspace Rules
+  containing Atomic Rules previously configured from it remain unchanged.
 
 ## 5. Business Rules
 
-- A Rule Factor may be deleted after the Rule Setter consumed it because the resulting Atomic Rules do not retain a managed Rule Factor reference.
-- Deleting a Rule Factor does not change Atomic Rules previously configured from it.
+- A Workspace Rule Factor may be deleted after the Rule Setter consumed it
+  because the resulting Atomic Rules do not retain a managed Workspace Rule
+  Factor reference.
+- Deleting a Workspace Rule Factor does not change Atomic Rules previously
+  configured from it.
 
 ## 6. Flow of Events
 
