@@ -13,6 +13,16 @@ The features are divided into multiple packages:
 | `@thesis/antd`    | Implement the rule workspace editor UI with antd components  |
 | `@thesis/polaris` | Rule configuration for interactive case collection           |
 
+## Development Guidance
+
+The repository guidance in [AGENTS.md](./AGENTS.md) applies to all changes. Consult
+the relevant reference before working in its area:
+
+- [Document writing standards](./docs/document.md)
+- [Automation testing standards](./docs/testing.md)
+- [Code conventions](./docs/conventions.md)
+- [React conventions](./docs/conventions/react.md)
+
 ## License
 
 MIT

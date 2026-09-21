@@ -31,7 +31,7 @@ None.
 
 ```mermaid
 flowchart TD
-    start([Start]) --> submit[Downstream Application request with RuleRetrievalBeacon]
+    start([Start]) --> submit[Downstream Application request with WorkspaceRuleBeacon]
     submit --> available{Does the request identify a Rule in a released Workspace Version Artifact?}
     available -->|Yes| archived{Is the workspace archived?}
     archived -->|No| returnRule[Platform returns the Rule's final definition]
@@ -42,7 +42,7 @@ flowchart TD
     unavailable --> endUnavailable([End: Rule unavailable])
 ```
 
-- The Downstream Application must provide [RuleRetrievalBeacon](../glossary/rule-retrieval-beacon.md)
+- The Downstream Application must provide [WorkspaceRuleBeacon](../glossary/workspace-rule-beacon.md)
 
 ## 7. Special Requirements
 

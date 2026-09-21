@@ -59,8 +59,8 @@ are the constituents of a public `Rule`.
   Rules with logical AND.
 - [Atomic Rule](../baseline/rule.md) (`AtomicRule`) is the smallest configured
   rule condition.
-- [Rule Retrieval Beacon](./glossary/rule-retrieval-beacon.md)
-  (`RuleRetrievalBeacon`) identifies one public Rule in a released Workspace
+- [Workspace Rule Beacon](./glossary/workspace-rule-beacon.md)
+  (`WorkspaceRuleBeacon`) identifies one public Rule in a released Workspace
   Version for downstream retrieval.
 
 The [Rule Manager](./requirement.md#rule-manager), [Rule Setter](../baseline/rule-factor.md),

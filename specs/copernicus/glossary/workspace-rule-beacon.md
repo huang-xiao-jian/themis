@@ -1,4 +1,4 @@
-# RuleRetrievalBeacon
+# WorkspaceRuleBeacon
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ import type { Workspace } from './workspace.md';
 import type { WorkspaceRule } from './workspace-rule.md';
 import type { WorkspaceVersion } from './workspace-version.md';
 
-interface RuleRetrievalBeacon {
+interface WorkspaceRuleBeacon {
   // required
   workspaceIdentifier: Workspace['identifier'];
   // required
