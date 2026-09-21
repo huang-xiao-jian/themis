@@ -66,7 +66,7 @@ Each concept has one canonical definition in the [glossary](./glossary/).
 - [Workspace Rule](./glossary/workspace-rule.md)
 - [Workspace Version Artifact](./glossary/workspace-version-artifact.md)
 - [Workspace Release](./glossary/workspace-release.md)
-- [Rule Retrieval Beacon](./glossary/rule-retrieval-beacon.md)
+- [Workspace Rule Beacon](./glossary/workspace-rule-beacon.md)
 
 For the classified relationships among these concepts, see
 

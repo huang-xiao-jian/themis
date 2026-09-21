@@ -193,7 +193,7 @@ flowchart LR
     artifact[Workspace Version Artifact]
     release[Workspace Release]
     rule[Rule]
-    beacon[Rule Retrieval Beacon]
+    beacon[Workspace Rule Beacon]
     app[Downstream Application]
 
     base -->|is base for derivation of| version
@@ -236,17 +236,17 @@ artifact or the Rules.
 projected from its source Workspace Version. These Rules are the only rule
 content available to downstream retrieval.
 
-### Rule Retrieval Beacon → Rule
+### Workspace Rule Beacon → Rule
 
-**Projection.** A Rule Retrieval Beacon identifies one Workspace, one
+**Projection.** A Workspace Rule Beacon identifies one Workspace, one
 Workspace Version, and one public Rule. It is the representation a Downstream
 Application uses to request a Rule from the corresponding Workspace Version
 Artifact. The identified version must be released and the Rule must exist in
 that artifact.
 
-### Downstream Application → Rule Retrieval Beacon
+### Downstream Application → Workspace Rule Beacon
 
-**Dependency.** A retrieval request needs one Rule Retrieval Beacon. The
+**Dependency.** A retrieval request needs one Workspace Rule Beacon. The
 application submits it and receives the final Rule definition or a simple
 unavailable exception.
 
