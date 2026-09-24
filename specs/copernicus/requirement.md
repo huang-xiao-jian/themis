@@ -68,8 +68,6 @@ Each concept has one canonical definition in the [glossary](./glossary/).
 - [Workspace Release](./glossary/workspace-release.md)
 - [Workspace Rule Beacon](./glossary/workspace-rule-beacon.md)
 
-For the classified relationships among these concepts, see
-
 ## Semantic Concepts Relationship
 
 - [Concept Relationships](./relationships.md).
