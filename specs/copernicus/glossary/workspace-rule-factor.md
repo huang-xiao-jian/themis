@@ -21,6 +21,7 @@ None
 - **Definition**: the attributes of the projected **RuleFactor**.
 - **Resource Identifier**: the optional identity of the **Workspace Rule Factor
   Resource** used to construct the projected resource in **RuleFactor**.
+- **Times**: the audit times that record its creation and most recent change.
 
 ## Data Model
 
@@ -28,8 +29,59 @@ None
 import type { RuleFactor } from '../../baseline/rule-factor.md';
 import type { WorkspaceRuleFactorResource } from './workspace-rule-factor-resource.md';
 
-interface WorkspaceRuleFactor extends Omit<RuleFactor, 'resource'> {
+interface WorkspaceRuleFactor {
   identifier: string;
+  name: RuleFactor['name'];
+  title: RuleFactor['title'];
+  description: RuleFactor['description'];
+  dataType: RuleFactor['dataType'];
+  semantic?: RuleFactor['semantic'];
+  mode?: RuleFactor['mode'];
+  quantity?: RuleFactor['quantity'];
+  constraints?: RuleFactor['constraints'];
+  resourceIdentifier?: WorkspaceRuleFactorResource['identifier'];
+  // audit times
+  createdAt: number;
+  updatedAt: number;
+}
+```
+
+- The platform sets `createdAt` when it creates a Workspace Rule Factor and
+  updates `updatedAt` whenever the Rule Factor changes.
+
+### Workspace Rule Factor Creation
+
+The input a Rule Manager provides to create a Workspace Rule Factor:
+
+```ts
+interface WorkspaceRuleFactorMaterial {
+  identifier: string;
+  name: RuleFactor['name'];
+  title: RuleFactor['title'];
+  description: RuleFactor['description'];
+  dataType: RuleFactor['dataType'];
+  semantic?: RuleFactor['semantic'];
+  mode?: RuleFactor['mode'];
+  quantity?: RuleFactor['quantity'];
+  constraints?: RuleFactor['constraints'];
+  resourceIdentifier?: WorkspaceRuleFactorResource['identifier'];
+}
+```
+
+### Workspace Rule Factor Modification
+
+The input a Rule Manager provides to update a Workspace Rule Factor:
+
+```ts
+interface WorkspaceRuleFactorPatch {
+  name: RuleFactor['name'];
+  title: RuleFactor['title'];
+  description: RuleFactor['description'];
+  dataType: RuleFactor['dataType'];
+  semantic?: RuleFactor['semantic'];
+  mode?: RuleFactor['mode'];
+  quantity?: RuleFactor['quantity'];
+  constraints?: RuleFactor['constraints'];
   resourceIdentifier?: WorkspaceRuleFactorResource['identifier'];
 }
 ```

@@ -23,11 +23,17 @@ The specified Workspace exists and is active, and the target Workspace Version e
 ## 4. Postconditions
 
 - On success, the Workspace Rule exists with its immutable identifier and
-  satisfies applicable managed-definition constraints.
+  initialized audit times, and satisfies applicable managed-definition
+  constraints.
 
 ## 5. Business Rules
 
 - The Rule Setter validates each Atomic Rule against the Rule Factor it consumes during configuration.
+- The Rule Manager must supply a `WorkspaceRuleMaterial`.
+
+```ts
+import type { WorkspaceRuleMaterial } from '../glossary/workspace-rule.md';
+```
 
 ## 6. Flow of Events
 

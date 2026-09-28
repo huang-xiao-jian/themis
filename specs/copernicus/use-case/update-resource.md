@@ -24,12 +24,18 @@ in the [Workspace Rule Factor Resource glossary entry](../glossary/workspace-rul
 ## 4. Postconditions
 
 - On success, the Workspace Rule Factor Resource stores the validated
-  replacement definition; its identifier remains unchanged.
+  replacement definition and records the change in `updatedAt`; its identifier
+  remains unchanged.
 
 ## 5. Business Rules
 
 - A Workspace Rule Factor Resource change is refused when it would leave a
   Workspace Rule Factor with an unsatisfied resource association.
+- The Rule Manager must supply a `WorkspaceRuleFactorResourcePatch`.
+
+```ts
+import type { WorkspaceRuleFactorResourcePatch } from '../glossary/workspace-rule-factor-resource.md';
+```
 
 ## 6. Flow of Events
 

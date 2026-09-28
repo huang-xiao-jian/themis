@@ -22,9 +22,10 @@ None
 ## Attributes
 
 - **Identifier**: the unique semantic-version identity of a Workspace Version within its Workspace.
-- **Metadata**: the required name and description of a Workspace Version.
+- **Metadata**: the required title and description of a Workspace Version.
 - **State**: whether the Workspace Version is unreleased or released.
 - **Base Version Identifier**: the identity of the released Workspace Version from which a derived version is created. It is absent for an independently created version.
+- **Times**: the audit times that record its creation and most recent change.
 
 ## Data Model
 
@@ -43,12 +44,35 @@ interface WorkspaceVersion extends WorkspaceVersionMetadata {
   // the released Workspace Version from which this version was derived
   baseVersion?: string;
   state: WorkspaceVersionState;
+  // audit times
+  createdAt: number;
+  updatedAt: number;
 }
 ```
 
 - The `identifier` is read-only once created.
 - The `identifier` is unique within its Workspace.
 - The `identifier` uses strict `MAJOR.MINOR.PATCH` semantic-version form.
+- The platform sets `createdAt` when it creates a Workspace Version and updates
+  `updatedAt` whenever the Workspace Version changes.
+
+### Workspace Version Creation
+
+The input a Rule Manager provides to create or derive a Workspace Version:
+
+```ts
+interface WorkspaceVersionMaterial extends WorkspaceVersionMetadata {
+  identifier: string;
+}
+```
+
+### Workspace Version Modification
+
+The input a Rule Manager provides to update an unreleased Workspace Version:
+
+```ts
+interface WorkspaceVersionPatch extends WorkspaceVersionMetadata {}
+```
 
 ## State Transitions
 

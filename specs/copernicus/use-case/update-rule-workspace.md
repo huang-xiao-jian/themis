@@ -21,11 +21,17 @@ The specified Workspace exists and is active.
 
 ## 4. Postconditions
 
-- On success, the workspace stores validated replacement metadata; its identifier and versions remain unchanged.
+- On success, the Workspace stores the validated description and records the
+  change in `updatedAt`; its identifier and Workspace Versions remain unchanged.
 
 ## 5. Business Rules
 
 - Workspace metadata may be changed only while the workspace is active.
+- The Rule Manager must supply a `WorkspacePatch`.
+
+```ts
+import type { WorkspacePatch } from '../glossary/workspace.md';
+```
 
 ## 6. Flow of Events
 

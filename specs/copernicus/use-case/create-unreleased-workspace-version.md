@@ -25,8 +25,16 @@ A Rule Manager creates an empty unreleased Workspace Version in an active Worksp
 
 ## 5. Business Rules
 
-- The Rule Manager supplies the new version identifier and metadata. Its identifier must have semantic-version form and be unique within the workspace.
+- The Rule Manager must supply a `WorkspaceVersionMaterial`. Its identifier
+  must have semantic-version form and be unique within the Workspace.
+
+```ts
+import type { WorkspaceVersionMaterial } from '../glossary/workspace-version.md';
+```
+
 - The platform creates no Resources, Rule Factors, or Rules with the version.
+- The platform sets the Workspace Version audit times when it creates the
+  version.
 
 ## 6. Flow of Events
 

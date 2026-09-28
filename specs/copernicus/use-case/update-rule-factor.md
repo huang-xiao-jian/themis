@@ -24,8 +24,9 @@ Workspace Version. The relevant concepts and constraints are defined in the
 ## 4. Postconditions
 
 - On success, the Workspace Rule Factor stores the validated replacement
-  definition; its identifier remains unchanged, and Workspace Rules containing
-  Atomic Rules previously configured from it remain unchanged.
+  definition and records the change in `updatedAt`; its identifier remains
+  unchanged, and Workspace Rules containing Atomic Rules previously configured
+  from it remain unchanged.
 
 ## 5. Business Rules
 
@@ -33,6 +34,11 @@ Workspace Version. The relevant concepts and constraints are defined in the
   invalid change is refused.
 - Changing a Workspace Rule Factor does not change Atomic Rules previously
   configured from it.
+- The Rule Manager must supply a `WorkspaceRuleFactorPatch`.
+
+```ts
+import type { WorkspaceRuleFactorPatch } from '../glossary/workspace-rule-factor.md';
+```
 
 ## 6. Flow of Events
 

@@ -20,11 +20,21 @@ The specified Workspace exists and is active, and the specified Workspace Versio
 
 ## 4. Postconditions
 
-- On success, the version stores validated replacement metadata; its identifier, base, and content remain unchanged.
+- On success, the Workspace Version stores the validated replacement metadata
+  and records the change in `updatedAt`; its identifier, base, and content
+  remain unchanged.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- The Rule Manager must supply a `WorkspaceVersionPatch`.
+
+```ts
+import type { WorkspaceVersionPatch } from '../glossary/workspace-version.md';
+```
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -36,10 +46,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 6. Special Requirements
+## 7. Special Requirements
 
 None.
 
-## 7. Extension Points
+## 8. Extension Points
 
 None.

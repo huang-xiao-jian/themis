@@ -25,9 +25,13 @@ Fewer than 20 active Workspaces exist.
 
 ## 5. Business Rules
 
-- The Rule Manager supplies the workspace metadata.
-- The platform validates the submitted data against the applicable Workspace constraints before creation.
-- The platform creates no Workspace Version with the Workspace.
+- The Rule Manager must supply a `WorkspaceMaterial`.
+
+```ts
+import type { WorkspaceMaterial } from '../glossary/workspace.md';
+```
+
+- The platform sets the Workspace audit times when it creates the Workspace.
 
 ## 6. Flow of Events
 

@@ -23,11 +23,20 @@ The specified Workspace exists and is active, and the target Workspace Version e
 ## 4. Postconditions
 
 - On success, the Workspace Rule Factor Resource exists with its immutable
-  identifier and satisfies applicable managed-definition constraints.
+  identifier, initialized audit times, and applicable managed-definition
+  constraints.
 
-## 5. Flow of Events
+## 5. Business Rules
 
-### 5.1 Basic Flow
+- The Rule Manager must supply a `WorkspaceRuleFactorResourceMaterial`.
+
+```ts
+import type { WorkspaceRuleFactorResourceMaterial } from '../glossary/workspace-rule-factor-resource.md';
+```
+
+## 6. Flow of Events
+
+### 6.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -39,10 +48,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 6. Special Requirements
+## 7. Special Requirements
 
 None.
 
-## 7. Extension Points
+## 8. Extension Points
 
 None.

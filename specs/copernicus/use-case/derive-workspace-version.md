@@ -33,7 +33,17 @@ A Rule Manager derives a new unreleased Workspace Version from a selected releas
 - The new version copies the base Workspace Rule Factor Resources, Workspace
   Rule Factors, Workspace Rules, and identifiers but not its metadata; later
   changes do not affect the base.
-- The Rule Manager supplies the new version identifier and metadata. Its identifier must have semantic-version form, be unique within the workspace, and be strictly greater than the selected base; no other semantic-version ordering is required.
+- The Rule Manager must supply a `WorkspaceVersionMaterial`. Its identifier
+  must have semantic-version form, be unique within the Workspace, and be
+  strictly greater than the selected base; no other semantic-version ordering
+  is required.
+
+```ts
+import type { WorkspaceVersionMaterial } from '../glossary/workspace-version.md';
+```
+
+- The platform sets the derived Workspace Version audit times when it creates
+  the version.
 - Multiple unreleased versions may share a released base. Each is assessed only against its own base.
 
 ## 6. Flow of Events

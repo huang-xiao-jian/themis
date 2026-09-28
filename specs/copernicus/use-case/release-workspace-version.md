@@ -41,6 +41,7 @@ and the [Workspace Release glossary entry](../glossary/workspace-release.md).
 - Release locks the complete Workspace Version snapshot, creates its immutable
   Workspace Version Artifact, and immediately makes the artifact's public Rules
   available for downstream retrieval without notification.
+- Release records the Workspace Version state change in `updatedAt`.
 - A sibling version with a higher identifier does not prevent release; each version is compared only with its own base.
 
 ## 6. Flow of Events

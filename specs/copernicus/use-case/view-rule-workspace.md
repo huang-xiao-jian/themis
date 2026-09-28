@@ -12,9 +12,9 @@ View an Active Workspace.
 
 ## 2. Brief Description
 
-A Rule Manager views an active Workspace, including its metadata and Workspace
-Versions. The relevant concepts and constraints are defined in the [Workspace
-glossary entry](../glossary/workspace.md).
+A Rule Manager views an active Workspace together with the Workspace Version
+information it organizes. The relevant concepts and constraints are defined in
+the [Workspace](../glossary/workspace.md).
 
 ## 3. Preconditions
 

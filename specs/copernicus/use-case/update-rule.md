@@ -24,15 +24,20 @@ Workspace Version. The relevant concepts and constraints are defined in the
 ## 4. Postconditions
 
 - On success, the Workspace Rule stores the validated replacement definition;
-  its identifier remains unchanged. Any removed Atomic Rule Group or Atomic
-  Rule identifier may be used again in the replacement or a later Workspace
-  Rule update.
+  it records the change in `updatedAt`, and its identifier remains unchanged.
+  Any removed Atomic Rule Group or Atomic Rule identifier may be used again in
+  the replacement or a later Workspace Rule update.
 
 ## 5. Business Rules
 
 - The Rule Setter validates each Atomic Rule against the Rule Factor it consumes during configuration.
 - An Atomic Rule Group or Atomic Rule identifier removed during a Workspace Rule
   update may be used again in that version.
+- The Rule Manager must supply a `WorkspaceRulePatch`.
+
+```ts
+import type { WorkspaceRulePatch } from '../glossary/workspace-rule.md';
+```
 
 ## 6. Flow of Events
 

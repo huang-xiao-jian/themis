@@ -25,6 +25,7 @@ None
   1. **Title**
   2. **Description**
 - **Definition**: the detail definition for **RuleFactorResource**.
+- **Times**: the audit times that record its creation and most recent change.
 
 ## Data Model
 
@@ -38,17 +39,62 @@ interface WorkspaceRuleFactorResourceExtension {
   identifier: string;
   title: string;
   description: string;
+  // audit times
+  createdAt: number;
+  updatedAt: number;
 }
 
 type DynamicWorkspaceRuleFactorResource = WorkspaceRuleFactorResourceExtension &
   DynamicRuleFactorResource;
 type StaticWorkspaceRuleFactorResource = WorkspaceRuleFactorResourceExtension &
   StaticRuleFactorResource;
+
+type WorkspaceRuleFactorResource =
+  DynamicWorkspaceRuleFactorResource | StaticWorkspaceRuleFactorResource;
 ```
 
 - The `identifier` is read-only once created.
 - The `name` and `title` are unique among **WorkspaceRuleFactorResource** values
   within a **WorkspaceVersion**.
+- The platform sets `createdAt` when it creates a Workspace Rule Factor Resource
+  and updates `updatedAt` whenever the resource changes.
+
+### Workspace Rule Factor Resource Creation
+
+The input a Rule Manager provides to create a Workspace Rule Factor Resource:
+
+```ts
+interface WorkspaceRuleFactorResourceMaterialExtension {
+  identifier: string;
+  title: string;
+  description: string;
+}
+
+type DynamicWorkspaceRuleFactorResourceMaterial = WorkspaceRuleFactorResourceMaterialExtension &
+  DynamicRuleFactorResource;
+type StaticWorkspaceRuleFactorResourceMaterial = WorkspaceRuleFactorResourceMaterialExtension &
+  StaticRuleFactorResource;
+type WorkspaceRuleFactorResourceMaterial =
+  DynamicWorkspaceRuleFactorResourceMaterial | StaticWorkspaceRuleFactorResourceMaterial;
+```
+
+### Workspace Rule Factor Resource Modification
+
+The input a Rule Manager provides to update a Workspace Rule Factor Resource:
+
+```ts
+interface WorkspaceRuleFactorResourcePatchExtension {
+  title: string;
+  description: string;
+}
+
+type DynamicWorkspaceRuleFactorResourcePatch = WorkspaceRuleFactorResourcePatchExtension &
+  DynamicRuleFactorResource;
+type StaticWorkspaceRuleFactorResourcePatch = WorkspaceRuleFactorResourcePatchExtension &
+  StaticRuleFactorResource;
+type WorkspaceRuleFactorResourcePatch =
+  DynamicWorkspaceRuleFactorResourcePatch | StaticWorkspaceRuleFactorResourcePatch;
+```
 
 ## State Transitions
 

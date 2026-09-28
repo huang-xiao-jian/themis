@@ -23,12 +23,18 @@ The specified Workspace exists and is active, and the target Workspace Version e
 ## 4. Postconditions
 
 - On success, the Workspace Rule Factor exists with its immutable identifier and
-  satisfies applicable managed-definition constraints.
+  initialized audit times, and satisfies applicable managed-definition
+  constraints.
 
 ## 5. Business Rules
 
 - A new Workspace Rule Factor must produce a valid Rule Factor projection; an
   invalid definition is refused.
+- The Rule Manager must supply a `WorkspaceRuleFactorMaterial`.
+
+```ts
+import type { WorkspaceRuleFactorMaterial } from '../glossary/workspace-rule-factor.md';
+```
 
 ## 6. Flow of Events
 

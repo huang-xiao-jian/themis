@@ -23,8 +23,8 @@ and constraints are defined in the [Workspace glossary entry](../glossary/worksp
 ## 4. Postconditions
 
 - On success, the Workspace is permanently archived; public Rules from its
-  released Workspace Versions remain retrievable, but no Workspace metadata,
-  version, or content can change.
+  released Workspace Versions remain retrievable, `updatedAt` records the
+  archival, and no Workspace metadata, version, or content can change.
 
 ## 5. Business Rules
 
