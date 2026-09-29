@@ -33,20 +33,9 @@ and the [Workspace Release glossary entry](../glossary/workspace-release.md).
   Version Artifact containing its public Rules exists and is available
   downstream; no downstream notification is sent.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- A final public Rule added, removed, or changed from the base satisfies the
-  derived-version difference requirement. Metadata, Workspace Rule Factor
-  Resource, and Workspace Rule Factor changes alone do not.
-- Release locks the complete Workspace Version snapshot, creates its immutable
-  Workspace Version Artifact, and immediately makes the artifact's public Rules
-  available for downstream retrieval without notification.
-- Release records the Workspace Version state change in `updatedAt`.
-- A sibling version with a higher identifier does not prevent release; each version is compared only with its own base.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -58,10 +47,21 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A final public Rule added, removed, or changed from the base satisfies the
+  derived-version difference requirement. Metadata, Workspace Rule Factor
+  Resource, and Workspace Rule Factor changes alone do not.
+- Release locks the complete Workspace Version snapshot, creates its immutable
+  Workspace Version Artifact, and immediately makes the artifact's public Rules
+  available for downstream retrieval without notification.
+- Release records the Workspace Version state change in `updatedAt`.
+- A sibling version with a higher identifier does not prevent release; each version is compared only with its own base.

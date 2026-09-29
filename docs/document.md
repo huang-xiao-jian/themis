@@ -43,3 +43,6 @@ Use these documents as the structural templates for new specifications:
 
 Preserve the applicable template structure. Update a template when a structural
 change should become a convention for future specifications.
+
+In a use-case specification, include a Business Rules section only when at
+least one business rule applies, and place it as the final numbered section.

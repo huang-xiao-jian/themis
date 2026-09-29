@@ -27,16 +27,9 @@ constraints are defined in the [Workspace Rule Factor Resource glossary entry](.
   manager may create a Workspace Rule Factor Resource with the deleted
   identifier. Workspace Rule Factors and Workspace Rules remain unchanged.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- A Workspace Rule Factor Resource deletion is refused when it would leave a
-  Workspace Rule Factor with an unsatisfied resource association.
-- Deleting a Workspace Rule Factor Resource does not modify Workspace Rule
-  Factors or Workspace Rules.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -48,10 +41,17 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A Workspace Rule Factor Resource deletion is refused when it would leave a
+  Workspace Rule Factor with an unsatisfied resource association.
+- Deleting a Workspace Rule Factor Resource does not modify Workspace Rule
+  Factors or Workspace Rules.

@@ -23,15 +23,11 @@ None.
 
 - On success, the Downstream Application has the final definition of the specified Rule; no managed definitions change.
 
-## 5. Business Rules
-
-- A Rule remains retrievable from a Workspace Version Artifact after its source workspace is archived.
-
-## 6. Flow of Events
+## 5. Flow of Events
 
 ```mermaid
 flowchart TD
-    start([Start]) --> submit[Downstream Application request with WorkspaceRuleBeacon]
+    start([Start]) --> submit[Downstream Application requests a Rule]
     submit --> available{Does the request identify a Rule in a released Workspace Version Artifact?}
     available -->|Yes| archived{Is the workspace archived?}
     archived -->|No| returnRule[Platform returns the Rule's final definition]
@@ -42,12 +38,14 @@ flowchart TD
     unavailable --> endUnavailable([End: Rule unavailable])
 ```
 
-- The Downstream Application must provide [WorkspaceRuleBeacon](../glossary/workspace-rule-beacon.md)
-
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A Rule remains retrievable from a Workspace Version Artifact after its source workspace is archived.

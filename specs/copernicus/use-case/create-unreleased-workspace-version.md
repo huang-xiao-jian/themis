@@ -23,22 +23,9 @@ A Rule Manager creates an empty unreleased Workspace Version in an active Worksp
 
 - On success, an empty unreleased Workspace Version with no base version exists in the workspace.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- The Rule Manager must supply a `WorkspaceVersionMaterial`. Its identifier
-  must have semantic-version form and be unique within the Workspace.
-
-```ts
-import type { WorkspaceVersionMaterial } from '../glossary/workspace-version.md';
-```
-
-- The platform creates no Resources, Rule Factors, or Rules with the version.
-- The platform sets the Workspace Version audit times when it creates the
-  version.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -50,10 +37,19 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A Workspace Version identifier must have semantic-version form and be unique
+  within the Workspace.
+
+- The platform creates no Resources, Rule Factors, or Rules with the version.
+- The platform sets the Workspace Version audit times when it creates the
+  version.

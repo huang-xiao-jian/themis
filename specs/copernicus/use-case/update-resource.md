@@ -27,19 +27,9 @@ in the [Workspace Rule Factor Resource glossary entry](../glossary/workspace-rul
   replacement definition and records the change in `updatedAt`; its identifier
   remains unchanged.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- A Workspace Rule Factor Resource change is refused when it would leave a
-  Workspace Rule Factor with an unsatisfied resource association.
-- The Rule Manager must supply a `WorkspaceRuleFactorResourcePatch`.
-
-```ts
-import type { WorkspaceRuleFactorResourcePatch } from '../glossary/workspace-rule-factor-resource.md';
-```
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -51,10 +41,15 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A Workspace Rule Factor Resource change is refused when it would leave a
+  Workspace Rule Factor with an unsatisfied resource association.

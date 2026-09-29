@@ -26,18 +26,9 @@ The specified Workspace exists and is active, and the target Workspace Version e
   initialized audit times, and satisfies applicable managed-definition
   constraints.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- The Rule Setter validates each Atomic Rule against the Rule Factor it consumes during configuration.
-- The Rule Manager must supply a `WorkspaceRuleMaterial`.
-
-```ts
-import type { WorkspaceRuleMaterial } from '../glossary/workspace-rule.md';
-```
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -49,10 +40,14 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- The Rule Setter validates each Atomic Rule against the Rule Factor it consumes during configuration.

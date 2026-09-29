@@ -27,15 +27,9 @@ in the [Workspace Rule glossary entry](../glossary/workspace-rule.md).
   Workspace Rule with the deleted identifier. This use case may remove the last
   Workspace Rule in the version.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- A Workspace Rule deletion may remove the last Workspace Rule in an unreleased
-  Workspace Version.
-- A deleted Workspace Rule identifier may be used again in that version.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -47,10 +41,16 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A Workspace Rule deletion may remove the last Workspace Rule in an unreleased
+  Workspace Version.
+- A deleted Workspace Rule identifier may be used again in that version.

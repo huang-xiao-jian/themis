@@ -27,28 +27,9 @@ A Rule Manager derives a new unreleased Workspace Version from a selected releas
   Resources, Workspace Rule Factors, Workspace Rules, and identifiers; the base
   remains unchanged.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- A subsequent Workspace Version is created only from a released base in the same active workspace.
-- The new version copies the base Workspace Rule Factor Resources, Workspace
-  Rule Factors, Workspace Rules, and identifiers but not its metadata; later
-  changes do not affect the base.
-- The Rule Manager must supply a `WorkspaceVersionMaterial`. Its identifier
-  must have semantic-version form, be unique within the Workspace, and be
-  strictly greater than the selected base; no other semantic-version ordering
-  is required.
-
-```ts
-import type { WorkspaceVersionMaterial } from '../glossary/workspace-version.md';
-```
-
-- The platform sets the derived Workspace Version audit times when it creates
-  the version.
-- Multiple unreleased versions may share a released base. Each is assessed only against its own base.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -60,10 +41,24 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A subsequent Workspace Version is created only from a released base in the same active workspace.
+- The new version copies the base Workspace Rule Factor Resources, Workspace
+  Rule Factors, Workspace Rules, and identifiers but not its metadata; later
+  changes do not affect the base.
+- A derived Workspace Version identifier must have semantic-version form, be
+  unique within the Workspace, and be strictly greater than the selected base;
+  no other semantic-version ordering is required.
+
+- The platform sets the derived Workspace Version audit times when it creates
+  the version.
+- Multiple unreleased versions may share a released base. Each is assessed only against its own base.

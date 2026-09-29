@@ -24,17 +24,9 @@ The specified Workspace exists and is active, and the specified Workspace Versio
   and records the change in `updatedAt`; its identifier, base, and content
   remain unchanged.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- The Rule Manager must supply a `WorkspaceVersionPatch`.
-
-```ts
-import type { WorkspaceVersionPatch } from '../glossary/workspace-version.md';
-```
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -46,10 +38,10 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.

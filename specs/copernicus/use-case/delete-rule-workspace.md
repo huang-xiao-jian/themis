@@ -25,13 +25,9 @@ version history. The relevant concepts and constraints are defined in the
 
 - On success, the workspace no longer exists.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- An active workspace may be permanently deleted only when it has no Workspace Versions.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -43,10 +39,14 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- An active workspace may be permanently deleted only when it has no Workspace Versions.

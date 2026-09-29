@@ -22,13 +22,9 @@ The specified Workspace exists and is active, and the specified Workspace Versio
 
 - On success, the version and its version-local content no longer exist; an unreleased-version slot is immediately available.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- Deleting an unreleased Workspace Version immediately frees an unreleased-version slot.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -40,10 +36,14 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- Deleting an unreleased Workspace Version immediately frees an unreleased-version slot.

@@ -28,21 +28,9 @@ Workspace Version. The relevant concepts and constraints are defined in the
   unchanged, and Workspace Rules containing Atomic Rules previously configured
   from it remain unchanged.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- A Workspace Rule Factor change must produce a valid Rule Factor projection; an
-  invalid change is refused.
-- Changing a Workspace Rule Factor does not change Atomic Rules previously
-  configured from it.
-- The Rule Manager must supply a `WorkspaceRuleFactorPatch`.
-
-```ts
-import type { WorkspaceRuleFactorPatch } from '../glossary/workspace-rule-factor.md';
-```
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -54,10 +42,17 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A Workspace Rule Factor change must produce a valid Rule Factor projection; an
+  invalid change is refused.
+- Changing a Workspace Rule Factor does not change Atomic Rules previously
+  configured from it.

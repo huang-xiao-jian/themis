@@ -27,17 +27,9 @@ defined in the [Workspace Rule Factor glossary entry](../glossary/workspace-rule
   create a Workspace Rule Factor with the deleted identifier. Workspace Rules
   containing Atomic Rules previously configured from it remain unchanged.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- A Workspace Rule Factor may be deleted after the Rule Setter consumed it
-  because the resulting Atomic Rules do not retain a managed Workspace Rule
-  Factor reference.
-- Deleting a Workspace Rule Factor does not change Atomic Rules previously
-  configured from it.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -49,10 +41,18 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A Workspace Rule Factor may be deleted after the Rule Setter consumed it
+  because the resulting Atomic Rules do not retain a managed Workspace Rule
+  Factor reference.
+- Deleting a Workspace Rule Factor does not change Atomic Rules previously
+  configured from it.

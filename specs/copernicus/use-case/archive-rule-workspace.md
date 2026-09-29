@@ -26,17 +26,9 @@ and constraints are defined in the [Workspace glossary entry](../glossary/worksp
   released Workspace Versions remain retrievable, `updatedAt` records the
   archival, and no Workspace metadata, version, or content can change.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- Archival is permanent and applies only to the Workspace.
-- Archival neither changes nor makes unavailable public Rules from released
-  Workspace Versions. An archived Workspace remains available to Downstream
-  Applications but cannot be modified, and no content creation, version
-  release, or version deletion is permitted.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -48,10 +40,18 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- Archival is permanent and applies only to the Workspace.
+- Archival neither changes nor makes unavailable public Rules from released
+  Workspace Versions. An archived Workspace remains available to Downstream
+  Applications but cannot be modified, and no content creation, version
+  release, or version deletion is permitted.

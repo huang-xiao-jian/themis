@@ -26,19 +26,9 @@ The specified Workspace exists and is active, and the target Workspace Version e
   initialized audit times, and satisfies applicable managed-definition
   constraints.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- A new Workspace Rule Factor must produce a valid Rule Factor projection; an
-  invalid definition is refused.
-- The Rule Manager must supply a `WorkspaceRuleFactorMaterial`.
-
-```ts
-import type { WorkspaceRuleFactorMaterial } from '../glossary/workspace-rule-factor.md';
-```
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -50,10 +40,15 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- A new Workspace Rule Factor must produce a valid Rule Factor projection; an
+  invalid definition is refused.

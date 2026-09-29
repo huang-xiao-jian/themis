@@ -23,19 +23,9 @@ Fewer than 20 active Workspaces exist.
 
 - On success, an active Workspace with no Workspace Versions exists; the active-workspace limit is respected.
 
-## 5. Business Rules
+## 5. Flow of Events
 
-- The Rule Manager must supply a `WorkspaceMaterial`.
-
-```ts
-import type { WorkspaceMaterial } from '../glossary/workspace.md';
-```
-
-- The platform sets the Workspace audit times when it creates the Workspace.
-
-## 6. Flow of Events
-
-### 6.1 Basic Flow
+### 5.1 Basic Flow
 
 ```mermaid
 flowchart TD
@@ -47,10 +37,14 @@ flowchart TD
     reject --> failure([End: request refused])
 ```
 
-## 7. Special Requirements
+## 6. Special Requirements
 
 None.
 
-## 8. Extension Points
+## 7. Extension Points
 
 None.
+
+## 8. Business Rules
+
+- The platform sets the Workspace audit times when it creates the Workspace.
