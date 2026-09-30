@@ -22,7 +22,7 @@
     "@formily/react": "^2.3.7",
     "@thesis/core": "workspace:*",
     "@thesis/react": "workspace:*",
-    "@unsignal/react": "^1.0.2"
+    "@unsignal/react": "^1.0.3"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.3",

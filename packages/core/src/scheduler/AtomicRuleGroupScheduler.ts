@@ -1,4 +1,4 @@
-import { computed, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
+import { computed, signal, type ReadonlySignal, type Signal } from '@unsignal/baseline';
 import { nanoid } from 'nanoid';
 import type { AtomicRule, AtomicRuleGroup } from '../dsl/AtomicRule';
 import type { FieldDataSource } from '../dsl/FieldDataSource';

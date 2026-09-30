@@ -1,4 +1,4 @@
-import { signal, type Signal } from '@preact/signals-core';
+import { signal, type Signal } from '@unsignal/baseline';
 import type { PaginatedFilterableFetcher } from '../fetcher/PaginatedFilterableFetcher';
 import type { Pagination } from '../fetcher/Pagination';
 import type { PaginatedFilterableDynamicResource } from './DynamicResource';

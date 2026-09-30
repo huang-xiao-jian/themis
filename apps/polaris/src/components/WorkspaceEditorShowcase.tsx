@@ -32,14 +32,13 @@ const MULTI_GROUP_RULE_GROUPS: readonly AtomicRuleGroup[] = [
 export function EmptyWorkspaceCase(): ReactElement {
   const workspace = useMemo(() => createRuleWorkspace({ factors: DEMO_FACTORS }), []);
 
+  console.log(workspace);
+
   return (
     <SisyphusProvider scheduler={workspace}>
       <SisyphusAntdProvider>
         <Row gutter={16}>
-          <Col lg={12} md={16}>
-            <RuleWorkspaceEditor />
-          </Col>
-          <Col lg={12} md={16}>
+          <Col lg={16} md={24}>
             <RuleWorkspaceEditor />
           </Col>
         </Row>
@@ -59,10 +58,7 @@ export function MultiGroupsCase(): ReactElement {
     <SisyphusProvider scheduler={workspace}>
       <SisyphusAntdProvider>
         <Row gutter={16}>
-          <Col span={8}>
-            <RuleWorkspaceEditor />
-          </Col>
-          <Col span={8}>
+          <Col span={24}>
             <RuleWorkspaceEditor />
           </Col>
         </Row>

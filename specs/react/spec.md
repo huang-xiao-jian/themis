@@ -17,7 +17,7 @@
 - Prefer `HOC Pattern` to consume `Signal` within reactive components
 
 ```tsx
-import { Signal } from '@preact/signals-core';
+import { Signal } from '@unsignal/baseline';
 import { observer } from '@unsignal/react';
 
 interface ExampleViewProps {

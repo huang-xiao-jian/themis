@@ -1,4 +1,11 @@
-import { computed, effect, signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
+import {
+  computed,
+  effect,
+  signal,
+  type Disposable,
+  type ReadonlySignal,
+  type Signal,
+} from '@unsignal/baseline';
 import type { AtomicRule } from '../dsl/AtomicRule';
 import { GroupCoordinationEventType } from '../dsl/GroupCoordinationEventType';
 import { SchedulerState } from '../dsl/SchedulerState';
@@ -32,7 +39,7 @@ export class AtomicRuleScheduler {
   readonly factorName: ReadonlySignal<string | null>;
 
   /** 规则调度器销毁回调集合 */
-  private disposers: DisposeFn[] = [];
+  private disposables: Disposable[] = [];
   private readonly coordination: GroupCoordination;
   private destroyed = false;
 
@@ -63,7 +70,7 @@ export class AtomicRuleScheduler {
     this.factorName = computed<string | null>(() => this.rule.value?.name ?? null);
 
     // pattern 同步：state → form.pattern
-    this.disposers.push(
+    this.disposables.push(
       effect(() => {
         this.form.pattern = this.state.value === SchedulerState.EDITING ? 'editable' : 'disabled';
       })
@@ -151,7 +158,7 @@ export class AtomicRuleScheduler {
   destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
-    this.disposers.forEach((fn) => fn());
-    this.disposers = [];
+    this.disposables.forEach((disposable) => disposable.dispose());
+    this.disposables = [];
   }
 }

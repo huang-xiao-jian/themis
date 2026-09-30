@@ -328,8 +328,8 @@ importers:
         specifier: workspace:*
         version: link:../react
       '@unsignal/react':
-        specifier: ^1.0.2
-        version: 1.0.2(@unsignal/baseline@1.0.2)(@unsignal/core@1.0.2(@unsignal/baseline@1.0.2))(immer@11.1.8)(react@19.3.0)
+        specifier: ^1.0.3
+        version: 1.0.3(@unsignal/baseline@1.0.3)(@unsignal/core@1.0.3(@unsignal/baseline@1.0.3))(immer@11.1.18)(react@19.3.0)
       antd:
         specifier: '>=6.0.0'
         version: 6.6.3(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -361,9 +361,12 @@ importers:
       '@formily/core':
         specifier: ^2.3.7
         version: 2.3.7
-      '@preact/signals-core':
-        specifier: ^1.14.4
-        version: 1.14.4
+      '@unsignal/baseline':
+        specifier: ^1.0.3
+        version: 1.0.3
+      '@unsignal/core':
+        specifier: ^1.0.3
+        version: 1.0.3(@unsignal/baseline@1.0.3)
       nanoevents:
         specifier: ^10.0.0
         version: 10.0.0
@@ -1057,9 +1060,6 @@ packages:
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
-
-  '@preact/signals-core@1.14.4':
-    resolution: {integrity: sha512-HNB6HYeYKhQbJ1aKl+YRjrS4+QWHLKX6qKoUsfS/m0vqzsVaEBiZiaKbG/e+NKk2ch5ALQr/ihWaMHxiCuuWHA==}
 
   '@quansync/fs@1.0.0':
     resolution: {integrity: sha512-4TJ3DFtlf1L5LDMaM6CanJ/0lckGNtJcMjQ1NAV6zDmA0tEHKZtxNKin8EgPaVX1YzljbxckyT2tJrpQKAtngQ==}
@@ -1872,21 +1872,21 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@unsignal/baseline@1.0.2':
-    resolution: {integrity: sha512-tQSGfLCr19cMBybzoIZNOuVmKTfUvrKs50fzgGFYeP0v3WEjX35eixMCqncxvfCF9IuNRb5zalvgL1Tc6UJtpQ==}
+  '@unsignal/baseline@1.0.3':
+    resolution: {integrity: sha512-UkhljdEPDLqYy1DohAGHtXD/ETI09PBq7JSF+zJ8o9PMTJQPehm0Bc5+xgccZrrlT32juG4tDl/p7f/4rLA12Q==}
 
-  '@unsignal/core@1.0.2':
-    resolution: {integrity: sha512-TOEJQ/l+a5jX1Y3hTSX0iFgs6CTbXxSrGJ2FCaUjgYnl62c85MMdmOCP9fDlpLKXzGZN1wDGNC3GJq5pMpyRHQ==}
+  '@unsignal/core@1.0.3':
+    resolution: {integrity: sha512-YXGxkwOUQzV69w/xS2U6PVg+thHuG2mtPU4x588YJih4vpLEfdypAyFdGlBZXTDk+OXnFv2uq71NW4MHTNUAfA==}
     peerDependencies:
-      '@unsignal/baseline': ^1.0.2
+      '@unsignal/baseline': ^1.0.3
 
-  '@unsignal/react@1.0.2':
-    resolution: {integrity: sha512-j3ZUhyqw0LYZhO8ouQzs65yx8jPS+K8K2k51wt4hnMedJ4PVWFMSrYR7R7Sa1DulJZtmt/a5p8/fGtKAaWOD3w==}
+  '@unsignal/react@1.0.3':
+    resolution: {integrity: sha512-Iqipt/lLKv8Zm/32yMkfWbrdAtqR4veueZQSQCV469OJXevAkz0RxPZrazsB9Hvw2MZmdCoeM/2NEdtGprkTjg==}
     peerDependencies:
-      '@unsignal/baseline': ^1.0.2
-      '@unsignal/core': ^1.0.2
-      immer: ^11.0.0
-      react: ^19.0.0
+      '@unsignal/baseline': ^1.0.3
+      '@unsignal/core': ^1.0.3
+      immer: ^11.1.18
+      react: ^19.2.8
 
   '@vitejs/plugin-react@6.1.1':
     resolution: {integrity: sha512-yxLaQV9gkhS8ezJqCM6+ndU7mDY6gqAg75NQ+0IjwEI8IYOmQCgkRwHKVSfWXW076DsqMo0Dk+0FK1U+M5RgFw==}
@@ -2581,8 +2581,8 @@ packages:
     resolution: {integrity: sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==}
     engines: {node: '>= 4'}
 
-  immer@11.1.8:
-    resolution: {integrity: sha512-/tbkHMW7y10Lx6i1crLjD4/OhNkRG+Fo7byZHtah0547nIeXYcpIXaUh0IAQY6gO5459qpGGYapcEOHtFXkIuA==}
+  immer@11.1.18:
+    resolution: {integrity: sha512-EQyQtLiYW029lyoczMl/Hh4Xu7cDecSc58JRYpHyL4tIAu3eqd1yJzQX04d2BZHDkzFFvm6qJEJWOtfDSWAXbQ==}
 
   import-without-cache@0.4.0:
     resolution: {integrity: sha512-NkJQA7oZ4YHQhd2+H3BoRFKF3d/XNsiKpHZCQEMH9pDX27hQQLsTyOocyRgaIVtf8gHX3Nt3LPkR4e5EdtPAGQ==}
@@ -4228,8 +4228,6 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@preact/signals-core@1.14.4': {}
-
   '@quansync/fs@1.0.0':
     dependencies:
       quansync: 1.0.0
@@ -5003,17 +5001,17 @@ snapshots:
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
 
-  '@unsignal/baseline@1.0.2': {}
+  '@unsignal/baseline@1.0.3': {}
 
-  '@unsignal/core@1.0.2(@unsignal/baseline@1.0.2)':
+  '@unsignal/core@1.0.3(@unsignal/baseline@1.0.3)':
     dependencies:
-      '@unsignal/baseline': 1.0.2
+      '@unsignal/baseline': 1.0.3
 
-  '@unsignal/react@1.0.2(@unsignal/baseline@1.0.2)(@unsignal/core@1.0.2(@unsignal/baseline@1.0.2))(immer@11.1.8)(react@19.3.0)':
+  '@unsignal/react@1.0.3(@unsignal/baseline@1.0.3)(@unsignal/core@1.0.3(@unsignal/baseline@1.0.3))(immer@11.1.18)(react@19.3.0)':
     dependencies:
-      '@unsignal/baseline': 1.0.2
-      '@unsignal/core': 1.0.2(@unsignal/baseline@1.0.2)
-      immer: 11.1.8
+      '@unsignal/baseline': 1.0.3
+      '@unsignal/core': 1.0.3(@unsignal/baseline@1.0.3)
+      immer: 11.1.18
       react: 19.3.0
 
   '@vitejs/plugin-react@6.1.1(vite@8.2.2(@types/node@26.5.1)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
@@ -5737,7 +5735,7 @@ snapshots:
 
   ignore@7.0.5: {}
 
-  immer@11.1.8: {}
+  immer@11.1.18: {}
 
   import-without-cache@0.4.0: {}
 

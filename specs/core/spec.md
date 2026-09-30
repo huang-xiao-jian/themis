@@ -16,7 +16,7 @@ Infer `Intermediate Representation`, `Matching Operator`s, `Available Rule Facto
 
 ## Tech Convention
 
-- Reactive state management is based on `@preact/signals-core` and is treated as a runtime standard rather than part of the core layered architecture.
+- Reactive state management is based on `@unsignal/baseline` and is treated as a runtime standard rather than part of the core layered architecture.
 
 ## References
 

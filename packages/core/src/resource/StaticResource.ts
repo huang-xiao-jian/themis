@@ -1,4 +1,4 @@
-import type { Signal } from '@preact/signals-core';
+import type { Signal } from '@unsignal/baseline';
 
 /**
  * 静态资源 - 预设选项，无需动态加载

@@ -18,9 +18,7 @@ export function WorkspaceEditorPanel(): ReactElement {
         label,
         children: (
           <Row gutter={16} align="middle" wrap={false}>
-            <Col lg={16} md={24}>
-              {children}
-            </Col>
+            <Col span={24}>{children}</Col>
           </Row>
         ),
       }))}

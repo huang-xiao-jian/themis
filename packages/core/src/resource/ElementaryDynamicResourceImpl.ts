@@ -1,4 +1,4 @@
-import { signal, type Signal } from '@preact/signals-core';
+import { signal, type Signal } from '@unsignal/baseline';
 import type { ElementaryFetcher } from '../fetcher/ElementaryFetcher';
 import type { ElementaryDynamicResource } from './DynamicResource';
 

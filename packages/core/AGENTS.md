@@ -4,7 +4,7 @@
 
 - Runtime: `Node.js 22.16.0` + `Chrome latest`
 - Language: `TypeScript 6.0.3`
-- Signal Primitives: `@preact/signals-core^1.14.2`
+- Signal Primitives: `@unsignal/baseline^1.14.2`
 
 ## Tech Guideline
 

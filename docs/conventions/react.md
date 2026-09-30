@@ -100,7 +100,7 @@ export const Modal = (props: ModalProps) => { ... };
 - **Limited Exceptions**: Specific tech stacks like `formily` have their own `Reactive System`, the component should follow their own practice
 
 ```tsx
-import { signal } from '@preact/signals-core';
+import { signal } from '@unsignal/baseline';
 import { observer } from '@unsignal/react';
 
 const count = signal(1);

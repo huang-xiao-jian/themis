@@ -7,7 +7,7 @@ import {
   onFormUnmount,
   type Form,
 } from '@formily/core';
-import { effect } from '@preact/signals-core';
+import { effect, type Disposable } from '@unsignal/baseline';
 import { AtomicRule } from '../dsl';
 import { FactorInferrer } from '../inferrer';
 import type { OperatorInferrer } from '../inferrer/OperatorInferrer';
@@ -65,10 +65,10 @@ export function createAtomicRuleForm(options: CreateAtomicRuleFormOptions): Atom
   const form = createForm<AtomicRule>({
     initialValues,
     effects() {
-      const disposers: (() => void)[] = [];
+      const disposables: Disposable[] = [];
 
       onFormMount((form) => {
-        disposers.push(
+        disposables.push(
           effect(() => {
             const $name = form.query('name').take();
 
@@ -80,7 +80,7 @@ export function createAtomicRuleForm(options: CreateAtomicRuleFormOptions): Atom
       });
 
       onFormUnmount(() => {
-        disposers.forEach((disposer) => disposer());
+        disposables.forEach((disposable) => disposable.dispose());
       });
 
       // name 变化时推断 operators / thresholder

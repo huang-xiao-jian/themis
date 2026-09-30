@@ -4,5 +4,8 @@ packages:
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
-  - '@unsignal/core@1.0.1'
-  - '@unsignal/react@1.0.1'
+  - '@unsignal/baseline'
+  - '@unsignal/core'
+  - '@unsignal/vue'
+  - '@unsignal/react'
+  - '@unsignal/rxjs'

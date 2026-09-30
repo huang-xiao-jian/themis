@@ -1,4 +1,4 @@
-import { signal, type ReadonlySignal, type Signal } from '@preact/signals-core';
+import { signal, type ReadonlySignal, type Signal } from '@unsignal/baseline';
 import { createNanoEvents, type Emitter, type EventsMap } from 'nanoevents';
 import type { FieldDataSource } from '../dsl/FieldDataSource';
 import type { GroupCoordinationEvent } from '../dsl/GroupCoordinationEvent';

@@ -1,4 +1,4 @@
-import { signal, type Signal } from '@preact/signals-core';
+import { signal, type Signal } from '@unsignal/baseline';
 import { assert, describe, expect, it } from 'vitest';
 import { ALL_FACTORS } from '../__fixtures__/factors';
 import type { FieldDataSource } from '../dsl/FieldDataSource';

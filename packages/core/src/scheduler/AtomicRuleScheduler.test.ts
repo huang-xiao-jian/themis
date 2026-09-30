@@ -1,4 +1,4 @@
-import { signal, type Signal } from '@preact/signals-core';
+import { signal, type Signal } from '@unsignal/baseline';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { ALL_FACTORS, BOOLEAN_FACTOR } from '../__fixtures__/factors';
 import { SAMPLE_RULE_1 } from '../__fixtures__/rules';

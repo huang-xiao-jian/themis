@@ -79,9 +79,7 @@ export function FactorShowcasePanel(): ReactElement {
         label,
         children: (
           <Row gutter={16} align="middle" wrap={false}>
-            <Col lg={12} md={16}>
-              {children}
-            </Col>
+            <Col span={24}>{children}</Col>
           </Row>
         ),
       }))}
